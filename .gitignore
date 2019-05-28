@@ -1,0 +1,7 @@
+*.x
+makefile
+*.o
+.idea/
+*.out
+*.xyz
+*.data
