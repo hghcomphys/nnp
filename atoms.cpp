@@ -13,19 +13,19 @@
 
 Atom::Atom(double x, double y, double z, std::string element): x(x), y(y), z(z), element(element) {}
 
-
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
 
-void Atoms::read_xyz(std::string filename)
+AtomicConfiguration::AtomicConfiguration(): is_atom(false), is_cell(false) {}
+
+void AtomicConfiguration::read_xyz(std::string filename)
 {
     std::ifstream inFile(filename);
     if (!inFile) {
         std::cerr << "Unable to open " << filename;
         exit(1);   // call system to stop
     }
-
     // TODO: need improvement
     /* read number fo atoms */
     int nAtoms;
@@ -45,4 +45,16 @@ void Atoms::read_xyz(std::string filename)
         atoms.push_back( Atom(x, y, z, element) );
     }
     inFile.close();
+
+    /* set atomic data is available */
+    is_atom = true;
+}
+
+void AtomicConfiguration::set_cell(double cell[])
+{
+    for(int d=0; d<9; d++)
+        this->cell[d] = cell[d];
+
+    /* set cell data is available */
+    is_cell = true;
 }

@@ -17,10 +17,17 @@ public:
 };
 
 
-class Atoms {
+class AtomicConfiguration {
+private:
+    bool is_atom;
+    bool is_cell;
+
 public:
     std::vector<Atom> atoms;
+    double cell[9];
+    AtomicConfiguration();
     void read_xyz(std::string filename);
+    void set_cell(double cell[]);
 };
 
 
