@@ -15,54 +15,54 @@ typedef enum  {
 
 
 class SymmetricFunction {
-protected:
-    virtual double function();
-    virtual double calculate();
-
 public:
     double cutoff_radius;
     double cutoff_function(double r);
     SymmetricFunction(double cutoff_radius);
+    virtual double descriptor(double rij) {}; /*two-body*/
+    virtual double descriptor(double rij, double rik, double jk) {}; /*three-body*/
+    virtual double calculate() {};
 };
 
 
-class G0 : SymmetricFunction {
+class G0 : public SymmetricFunction {
 public:
     G0(std::vector<double> p);
-    double function(double r);
+    double descriptor(double rij);
+    double descriptor(double rij, double rik, double jk);
     double calculate();
 };
 
 
-class G1 : SymmetricFunction {
+class G1 : public SymmetricFunction {
 private:
     double eta, rs;
-
 public:
     G1(std::vector<double> p);
-    double function(double r);
+    double descriptor(double rij);
+    double descriptor(double rij, double rik, double jk);
     double calculate();
 };
 
 
-class G4 : SymmetricFunction {
+class G4 : public SymmetricFunction {
 private:
     double cost, eta, zeta, lamb;
-
 public:
     G4(std::vector<double> p);
-    double function(double rij, double rik, double rjk);
+    double descriptor(double rij);
+    double descriptor(double rij, double rik, double rjk);
     double calculate();
 };
 
 
-class G5 : SymmetricFunction {
+class G5 : public SymmetricFunction {
 private:
     double cost, eta, zeta, lamb;
-
 public:
     G5(std::vector<double> p);
-    double function(double rij, double rik, double rjk);
+    double descriptor(double rij);
+    double descriptor(double rij, double rik, double rjk);
     double calculate();
 };
 
@@ -71,7 +71,8 @@ class ACSF {
 public:
     /* factory method */
     std::vector<SymmetricFunction *> list_of_symmetric_functions;
-    void add_symmetric_function(SymmetricFunctionType select);
+    void add(SymmetricFunctionType select, std::vector<double> p);
+//    ~ACSF();
 };
 
 //}
