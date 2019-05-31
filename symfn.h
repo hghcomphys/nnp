@@ -15,21 +15,20 @@ typedef enum  {
 
 
 class SymmetricFunction {
-
 protected:
-    virtual double function(double r);
+    virtual double function();
     virtual double calculate();
 
 public:
-    double r_cutoff;
-    double fn_cutoff(double r);
-    SymmetricFunction(double r_cutoff);
+    double cutoff_radius;
+    double cutoff_function(double r);
+    SymmetricFunction(double cutoff_radius);
 };
 
 
 class G0 : SymmetricFunction {
 public:
-    G0(double r_cutoff);
+    G0(std::vector<double> p);
     double function(double r);
     double calculate();
 };
@@ -40,7 +39,7 @@ private:
     double eta, rs;
 
 public:
-    G1(double r_cutoff, double eta, double rs);
+    G1(std::vector<double> p);
     double function(double r);
     double calculate();
 };
@@ -51,7 +50,7 @@ private:
     double cost, eta, zeta, lamb;
 
 public:
-    G4(double r_cutoff, double cost, double eta, double zeta, double lamb);
+    G4(std::vector<double> p);
     double function(double rij, double rik, double rjk);
     double calculate();
 };
@@ -62,7 +61,7 @@ private:
     double cost, eta, zeta, lamb;
 
 public:
-    G5(double r_cutoff, double cost, double eta, double zeta, double lamb);
+    G5(std::vector<double> p);
     double function(double rij, double rik, double rjk);
     double calculate();
 };
