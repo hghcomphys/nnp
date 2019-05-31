@@ -13,8 +13,7 @@
 
 SymmetricFunction::SymmetricFunction(double cutoff_radius): cutoff_radius(cutoff_radius) {}
 
-double SymmetricFunction::cutoff_function(double r)
-{
+double SymmetricFunction::cutoff_function(double r) {
     return ( cos(M_PI*r/cutoff_radius) + 1.0 ) * 0.5;
 }
 
@@ -24,8 +23,7 @@ double SymmetricFunction::cutoff_function(double r)
 
 G0::G0(std::vector<double> p): SymmetricFunction(p[0]) {}
 
-double G0::descriptor(double rij)
-{
+double G0::descriptor(double rij) {
     return cutoff_function(rij);
 }
 
@@ -39,8 +37,7 @@ double G0::calculate() {}
 
 G1::G1(std::vector<double> p): SymmetricFunction(p[0]), eta(p[1]), rs(p[2]) {}
 
-double G1::descriptor(double rij)
-{
+double G1::descriptor(double rij) {
     return exp( -eta * (rij-rs) * (rij-rs) ) * cutoff_function(rij);
 }
 
@@ -85,29 +82,15 @@ double G5::calculate() {}
    setup for symmetric function
 ------------------------------------------------------------------------- */
 
-//ACSF::ACSF() {}
+ACSF::ACSF() {}
 
-void ACSF::add(SymmetricFunctionType select, std::vector<double> p)
-{
-    switch(select)
-    {
-        case SymmetricFunctionType::TG0 :
-            list_of_symmetric_functions.push_back( new G0(p) );
-            break;
-        case SymmetricFunctionType::TG1 :
-            list_of_symmetric_functions.push_back( new G1(p) );
-            break;
-        case SymmetricFunctionType::TG4 :
-            list_of_symmetric_functions.push_back( new G4(p) );
-            break;
-        case SymmetricFunctionType::TG5 :
-            list_of_symmetric_functions.push_back( new G5(p) );
-            break;
-    }
+void ACSF::add(SymmetricFunction *symmetric_function) {
+    symmetric_functions.push_back( symmetric_function );
 }
 
-//ACSF::~ACSF()
-//{
-////    for (auto &sm: list_of_symmetric_functions)
-////        delete sm;
-//}
+ACSF::~ACSF() {
+    /* free the allocated memory*/
+    for (auto *sf: symmetric_functions)
+        delete sf;
+    symmetric_functions.clear();
+}

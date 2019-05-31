@@ -70,9 +70,10 @@ public:
 class ACSF {
 public:
     /* factory method */
-    std::vector<SymmetricFunction *> list_of_symmetric_functions;
-    void add(SymmetricFunctionType select, std::vector<double> p);
-//    ~ACSF();
+    std::vector<SymmetricFunction *> symmetric_functions;
+    void add(SymmetricFunction *symmetric_function);
+    ACSF();
+    ~ACSF();
 };
 
 //}
