@@ -1,81 +1,72 @@
 //
-// Created by hossein on 5/27/19.
+// Atomic Centered Symmetric Functions
 //
 
-#ifndef NNP_SYMMETRIC_FUNCTIONS_H
-#define NNP_SYMMETRIC_FUNCTIONS_H
+#ifndef NNP_ACSF_H
+#define NNP_ACSF_H
 
 #include <vector>
 
 //namespace NNP_SF {
 
-typedef enum  {
-    TG0, TG1, TG4, TG5
-}  SymmetricFunctionType;
-
-
-class SymmetricFunction {
-public:
-    double cutoff_radius;
-    double cutoff_function(double r);
-    SymmetricFunction(double cutoff_radius);
-    virtual double descriptor(double rij) {}; /*two-body*/
-    virtual double descriptor(double rij, double rik, double jk) {}; /*three-body*/
-    virtual double calculate() {};
-};
-
-
-class G0 : public SymmetricFunction {
-public:
-    G0(std::vector<double> p);
-    double descriptor(double rij);
-    double descriptor(double rij, double rik, double jk);
-    double calculate();
-};
-
-
-class G1 : public SymmetricFunction {
-private:
-    double eta, rs;
-public:
-    G1(std::vector<double> p);
-    double descriptor(double rij);
-    double descriptor(double rij, double rik, double jk);
-    double calculate();
-};
-
-
-class G4 : public SymmetricFunction {
-private:
-    double cost, eta, zeta, lamb;
-public:
-    G4(std::vector<double> p);
-    double descriptor(double rij);
-    double descriptor(double rij, double rik, double rjk);
-    double calculate();
-};
-
-
-class G5 : public SymmetricFunction {
-private:
-    double cost, eta, zeta, lamb;
-public:
-    G5(std::vector<double> p);
-    double descriptor(double rij);
-    double descriptor(double rij, double rik, double rjk);
-    double calculate();
-};
+//typedef enum  {
+//    TG0, TG1, TG4, TG5
+//}  SymmetricFunctionType;
 
 
 class ACSF {
 public:
-    /* factory method */
-    std::vector<SymmetricFunction *> symmetric_functions;
-    void add(SymmetricFunction *symmetric_function);
-    ACSF();
-    ~ACSF();
+    double cutoff_radius;
+    double cutoff_function(double r);
+    ACSF(double cutoff_radius);
+    virtual double function(double rij) {}; /*two-body*/
+    virtual double function(double rij, double rik, double jk) {}; /*three-body*/
+    virtual double calculate() {};
 };
+
+
+class G0 : public ACSF {
+public:
+    G0(std::vector<double> p);
+    double function(double rij);
+    double function(double rij, double rik, double jk);
+    double calculate();
+};
+
+
+class G1 : public ACSF {
+private:
+    double eta, rs;
+public:
+    G1(std::vector<double> p);
+    double function(double rij);
+    double function(double rij, double rik, double jk);
+    double calculate();
+};
+
+
+class G4 : public ACSF {
+private:
+    double cost, eta, zeta, lamb;
+public:
+    G4(std::vector<double> p);
+    double function(double rij);
+    double function(double rij, double rik, double rjk);
+    double calculate();
+};
+
+
+class G5 : public ACSF {
+private:
+    double cost, eta, zeta, lamb;
+public:
+    G5(std::vector<double> p);
+    double function(double rij);
+    double function(double rij, double rik, double rjk);
+    double calculate();
+};
+
 
 //}
 
-#endif //NNP_SYMMETRIC_FUNCTIONS_H
+#endif //NNP_ACSF_H
