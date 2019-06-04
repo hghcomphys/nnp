@@ -1,5 +1,5 @@
 //
-// Created by hossein on 5/30/19.
+// Atomic Configuration
 //
 
 #ifndef NNP_ATOMS_H
@@ -11,9 +11,10 @@
 
 class Atom {
 public:
+    int index;
     double x, y, z;
     std::string element;
-    Atom(double x, double y, double z, std::string element);
+    Atom(double x, double y, double z, std::string element, int index);
 };
 
 
@@ -21,13 +22,14 @@ class AtomicConfiguration {
 private:
     bool is_atom;
     bool is_cell;
-
 public:
     std::vector<Atom> atoms;
     double cell[9];
     AtomicConfiguration();
+    ~AtomicConfiguration();
     void read_xyz(std::string filename);
     void set_cell(double cell[]);
+    double distance(Atom &atom_i, Atom &atom_j);
 };
 
 

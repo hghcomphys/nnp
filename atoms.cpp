@@ -1,8 +1,10 @@
 //
-// Created by hossein on 5/30/19.
+// Atomic Configuration
 //
 
 #include "atoms.h"
+
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -11,13 +13,17 @@
    setup for Atom
 ------------------------------------------------------------------------- */
 
-Atom::Atom(double x, double y, double z, std::string element): x(x), y(y), z(z), element(element) {}
+Atom::Atom(double x, double y, double z, std::string element, int index): x(x), y(y), z(z), element(element), index(index) {}
 
 /* ----------------------------------------------------------------------
-   setup for Atoms
+   setup for Atomic Configuration
 ------------------------------------------------------------------------- */
 
 AtomicConfiguration::AtomicConfiguration(): is_atom(false), is_cell(false) {}
+
+AtomicConfiguration::~AtomicConfiguration() {
+    atoms.clear();
+}
 
 void AtomicConfiguration::read_xyz(std::string filename)
 {
@@ -38,11 +44,10 @@ void AtomicConfiguration::read_xyz(std::string filename)
     {
         std::getline(inFile, line);
         std::stringstream ss(line);
-
         double x, y, z;
         std::string element;
         ss >> element >> x >> y >> z;
-        atoms.push_back( Atom(x, y, z, element) );
+        atoms.push_back( Atom(x, y, z, element, nline+1) );
     }
     inFile.close();
 
@@ -57,4 +62,13 @@ void AtomicConfiguration::set_cell(double cell[])
 
     /* set cell data is available */
     is_cell = true;
+}
+
+double AtomicConfiguration::distance(Atom &atom_i, Atom &atom_j)
+{
+    // TODO: apply pbc
+    double xij = atom_i.x - atom_j.x;
+    double yij = atom_i.y - atom_j.y;
+    double zij = atom_i.z - atom_j.z;
+    return  sqrt( xij*xij + yij*yij + zij*zij );
 }
