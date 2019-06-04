@@ -5,3 +5,4 @@ makefile
 *.out
 *.xyz
 *.data
+.vscode/
