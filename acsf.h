@@ -79,7 +79,7 @@ public:
     ~ACSF();
     void addTwoBodySymmetricFunction(TwoBodySymmetricFunction *symmetric_function); /*add two-body symmettic function*/
     void addThreeBodySymmetricFunction(ThreeBodySymmetricFunction *symmetric_function); /*add three-body symmettic function*/
-    double calculate(AtomicConfiguration &configuration);
+    std::vector<double> calculate(AtomicConfiguration &configuration);
 };
 
 //}
