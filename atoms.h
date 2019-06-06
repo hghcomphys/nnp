@@ -18,15 +18,15 @@ public:
 };
 
 
-class AtomicConfiguration {
-private:
+class Atoms {
     bool is_atom;
     bool is_cell;
+    void apply_pbc(double &dx, double &dy, double &dz);
 public:
     std::vector<Atom> atoms;
     double cell[9];
-    AtomicConfiguration();
-    ~AtomicConfiguration();
+    Atoms();
+    ~Atoms();
     void read_xyz(std::string filename);
     void set_cell(double cell[]);
     double distance(Atom &atom_i, Atom &atom_j);
