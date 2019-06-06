@@ -109,14 +109,16 @@ std::vector<double> ACSF::calculate(AtomicConfiguration &configuration)
             if (atom_i.index == atom_j.index) continue;
             double rij = configuration.distance(atom_i, atom_j);
 
-            for (int n=0; n<n_2b; n++)
+            for (int n=0; n<n_2b; n++) {
                 results[n] += two_body_symmetric_functions[n]->function(rij);
+            }
 
             /*Three-body symmetric functions*/
             for(Atom &atom_k: configuration.atoms) { 
 
                 if (atom_i.index == atom_k.index) continue;
                 if (atom_j.index == atom_k.index) continue;
+
                 double rik = configuration.distance(atom_i, atom_k);
                 double rjk = configuration.distance(atom_j, atom_k);
 
