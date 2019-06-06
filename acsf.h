@@ -1,5 +1,5 @@
 //
-// Atomic Centered Symmetric Functions
+// Atomic Centered Symmetry Functions
 //
 
 #ifndef NNP_ACSF_H
@@ -12,39 +12,39 @@
 
 //typedef enum  {
 //    TG0, TG1, TG4, TG5
-//}  SymmetricFunctionType;
+//}  SymmetryFunctionType;
 
 
-class SymmetricFunction {
+class SymmetryFunction {
 public:
     double cutoff_radius;
     double cutoff_function(double r);
-    SymmetricFunction(double cutoff_radius);
+    SymmetryFunction(double cutoff_radius);
 };
 
 /*Two-body*/
-class TwoBodySymmetricFunction: public SymmetricFunction { 
+class TwoBodySymmetryFunction: public SymmetryFunction { 
 public:
-    TwoBodySymmetricFunction(double cutoff_radius): SymmetricFunction(cutoff_radius) {};
+    TwoBodySymmetryFunction(double cutoff_radius): SymmetryFunction(cutoff_radius) {};
     virtual double function(double rij) {}; 
 };
 
  /*Three-body*/
-class ThreeBodySymmetricFunction: public SymmetricFunction {
+class ThreeBodySymmetryFunction: public SymmetryFunction {
 public:
-    ThreeBodySymmetricFunction(double cutoff_radius): SymmetricFunction(cutoff_radius) {};
+    ThreeBodySymmetryFunction(double cutoff_radius): SymmetryFunction(cutoff_radius) {};
     virtual double function(double rij, double rik, double jk) {}; 
 };
 
 
-class G0 : public TwoBodySymmetricFunction {
+class G0 : public TwoBodySymmetryFunction {
 public:
     G0(std::vector<double> p);
     double function(double rij);
 };
 
 
-class G1 : public TwoBodySymmetricFunction {
+class G1 : public TwoBodySymmetryFunction {
 private:
     double eta, rs;
 public:
@@ -53,7 +53,7 @@ public:
 };
 
 
-class G4 : public ThreeBodySymmetricFunction {
+class G4 : public ThreeBodySymmetryFunction {
 private:
     double cost, eta, zeta, lamb;
 public:
@@ -62,7 +62,7 @@ public:
 };
 
 
-class G5 : public ThreeBodySymmetricFunction {
+class G5 : public ThreeBodySymmetryFunction {
 private:
     double cost, eta, zeta, lamb;
 public:
@@ -73,13 +73,13 @@ public:
 
 class ACSF {
 public:
-    std::vector<TwoBodySymmetricFunction *> two_body_symmetric_functions; /* factory method */
-    std::vector<ThreeBodySymmetricFunction *> three_body_symmetric_functions; /* factory method */
+    std::vector<TwoBodySymmetryFunction *> two_body_symmetry_functions; /* factory method */
+    std::vector<ThreeBodySymmetryFunction *> three_body_symmetry_functions; /* factory method */
     ACSF();
     ~ACSF();
-    void addTwoBodySymmetricFunction(TwoBodySymmetricFunction *symmetric_function); /*add two-body symmettic function*/
-    void addThreeBodySymmetricFunction(ThreeBodySymmetricFunction *symmetric_function); /*add three-body symmettic function*/
-    std::vector<double> calculate(AtomicConfiguration &configuration);
+    void addTwoBodySymmetryFunction(TwoBodySymmetryFunction *symmetry_function); /*add two-body symmetry function*/
+    void addThreeBodySymmetryFunction(ThreeBodySymmetryFunction *symmetry_function); /*add three-body symmetry function*/
+    std::vector<double> calculate(Atoms &configuration);
 };
 
 //}
