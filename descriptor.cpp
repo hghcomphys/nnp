@@ -1,24 +1,11 @@
-//
-// Created by hossein on 6/1/19.
-//
+// //
+// // Created by hossein on 6/1/19.
+// //
 
-#include "descriptor.h"
+// #include "descriptor.h"
 
-/* ----------------------------------------------------------------------
-   setup for Descriptor
-------------------------------------------------------------------------- */
+// /* ----------------------------------------------------------------------
+//    setup for Descriptor
+// ------------------------------------------------------------------------- */
 
-Descriptor::Descriptor() {}
-
-Descriptor::~Descriptor() {
-    /* free the allocated memory*/
-    for (auto *descriptor: descriptors)
-        delete descriptor;
-    descriptors.clear();
-}
-
-void Descriptor::add(ACSF *descriptor) {
-    descriptors.push_back(descriptor);
-}
-
-void Descriptor::calculate(AtomicConfiguration &configuration) {}
+// // void Descriptor::calculate(AtomicConfiguration &configuration) {}
