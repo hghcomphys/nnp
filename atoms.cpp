@@ -7,8 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include "atoms.h"
-
-#define ANGSTROM_TO_BOHR 1.88973
+#include "constants.h"
 
 /* ----------------------------------------------------------------------
    setup for Atom
@@ -18,13 +17,11 @@ Atom::Atom(double x, double y, double z, std::string element, int index): x(x), 
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
-Atoms::Atoms(): is_atom(false), is_cell(false) {}
+Atoms::Atoms(): isAtom(false), isCell(false) {}
 
-Atoms::~Atoms() {
-    atoms.clear();
-}
+Atoms::~Atoms() { atoms.clear(); }
 
-void Atoms::read_xyz(std::string filename)
+void Atoms::readXYZ(std::string filename)
 {
     std::ifstream inFile(filename);
     if (!inFile) {
@@ -39,37 +36,39 @@ void Atoms::read_xyz(std::string filename)
     std::string line;
     inFile >> line;
     // read atomic names and coordinates
-    for( int nline=0; nline<nAtoms; nline++)
+    for( int nLine=0; nLine<nAtoms; nLine++)
     {
         std::getline(inFile, line);
         std::stringstream ss(line);
         double x, y, z;
         std::string element;
         ss >> element >> x >> y >> z;
-        atoms.push_back( Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, nline+1) );
+        atoms.push_back( Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, nLine+1) );
     }
     inFile.close();
 
     // set atomic data is available
-    is_atom = true;
+    isAtom = true;
 }
 
-void Atoms::set_cell(double cell[]) {
+void Atoms::setCell(double cell[])
+{
     for(int d=0; d<9; d++)
         this->cell[d] = cell[d];
 
     // set cell data is available
-    is_cell = true;
+    isCell = true;
 }
 
-void Atoms::apply_pbc(double &dx, double &dy, double &dz)
+void Atoms::applyPBC(double &dx, double &dy, double &dz)
 {
     // TODO: extend it to non-orthogonal box
     const double lx = cell[1];
     const double ly = cell[4];
     const double lz = cell[8];
 
-    if ( is_cell ) {
+    if ( isCell )
+    {
         if ( dx > lx*0.5 ) dx -= lx;
         else if ( dx < -lx*0.5 ) dx += lx;  
 
@@ -81,11 +80,11 @@ void Atoms::apply_pbc(double &dx, double &dy, double &dz)
     }
 }
 
-double Atoms::distance(Atom &atom_i, Atom &atom_j) {
-    // TODO: apply pbc
+double Atoms::distance(Atom &atom_i, Atom &atom_j)
+{
     double xij = atom_i.x - atom_j.x;
     double yij = atom_i.y - atom_j.y;
     double zij = atom_i.z - atom_j.z;
-    apply_pbc(xij, yij, zij);
+    applyPBC(xij, yij, zij);
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }

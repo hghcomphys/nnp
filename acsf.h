@@ -6,14 +6,14 @@
 #define NNP_ACSF_H
 
 #include <vector>
-#include "symmetry_function.h"
+#include "symmetryfunction.h"
 #include "atoms.h"
 
 
 class ACSF {
 public:
-    std::vector<TwoBodySymmetryFunction *> two_body_symmetry_functions; /* factory method */
-    std::vector<ThreeBodySymmetryFunction *> three_body_symmetry_functions; /* factory method */
+    std::vector<TwoBodySymmetryFunction *> listOfTwoBodySF; /* factory method */
+    std::vector<ThreeBodySymmetryFunction *> listOfThreeBodySF; /* factory method */
     ACSF();
     ~ACSF();
     void addTwoBodySymmetryFunction(TwoBodySymmetryFunction *symmetry_function); /*add two-body symmetry function*/

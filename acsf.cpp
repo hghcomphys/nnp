@@ -4,7 +4,6 @@
 
 #include <vector>
 #include "acsf.h"
-#include "symmetry_function.h"
 #include "atoms.h"
 
 /* ----------------------------------------------------------------------
@@ -12,32 +11,32 @@
 ------------------------------------------------------------------------- */
 ACSF::ACSF() {}
 
-ACSF::~ACSF() {
-
+ACSF::~ACSF()
+{
     /* free the allocated memory for two-body symmetry fucntion*/
-    for (auto *each: two_body_symmetry_functions)
+    for (TwoBodySymmetryFunction *each: listOfTwoBodySF)
         delete each;
-    two_body_symmetry_functions.clear();
+    listOfTwoBodySF.clear();
 
     /* free the allocated memory for three-body symmetry fucntion*/
-    for (auto *each: three_body_symmetry_functions)
+    for (ThreeBodySymmetryFunction *each: listOfThreeBodySF)
         delete each;
-    three_body_symmetry_functions.clear();
+    listOfThreeBodySF.clear();
 }
 
 void ACSF::addTwoBodySymmetryFunction(TwoBodySymmetryFunction *symmetry_function) {
-    two_body_symmetry_functions.push_back(symmetry_function);
+    listOfTwoBodySF.push_back(symmetry_function);
 }
 
 void ACSF::addThreeBodySymmetryFunction(ThreeBodySymmetryFunction *symmetry_function) {
-    three_body_symmetry_functions.push_back(symmetry_function);
+    listOfThreeBodySF.push_back(symmetry_function);
 }
 
 std::vector<double> ACSF::calculate(Atoms &configuration) 
 {
     // TODO: optimization
-    int n_2b = two_body_symmetry_functions.size();
-    int n_3b = three_body_symmetry_functions.size();
+    int n_2b = listOfTwoBodySF.size();
+    int n_3b = listOfThreeBodySF.size();
 
     std::vector<double> results(n_2b+n_3b);
     std::fill(results.begin(), results.end(), 0.0);
@@ -51,7 +50,7 @@ std::vector<double> ACSF::calculate(Atoms &configuration)
             double rij = configuration.distance(atom_i, atom_j);
 
             for (int n=0; n<n_2b; n++) {
-                results[n] += two_body_symmetry_functions[n]->function(rij);
+                results[n] += listOfTwoBodySF[n]->function(rij);
             }
 
             /*Three-body symmetry functions*/
@@ -64,10 +63,11 @@ std::vector<double> ACSF::calculate(Atoms &configuration)
                 double rjk = configuration.distance(atom_j, atom_k);
 
                 for (int n=0; n<n_3b; n++) {
-                    results[n+n_2b] += three_body_symmetry_functions[n]->function(rij, rik, rjk);
+                    results[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk);
                 }
             }
         }
     }
+
     return results;
 }

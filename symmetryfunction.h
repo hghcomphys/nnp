@@ -8,30 +8,25 @@
 
 #include <vector>
 
-//namespace NNP_SF {
-
-//typedef enum  {
-//    TG0, TG1, TG4, TG5
-//}  SymmetryFunctionType;
 
 class SymmetryFunction {
 public:
-    double cutoff_radius;
-    double cutoff_function(double r);
-    SymmetryFunction(double cutoff_radius);
+    double cutoffRadius;
+    double cutoffFunction(double r);
+    SymmetryFunction(double cutoffRadius);
 };
 
 // Two-body
 class TwoBodySymmetryFunction: public SymmetryFunction { 
 public:
-    TwoBodySymmetryFunction(double cutoff_radius): SymmetryFunction(cutoff_radius) {};
+    TwoBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
     virtual double function(double rij) {}; 
 };
 
 // Three-body
 class ThreeBodySymmetryFunction: public SymmetryFunction {
 public:
-    ThreeBodySymmetryFunction(double cutoff_radius): SymmetryFunction(cutoff_radius) {};
+    ThreeBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
     virtual double function(double rij, double rik, double jk) {}; 
 };
 
@@ -69,6 +64,5 @@ public:
     double function(double rij, double rik, double rjk);
 };
 
-//}
 
 #endif //NNP_SYMMETRY_FUNCTION_H
