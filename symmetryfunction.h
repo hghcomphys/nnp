@@ -11,9 +11,11 @@
 
 class SymmetryFunction {
 public:
+    SymmetryFunction(double cutoffRadius);
+    double getCutoffRadius();
+protected:
     double cutoffRadius;
     double cutoffFunction(double r);
-    SymmetryFunction(double cutoffRadius);
 };
 
 // Two-body
@@ -39,20 +41,20 @@ public:
 
 
 class G1 : public TwoBodySymmetryFunction {
-private:
-    double eta, rs;
 public:
     G1(std::vector<double> p);
     double function(double rij);
+private:
+    double eta, rs;
 };
 
 
 class G4 : public ThreeBodySymmetryFunction {
-private:
-    double cost, eta, zeta, lamb;
 public:
     G4(std::vector<double> p);
     double function(double rij, double rik, double rjk);
+private:
+    double cost, eta, zeta, lamb;
 };
 
 

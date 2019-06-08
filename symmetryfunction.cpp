@@ -11,6 +11,8 @@
 ------------------------------------------------------------------------- */
 SymmetryFunction::SymmetryFunction(double cutoffRadius): cutoffRadius(cutoffRadius) {}
 
+double SymmetryFunction::getCutoffRadius() { return cutoffRadius; }
+
 double SymmetryFunction::cutoffFunction(double r) {
     // if ( r > cutoffRadius ) return 0;
     return ( cos(M_PI*r/cutoffRadius) + 1.0 ) * 0.5;
