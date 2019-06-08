@@ -7,15 +7,15 @@
 #define NNP_SYMMETRY_FUNCTION_H
 
 #include <vector>
-
+#include "cutofffunction.h"
 
 class SymmetryFunction {
 public:
     SymmetryFunction(double cutoffRadius);
     double getCutoffRadius();
+    CutoffFunction cutoffFunction;
 protected:
     double cutoffRadius;
-    double cutoffFunction(double r);
 };
 
 // Two-body
