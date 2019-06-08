@@ -12,13 +12,21 @@
 
 class ACSF {
 public:
-    std::vector<TwoBodySymmetryFunction *> listOfTwoBodySF; /* factory method */
-    std::vector<ThreeBodySymmetryFunction *> listOfThreeBodySF; /* factory method */
     ACSF();
     ~ACSF();
     void addTwoBodySymmetryFunction(TwoBodySymmetryFunction *symmetry_function); /*add two-body symmetry function*/
     void addThreeBodySymmetryFunction(ThreeBodySymmetryFunction *symmetry_function); /*add three-body symmetry function*/
-    std::vector<double> calculate(Atoms &configuration);
+    TwoBodySymmetryFunction& getTwoBodySF(const int index) const;
+    ThreeBodySymmetryFunction& getThreeBodySF(const int index) const;
+    int getNumberOfTwoBodySF() const;
+    int getNumberOfThreeBodySF() const;
+    int getNumberOfSF() const;
+    void calculate(Atoms &configuration);
+    std::vector<double>& getValues();
+private:
+    std::vector<TwoBodySymmetryFunction *> listOfTwoBodySF; /* factory method */
+    std::vector<ThreeBodySymmetryFunction *> listOfThreeBodySF; /* factory method */
+    std::vector<double> values;
 };
 
 

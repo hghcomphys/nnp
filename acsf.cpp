@@ -32,7 +32,23 @@ void ACSF::addThreeBodySymmetryFunction(ThreeBodySymmetryFunction *symmetry_func
     listOfThreeBodySF.push_back(symmetry_function);
 }
 
-std::vector<double> ACSF::calculate(Atoms &configuration) 
+int ACSF::getNumberOfTwoBodySF() const { return listOfTwoBodySF.size(); }
+
+int ACSF::getNumberOfThreeBodySF() const { return listOfThreeBodySF.size(); }
+
+int ACSF::getNumberOfSF() const { return getNumberOfTwoBodySF() + getNumberOfThreeBodySF(); }
+
+TwoBodySymmetryFunction& ACSF::getTwoBodySF(const int index) const {
+    // TODO: index error
+    return *(listOfTwoBodySF[index]);
+}
+
+ThreeBodySymmetryFunction& ACSF::getThreeBodySF(const int index) const {
+    // TODO: index error
+    return *(listOfThreeBodySF[index]);
+}
+
+void ACSF::calculate(Atoms &configuration)
 {
     // TODO: optimization
     int n_2b = listOfTwoBodySF.size();
@@ -42,11 +58,11 @@ std::vector<double> ACSF::calculate(Atoms &configuration)
     std::fill(results.begin(), results.end(), 0.0);
     // std::cout << results.size() << std::endl;
 
-    for(Atom &atom_i: configuration.atoms) {
-        for(Atom &atom_j: configuration.atoms) {
+    for(Atom &atom_i: configuration.getAtoms()) {
+        for(Atom &atom_j: configuration.getAtoms()) {
 
             /*Two-body symmetry functions*/
-            if (atom_i.index == atom_j.index) continue;
+            if (atom_i.getIndex() == atom_j.getIndex()) continue;
             double rij = configuration.distance(atom_i, atom_j);
 
             for (int n=0; n<n_2b; n++) {
@@ -54,10 +70,10 @@ std::vector<double> ACSF::calculate(Atoms &configuration)
             }
 
             /*Three-body symmetry functions*/
-            for(Atom &atom_k: configuration.atoms) { 
+            for(Atom &atom_k: configuration.getAtoms()) {
 
-                if (atom_i.index == atom_k.index) continue;
-                if (atom_j.index == atom_k.index) continue;
+                if (atom_i.getIndex() == atom_k.getIndex()) continue;
+                if (atom_j.getIndex() == atom_k.getIndex()) continue;
 
                 double rik = configuration.distance(atom_i, atom_k);
                 double rjk = configuration.distance(atom_j, atom_k);
@@ -69,5 +85,11 @@ std::vector<double> ACSF::calculate(Atoms &configuration)
         }
     }
 
-    return results;
+    // set results to values
+    // TODO: improve assignment
+    values.clear();
+    for (auto it = results.begin(); it != results.end(); it++)
+        values.push_back(*it);
 }
+
+std::vector<double>& ACSF::getValues() { return values; }
