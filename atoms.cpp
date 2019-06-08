@@ -14,12 +14,26 @@
 ------------------------------------------------------------------------- */
 Atom::Atom(double x, double y, double z, std::string element, int index): x(x), y(y), z(z), element(element), index(index) {}
 
+double Atom::getX() { return x; }
+
+double Atom::getY() { return y; }
+
+double Atom::getZ() { return y; }
+
+double Atom::getIndex() { return index; }
+
+std::string Atom::getElement() { return element; }
+
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
 Atoms::Atoms(): isAtom(false), isCell(false) {}
 
 Atoms::~Atoms() { atoms.clear(); }
+
+std::vector<Atom>& Atoms::getAtoms() { return atoms; }
+
+int Atoms::getNumberOfAtoms() { return atoms.size(); }
 
 void Atoms::readXYZ(std::string filename)
 {
@@ -82,9 +96,9 @@ void Atoms::applyPBC(double &dx, double &dy, double &dz)
 
 double Atoms::distance(Atom &atom_i, Atom &atom_j)
 {
-    double xij = atom_i.x - atom_j.x;
-    double yij = atom_i.y - atom_j.y;
-    double zij = atom_i.z - atom_j.z;
+    double xij = atom_i.getX() - atom_j.getX();
+    double yij = atom_i.getY() - atom_j.getY();
+    double zij = atom_i.getZ() - atom_j.getZ();
     applyPBC(xij, yij, zij);
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
