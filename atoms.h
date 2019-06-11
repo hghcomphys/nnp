@@ -33,6 +33,7 @@ public:
     void readXYZ(std::string filename);
     void setCell(double cell[]);
     double distance(Atom &atom_i, Atom &atom_j);
+    std::vector<int> getAtomsElement(const std::string &element);
 private:
     bool isAtom;
     bool isCell;

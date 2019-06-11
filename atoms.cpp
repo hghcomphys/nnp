@@ -102,3 +102,17 @@ double Atoms::distance(Atom &atom_i, Atom &atom_j)
     applyPBC(xij, yij, zij);
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
+
+std::vector<int> Atoms::getAtomsElement(const std::string &element)
+{
+    std::vector<int> atomsElement;
+    for (auto atom: atoms) {
+        if( atom.getElement() == element ) 
+            atomsElement.push_back( atom.getIndex() );
+    }
+
+    if ( atomsElement.size() == 0 )
+        throw std::runtime_error("Cannot find the element in list of atoms");
+
+    return atomsElement;
+}
