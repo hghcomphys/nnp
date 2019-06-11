@@ -45,7 +45,7 @@ public:
     G1(std::vector<double> p);
     double function(double rij);
 private:
-    double eta, rs;
+    double eta, rshift;
 };
 
 
@@ -54,13 +54,13 @@ public:
     G4(std::vector<double> p);
     double function(double rij, double rik, double rjk);
 private:
-    double cost, eta, zeta, lamb;
+    double cost, eta, zeta, lambda;
 };
 
 
 class G5 : public ThreeBodySymmetryFunction {
 private:
-    double cost, eta, zeta, lamb;
+    double cost, eta, zeta, lambda;
 public:
     G5(std::vector<double> p);
     double function(double rij, double rik, double rjk);
