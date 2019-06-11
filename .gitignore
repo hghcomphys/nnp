@@ -6,3 +6,4 @@ makefile
 *.xyz
 *.data
 .vscode/
+CMakeLists.txt
