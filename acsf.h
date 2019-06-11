@@ -14,13 +14,13 @@ class ACSF {
 public:
     ACSF();
     ~ACSF();
-    void addTwoBodySymmetryFunction(TwoBodySymmetryFunction *symmetry_function); /*add two-body symmetry function*/
-    void addThreeBodySymmetryFunction(ThreeBodySymmetryFunction *symmetry_function); /*add three-body symmetry function*/
-    TwoBodySymmetryFunction& getTwoBodySF(const int index) const;
-    ThreeBodySymmetryFunction& getThreeBodySF(const int index) const;
+    void addTwoBodySF(TwoBodySymmetryFunction *symmetry_function); /*add two-body symmetry function*/
+    void addThreeBodySF(ThreeBodySymmetryFunction *symmetry_function); /*add three-body symmetry function*/
+    TwoBodySymmetryFunction& getTwoBodySF(int index) const;
+    ThreeBodySymmetryFunction& getThreeBodySF(int index) const;
     int getNumberOfTwoBodySF() const;
     int getNumberOfThreeBodySF() const;
-    int getNumberOfSF() const;
+    int getTotalNumberOfSF() const;
     void calculate(Atoms &configuration);
     std::vector<double>& getValues();
 private:

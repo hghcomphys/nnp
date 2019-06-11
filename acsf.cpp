@@ -24,11 +24,11 @@ ACSF::~ACSF()
     listOfThreeBodySF.clear();
 }
 
-void ACSF::addTwoBodySymmetryFunction(TwoBodySymmetryFunction *symmetry_function) {
+void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetry_function) {
     listOfTwoBodySF.push_back(symmetry_function);
 }
 
-void ACSF::addThreeBodySymmetryFunction(ThreeBodySymmetryFunction *symmetry_function) {
+void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetry_function) {
     listOfThreeBodySF.push_back(symmetry_function);
 }
 
@@ -36,14 +36,14 @@ int ACSF::getNumberOfTwoBodySF() const { return listOfTwoBodySF.size(); }
 
 int ACSF::getNumberOfThreeBodySF() const { return listOfThreeBodySF.size(); }
 
-int ACSF::getNumberOfSF() const { return getNumberOfTwoBodySF() + getNumberOfThreeBodySF(); }
+int ACSF::getTotalNumberOfSF() const { return getNumberOfTwoBodySF() + getNumberOfThreeBodySF(); }
 
-TwoBodySymmetryFunction& ACSF::getTwoBodySF(const int index) const {
+TwoBodySymmetryFunction& ACSF::getTwoBodySF(int index) const {
     // TODO: index error
     return *(listOfTwoBodySF[index]);
 }
 
-ThreeBodySymmetryFunction& ACSF::getThreeBodySF(const int index) const {
+ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index) const {
     // TODO: index error
     return *(listOfThreeBodySF[index]);
 }
