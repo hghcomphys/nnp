@@ -22,7 +22,7 @@ double SymmetryFunction::getCutoffRadius() { return cutoffRadius; }
 ------------------------------------------------------------------------- */
 G0::G0(std::vector<double> p): TwoBodySymmetryFunction(p[0]) {
     if ( p.size()!=1 ) 
-        throw std::runtime_error("Expected rcutoff argument\n");
+        throw std::runtime_error("Expected rcutoff argument");
 }
 
 double G0::function(double rij) {
@@ -35,7 +35,7 @@ double G0::function(double rij) {
 ------------------------------------------------------------------------- */
 G1::G1(std::vector<double> p): eta(p[0]), rshift(p[1]), TwoBodySymmetryFunction(p[2]) {
     if ( p.size()<3 ) 
-        throw std::runtime_error("Expected eta, rshift, and rcutoff arguments\n");
+        throw std::runtime_error("Expected eta, rshift, and rcutoff arguments");
 }
 
 double G1::function(double rij) {
@@ -48,7 +48,7 @@ double G1::function(double rij) {
 ------------------------------------------------------------------------ */
 G4::G4(std::vector<double> p): cost(p[0]), eta(p[1]), lambda(p[2]), zeta(p[3]), ThreeBodySymmetryFunction(p[4]) {
     if ( p.size()<5 ) 
-        throw std::runtime_error("Expected cost, eta, lambda, zeta, and rcutoff arguments\n");
+        throw std::runtime_error("Expected cost, eta, lambda, zeta, and rcutoff arguments");
 }
 
 double G4::function(double rij, double rik, double rjk)
@@ -63,7 +63,7 @@ double G4::function(double rij, double rik, double rjk)
 ------------------------------------------------------------------------- */
 G5::G5(std::vector<double> p): cost(p[0]), eta(p[1]), lambda(p[2]), zeta(p[3]), ThreeBodySymmetryFunction(p[4]) {
      if ( p.size()<5 ) 
-        throw std::runtime_error("Expected cost, eta, lambda, zeta, and rcutoff arguments\n");
+        throw std::runtime_error("Expected cost, eta, lambda, zeta, and rcutoff arguments");
 }
 
 double G5::function(double rij, double rik, double rjk)
