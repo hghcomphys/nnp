@@ -4,8 +4,8 @@
 
 #include <cmath>
 #include <fstream>
-#include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include "atoms.h"
 #include "constants.h"
 
@@ -43,16 +43,18 @@ int Atoms::getNumberOfAtoms() { return listOfAtoms.size(); }
 std::stringstream readLineToStringStream(std::ifstream& inFile) {
     std::string line;
     std::getline(inFile, line);
-    std::stringstream sline(line);
-    return sline;
+    std::stringstream ss(line);
+    return ss;
 }
 
 void Atoms::readFileFormatXYZ(std::string filename)
 {
     std::ifstream inFile(filename);
     if (!inFile) {
-        std::cerr << "ERROR: Unable to open file " << filename << "\n";
-        exit(1);   // call system to stop
+        std::string ss; 
+        ss = "Unable to open file " + filename;
+        throw std::runtime_error(ss);
+        // exit(1);   // call system to stop
     }
     // TODO: need improvement
     // read number of atoms
