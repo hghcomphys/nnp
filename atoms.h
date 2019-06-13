@@ -36,6 +36,7 @@ public:
     double distance(Atom &atom_i, Atom &atom_j);
     std::vector<int> getListOfIndexForElement(const std::string &element);
     // const Atom& operator[] (unsigned int i) const;
+    bool isPBC();
 private:
     bool isAtom;
     bool isCell;

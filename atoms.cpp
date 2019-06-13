@@ -127,3 +127,5 @@ std::vector<int> Atoms::getListOfIndexForElement(const std::string &element)
 }
 
 // const Atom& Atoms::operator [] (unsigned int i) const { return listOfAtoms[i]; }
+
+bool Atoms::isPBC() { return isCell; } 
