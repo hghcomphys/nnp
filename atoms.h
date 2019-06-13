@@ -28,18 +28,21 @@ class Atoms {
 public:
     Atoms();
     ~Atoms();
+    void addAtom(const Atom& atom);
     std::vector<Atom>& getListOfAtoms();
     int getNumberOfAtoms();
-    void readXYZ(std::string filename);
+    void readFileFormatXYZ(std::string filename);
     void setCell(double cell[]);
     double distance(Atom &atom_i, Atom &atom_j);
     std::vector<int> getListOfIndexForElement(const std::string &element);
+    // const Atom& operator[] (unsigned int i) const;
 private:
     bool isAtom;
     bool isCell;
     void applyPBC(double &dx, double &dy, double &dz);
     double cell[9];
-    std::vector<Atom> atoms;
+    std::vector<Atom> listOfAtoms;
+    int atomIndex; //TODO: improve the method for indexing atoms
 };
 
 

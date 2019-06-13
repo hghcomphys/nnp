@@ -27,13 +27,18 @@ std::string Atom::getElement() { return element; }
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
-Atoms::Atoms(): isAtom(false), isCell(false) {}
+Atoms::Atoms(): isAtom(false), isCell(false), atomIndex(0) {}
 
-Atoms::~Atoms() { atoms.clear(); }
+Atoms::~Atoms() { listOfAtoms.clear(); }
 
-std::vector<Atom>& Atoms::getListOfAtoms() { return atoms; }
+void Atoms::addAtom(const Atom& atom) {
+    listOfAtoms.push_back( atom );
+    atomIndex++;
+}
 
-int Atoms::getNumberOfAtoms() { return atoms.size(); }
+std::vector<Atom>& Atoms::getListOfAtoms() { return listOfAtoms; }
+
+int Atoms::getNumberOfAtoms() { return listOfAtoms.size(); }
 
 std::stringstream readLineToStringStream(std::ifstream& inFile) {
     std::string line;
@@ -42,7 +47,7 @@ std::stringstream readLineToStringStream(std::ifstream& inFile) {
     return sline;
 }
 
-void Atoms::readXYZ(std::string filename)
+void Atoms::readFileFormatXYZ(std::string filename)
 {
     std::ifstream inFile(filename);
     if (!inFile) {
@@ -61,7 +66,7 @@ void Atoms::readXYZ(std::string filename)
         double x, y, z;
         std::string element;
         readLineToStringStream(inFile) >> element >> x >> y >> z;
-        atoms.push_back( Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, nLine+1) );
+        addAtom( Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, atomIndex) );
     }
     inFile.close();
 
@@ -110,7 +115,7 @@ double Atoms::distance(Atom &atom_i, Atom &atom_j)
 std::vector<int> Atoms::getListOfIndexForElement(const std::string &element)
 {
     std::vector<int> listOfindexForElement;
-    for (Atom &atom: atoms) {
+    for (Atom &atom: listOfAtoms) {
         if( atom.getElement() == element )
             listOfindexForElement.push_back( atom.getIndex() );
     }
@@ -120,3 +125,5 @@ std::vector<int> Atoms::getListOfIndexForElement(const std::string &element)
 
     return listOfindexForElement;
 }
+
+// const Atom& Atoms::operator [] (unsigned int i) const { return listOfAtoms[i]; }
