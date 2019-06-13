@@ -31,9 +31,16 @@ Atoms::Atoms(): isAtom(false), isCell(false) {}
 
 Atoms::~Atoms() { atoms.clear(); }
 
-std::vector<Atom>& Atoms::getAtoms() { return atoms; }
+std::vector<Atom>& Atoms::getListOfAtoms() { return atoms; }
 
 int Atoms::getNumberOfAtoms() { return atoms.size(); }
+
+std::stringstream readLineToStringStream(std::ifstream& inFile) {
+    std::string line;
+    std::getline(inFile, line);
+    std::stringstream sline(line);
+    return sline;
+}
 
 void Atoms::readXYZ(std::string filename)
 {
@@ -43,20 +50,17 @@ void Atoms::readXYZ(std::string filename)
         exit(1);   // call system to stop
     }
     // TODO: need improvement
-    // read number fo atoms
+    // read number of atoms
     int nAtoms;
-    inFile >> nAtoms;
+    readLineToStringStream(inFile) >> nAtoms;
     // skip the second line
-    std::string line;
-    inFile >> line;
+    readLineToStringStream(inFile);
     // read atomic names and coordinates
     for( int nLine=0; nLine<nAtoms; nLine++)
     {
-        std::getline(inFile, line);
-        std::stringstream ss(line);
         double x, y, z;
         std::string element;
-        ss >> element >> x >> y >> z;
+        readLineToStringStream(inFile) >> element >> x >> y >> z;
         atoms.push_back( Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, nLine+1) );
     }
     inFile.close();
@@ -103,16 +107,16 @@ double Atoms::distance(Atom &atom_i, Atom &atom_j)
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
-std::vector<int> Atoms::getAtomsElement(const std::string &element)
+std::vector<int> Atoms::getListOfIndexForElement(const std::string &element)
 {
-    std::vector<int> atomsElement;
-    for (auto atom: atoms) {
-        if( atom.getElement() == element ) 
-            atomsElement.push_back( atom.getIndex() );
+    std::vector<int> listOfindexForElement;
+    for (Atom &atom: atoms) {
+        if( atom.getElement() == element )
+            listOfindexForElement.push_back( atom.getIndex() );
     }
 
-    if ( atomsElement.size() == 0 )
+    if ( listOfindexForElement.size() == 0 )
         throw std::runtime_error("Cannot find the element in list of atoms");
 
-    return atomsElement;
+    return listOfindexForElement;
 }

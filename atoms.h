@@ -28,12 +28,12 @@ class Atoms {
 public:
     Atoms();
     ~Atoms();
-    std::vector<Atom>& getAtoms();
+    std::vector<Atom>& getListOfAtoms();
     int getNumberOfAtoms();
     void readXYZ(std::string filename);
     void setCell(double cell[]);
     double distance(Atom &atom_i, Atom &atom_j);
-    std::vector<int> getAtomsElement(const std::string &element);
+    std::vector<int> getListOfIndexForElement(const std::string &element);
 private:
     bool isAtom;
     bool isCell;
