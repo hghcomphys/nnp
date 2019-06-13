@@ -9,7 +9,7 @@
 /* ----------------------------------------------------------------------
    setup for ACSF
 ------------------------------------------------------------------------- */
-ACSF::ACSF() {}
+ACSF::ACSF(std::string element): centralElement(element) {}
 
 ACSF::~ACSF()
 {
@@ -24,12 +24,16 @@ ACSF::~ACSF()
     listOfThreeBodySF.clear();
 }
 
-void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetry_function) {
-    listOfTwoBodySF.push_back(symmetry_function);
+void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement) {
+    listOfTwoBodySF.push_back(symmetryFunction);
+    listOfTwoBodyNeighborElement.push_back(neighborElement);
 }
 
-void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetry_function) {
-    listOfThreeBodySF.push_back(symmetry_function);
+void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction,
+                            const std::string& neighborElement1, const std::string& neighborElement2) {
+    listOfThreeBodySF.push_back(symmetryFunction);
+    listOfThreeBodyNeighborElement1.push_back(neighborElement1);
+    listOfThreeBodyNeighborElement2.push_back(neighborElement2);
 }
 
 int ACSF::getNumberOfTwoBodySF() const { return listOfTwoBodySF.size(); }
@@ -58,29 +62,38 @@ void ACSF::calculate(Atoms &configuration)
     std::fill(results.begin(), results.end(), 0.0);
     // std::cout << results.size() << std::endl;
 
-    for(Atom &atom_i: configuration.getAtoms()) {
-        for(Atom &atom_j: configuration.getAtoms()) {
+    auto atoms = configuration.getListOfAtoms();
+    for(int i: configuration.getListOfIndexForElement(centralElement)) 
+    {
+        // central element
+        Atom& atom_i = atoms[i];
 
-            /*Two-body symmetry functions*/
-            if (atom_i.getIndex() == atom_j.getIndex()) continue;
-            double rij = configuration.distance(atom_i, atom_j);
-
-            for (int n=0; n<n_2b; n++) {
-                results[n] += listOfTwoBodySF[n]->function(rij);
+        // Loop over all two-body symmetry functions
+        for (int n=0; n<n_2b; n++) 
+        {
+            // first neighbors
+            for(int j: configuration.getListOfIndexForElement(listOfTwoBodyNeighborElement[n])) {
+                    Atom& atom_j = atoms[j];
+                    const double rij = configuration.distance(atom_i, atom_j);
+                    results[n] += listOfTwoBodySF[n]->function(rij);
             }
+        }
 
-            /*Three-body symmetry functions*/
-            for(Atom &atom_k: configuration.getAtoms()) {
+        // Loop over all tree-body symmetry functions
+        for (int n=0; n<n_3b; n++) 
+        {
+            // first neighbors
+            for(int j: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n])) {
+                    Atom& atom_j = atoms[j];
+                    const double rij = configuration.distance(atom_i, atom_j);
 
-                if (atom_i.getIndex() == atom_k.getIndex()) continue;
-                if (atom_j.getIndex() == atom_k.getIndex()) continue;
-
-                double rik = configuration.distance(atom_i, atom_k);
-                double rjk = configuration.distance(atom_j, atom_k);
-
-                for (int n=0; n<n_3b; n++) {
-                    results[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk);
-                }
+                    // second neighbors
+                    for(int k: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n])) {
+                        Atom& atom_k = atoms[k];
+                        const double rik = configuration.distance(atom_i, atom_k);
+                        const double rjk = configuration.distance(atom_j, atom_k);
+                        results[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk);
+                    }
             }
         }
     }
@@ -93,3 +106,5 @@ void ACSF::calculate(Atoms &configuration)
 }
 
 std::vector<double>& ACSF::getValues() { return values; }
+
+std::string ACSF::getCentralElement() { return centralElement; }
