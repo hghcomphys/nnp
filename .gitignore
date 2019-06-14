@@ -7,3 +7,4 @@ makefile
 *.data
 .vscode/
 CMakeLists.txt
+input.nn
