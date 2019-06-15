@@ -24,9 +24,9 @@ ACSF::~ACSF()
     listOfThreeBodySF.clear();
 }
 
-void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement) {
+void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1) {
     listOfTwoBodySF.push_back(symmetryFunction);
-    listOfTwoBodyNeighborElement.push_back(neighborElement);
+    listOfTwoBodyNeighborElement.push_back(neighborElement1);
 }
 
 void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction,
