@@ -11,7 +11,7 @@
    setup for Neural Network Potential
 ------------------------------------------------------------------------- */
 
-NeuralNetworkPotential::NeuralNetworkPotential(): number_of_elements(0) {}
+NeuralNetworkPotential::NeuralNetworkPotential() {}
 
 NeuralNetworkPotential::~NeuralNetworkPotential() {}
 
@@ -19,7 +19,11 @@ void NeuralNetworkPotential::addDescriptor(const ACSF& descriptor) {
     descriptors.push_back( descriptor );
 }
 
-ACSF& NeuralNetworkPotential::getDescriptorForElement(const std::string element) {
+int NeuralNetworkPotential::getNumberOfElements() { return elements.size(); }
+
+std::vector<std::string>& NeuralNetworkPotential::getElements() { return elements; }
+
+ACSF& NeuralNetworkPotential::getDescriptorForElement(const std::string& element) {
     for (auto& descriptor: descriptors)
         if (descriptor.getCentralElement() == element)
             return descriptor;
@@ -42,6 +46,7 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
     char cSpace = ' ';
     std::string line, dummy;
     double ddummy;
+    int number_of_elements = 0;
     
     while ( std::getline(inFile, line) ) {
         std::stringstream ss(line);
@@ -97,7 +102,7 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                         params.push_back(ddummy);
                     }
                     getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2 );
-                    std::cout << "add G4(" << centralElement << ", " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    std::cout << "add G4(" << neighborElement1 << ", " << centralElement << ", " << neighborElement2 << "): ";
                     for (auto& p: params) 
                         std::cout << p << ' ';
                     std::cout << std::endl;
@@ -106,12 +111,18 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                 default:
                     break;
                 }
-            }
-            
-        }
-                
+            } 
+        }           
     }
 }
 
 void NeuralNetworkPotential::readScript() { readScript("input.nn"); }
 
+void NeuralNetworkPotential::calculate(Atoms &configuration) {
+    for (auto& descriptor: descriptors)
+        descriptor.calculate(configuration);
+}
+
+std::vector<double>& NeuralNetworkPotential::getDescriptorValuesForElement(const std::string& element) {
+    return getDescriptorForElement(element).getValues();
+}

@@ -16,13 +16,16 @@ public:
     void addDescriptor(const ACSF& descriptor);
     void readScript();
     void readScript(const std::string& fileName);
-    ACSF& getDescriptorForElement(const std::string element);
+    ACSF& getDescriptorForElement(const std::string& element);
     int getTotalNumberOfDescriptors();
+    int getNumberOfElements();
+    std::vector<std::string> &getElements();
+    void calculate(Atoms &configuration);
+    std::vector<double>& getDescriptorValuesForElement(const std::string& element);
 
 private:
     std::string scriptFileName;
     std::vector<ACSF> descriptors;
-    int number_of_elements;
     std::vector<std::string> elements;
 };
 
