@@ -7,7 +7,7 @@
 #define NNP_SYMMETRY_FUNCTION_H
 
 #include <vector>
-#include "cutofffunction.h"
+#include "cutofffunc.h"
 
 class SymmetryFunction {
 public:

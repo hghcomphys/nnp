@@ -17,6 +17,7 @@ public:
     double getZ();
     double getIndex();
     std::string getElement();
+    
 private:
     int index;
     double x, y, z;

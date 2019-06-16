@@ -5,7 +5,7 @@
 #include <cmath>
 #include <vector>
 #include <stdexcept>
-#include "symmetryfunction.h"
+#include "symmfunc.h"
 
 /* ----------------------------------------------------------------------
    setup for base symmetry function base

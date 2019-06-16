@@ -6,7 +6,7 @@
 #define NNP_ACSF_H
 
 #include <vector>
-#include "symmetryfunction.h"
+#include "symmfunc.h"
 #include "atoms.h"
 
 
@@ -25,6 +25,7 @@ public:
     void calculate(Atoms &configuration);
     std::vector<double>& getValues();
     std::string getCentralElement();
+    
 private:
     std::string centralElement;
     std::vector<TwoBodySymmetryFunction *> listOfTwoBodySF; /* factory method */

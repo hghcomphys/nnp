@@ -3,7 +3,7 @@
 //
 
 #include <cmath>
-#include "cutofffunction.h"
+#include "cutofffunc.h"
 
 /* ----------------------------------------------------------------------
    setup for base cutoff function
