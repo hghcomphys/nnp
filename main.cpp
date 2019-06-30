@@ -98,7 +98,7 @@ int main()
         Atoms configuration;
         configuration.readFileFormatXYZ("water12.xyz");
         double cell[9] = {4, 0, 0, 0, 4, 0, 0, 0, 4};
-        configuration.setCell(cell);
+        // configuration.setCell(cell);
         cout << "Number of atoms: " << configuration.getNumberOfAtoms() << endl;
         cout << "Is PBC: " << configuration.isPBC() << endl;
 
