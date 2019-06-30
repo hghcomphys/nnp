@@ -18,7 +18,7 @@ double Atom::getX() { return x; }
 
 double Atom::getY() { return y; }
 
-double Atom::getZ() { return y; }
+double Atom::getZ() { return z; }
 
 double Atom::getIndex() { return index; }
 
@@ -47,14 +47,13 @@ std::stringstream readLineToStringStream(std::ifstream& inFile) {
     return ss;
 }
 
-void Atoms::readFileFormatXYZ(std::string filename)
+void Atoms::readFileFormatXYZ(const std::string& filename)
 {
     std::ifstream inFile(filename);
     if (!inFile) {
         std::string ss; 
         ss = "Unable to open file " + filename;
         throw std::runtime_error(ss);
-        // exit(1);   // call system to stop
     }
     // TODO: need improvement
     // read number of atoms
@@ -79,7 +78,7 @@ void Atoms::readFileFormatXYZ(std::string filename)
 void Atoms::setCell(double cell[])
 {
     for(int d=0; d<9; d++)
-        this->cell[d] = cell[d];
+        this->cell[d] = cell[d]*ANGSTROM_TO_BOHR;
 
     // set cell data is available
     isCell = true;
@@ -131,3 +130,42 @@ std::vector<int> Atoms::getListOfIndexForElement(const std::string &element)
 // const Atom& Atoms::operator [] (unsigned int i) const { return listOfAtoms[i]; }
 
 bool Atoms::isPBC() { return isCell; } 
+
+void Atoms::readFileFormatRuNNer(const std::string& filename)
+{
+    std::ifstream inFile(filename);
+    if (!inFile) {
+        std::string ss; 
+        ss = "Unable to open file " + filename;
+        throw std::runtime_error(ss);
+    }
+
+    std::string line, keyword;
+    int cellIndex = 0;
+    while ( std::getline(inFile, line) ) {
+        std::stringstream ss(line);
+        ss >> keyword;
+
+        if (keyword == "lattice") {
+            if (cellIndex == 9)
+                    throw std::runtime_error("Unexpected number of data for cell");
+            for (int i=0; i<3; i++)
+                ss >> cell[cellIndex++];
+        }
+        else if (keyword == "atom") {
+            double x, y, z;
+            std::string element;
+            ss >> x >> y >> z >> element;
+            addAtom( Atom(x, y, z, element, atomIndex) );
+        }
+        else if (keyword == "end")
+            break; // read only the first frame
+    }
+    inFile.close();
+
+    // set atomic data is available
+    isAtom = true;
+    isCell = true;
+}
+
+void Atoms::readFileFormatRuNNer() { readFileFormatRuNNer("input.data"); }

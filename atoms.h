@@ -32,7 +32,9 @@ public:
     void addAtom(const Atom& atom);
     std::vector<Atom>& getListOfAtoms();
     int getNumberOfAtoms();
-    void readFileFormatXYZ(std::string filename);
+    void readFileFormatXYZ(const std::string& filename);
+    void readFileFormatRuNNer(const std::string& filename);
+    void readFileFormatRuNNer();
     void setCell(double cell[]);
     double distance(Atom &atom_i, Atom &atom_j);
     std::vector<int> getListOfIndexForElement(const std::string &element);
