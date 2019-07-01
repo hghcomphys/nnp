@@ -113,6 +113,16 @@ double Atoms::distance(Atom &atom_i, Atom &atom_j)
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
+double Atoms::distance(Atom &atom_i, Atom &atom_j, double drij[3])
+{
+    double xij = atom_i.getX() - atom_j.getX();
+    double yij = atom_i.getY() - atom_j.getY();
+    double zij = atom_i.getZ() - atom_j.getZ();
+    applyPBC(xij, yij, zij);
+    drij[0] = xij; drij[1] = yij; drij[2] = zij; 
+    return  sqrt( xij*xij + yij*yij + zij*zij );
+}
+
 std::vector<int> Atoms::getListOfIndexForElement(const std::string &element)
 {
     std::vector<int> listOfindexForElement;
