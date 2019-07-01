@@ -26,15 +26,18 @@ ACSF::~ACSF()
 }
 
 void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1) {
+    listOfTwoBodySFindex.push_back(getTotalNumberOfSF());
     listOfTwoBodySF.push_back(symmetryFunction);
     listOfTwoBodyNeighborElement.push_back(neighborElement1);
 }
 
 void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction,
                             const std::string& neighborElement1, const std::string& neighborElement2) {
+    listOfThreeBodySFindex.push_back(getTotalNumberOfSF());
     listOfThreeBodySF.push_back(symmetryFunction);
     listOfThreeBodyNeighborElement1.push_back(neighborElement1);
     listOfThreeBodyNeighborElement2.push_back(neighborElement2);
+    
 }
 
 int ACSF::getNumberOfTwoBodySF() const { return listOfTwoBodySF.size(); }
@@ -72,13 +75,12 @@ void ACSF::calculate(Atoms &configuration)
         // Loop over all two-body symmetry functions
         for (int n=0; n<n_2b; n++) 
         {
-            // first neighbors
             for(int j: configuration.getListOfIndexForElement(listOfTwoBodyNeighborElement[n])) {
                     Atom& atom_j = atoms[j];
                     if (atom_j.getIndex() == atom_i.getIndex()) continue;
                     const double rij = configuration.distance(atom_i, atom_j);
-                    results[n] += listOfTwoBodySF[n]->function(rij);
-            }
+                    results[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
+                } 
         }
 
         // Loop over all tree-body symmetry functions
@@ -111,10 +113,11 @@ void ACSF::calculate(Atoms &configuration)
                         cost *= inv_r;
                         // std::cout << cost << std::endl;
 
-                        results[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
+                        results[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
                     }
             }
         }
+        break;
     }
 
     // set results to values

@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdexcept>
 #include "symmfunc.h"
+#include <iostream>
 
 /* ----------------------------------------------------------------------
    setup for base symmetry function base

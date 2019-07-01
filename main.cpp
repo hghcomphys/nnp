@@ -29,9 +29,9 @@ int main()
         //    Atom atom(1, 2, 3, "X", 0);
         //    cout << atom.element << " " << atom.x << " " << atom.z << " " << atom.z <<  " " << atom.index << endl;
 
-        auto atoms = configuration.getListOfAtoms();
-        for (auto index: configuration.getListOfIndexForElement("H"))
-            cout << index << " " << atoms[index].getZ() << " " << atoms[index].getElement() << endl;
+        // auto atoms = configuration.getListOfAtoms();
+        // for (auto index: configuration.getListOfIndexForElement("H"))
+        //     cout << index << " " << atoms[index].getZ() << " " << atoms[index].getElement() << endl;
         // cout << configuration.getListOfIndexForElement("H").size() << endl;
 
         //    for(auto &atom: ac.atoms) {
