@@ -5,6 +5,7 @@
 #include <vector>
 #include "acsf.h"
 #include "atoms.h"
+#include <iostream>
 
 /* ----------------------------------------------------------------------
    setup for ACSF
@@ -74,6 +75,7 @@ void ACSF::calculate(Atoms &configuration)
             // first neighbors
             for(int j: configuration.getListOfIndexForElement(listOfTwoBodyNeighborElement[n])) {
                     Atom& atom_j = atoms[j];
+                    if (atom_j.getIndex() == atom_i.getIndex()) continue;
                     const double rij = configuration.distance(atom_i, atom_j);
                     results[n] += listOfTwoBodySF[n]->function(rij);
             }
@@ -84,15 +86,32 @@ void ACSF::calculate(Atoms &configuration)
         {
             // first neighbors
             for(int j: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n])) {
+                    
                     Atom& atom_j = atoms[j];
-                    const double rij = configuration.distance(atom_i, atom_j);
+                    if (atom_j.getIndex() == atom_i.getIndex()) continue;
+                    
+                    double drij[3];
+                    const double rij = configuration.distance(atom_i, atom_j, drij);
 
                     // second neighbors
                     for(int k: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n])) {
+                        
                         Atom& atom_k = atoms[k];
-                        const double rik = configuration.distance(atom_i, atom_k);
+                        if (atom_k.getIndex() == atom_i.getIndex()) continue;
+
+                        double drik[3];
+                        const double rik = configuration.distance(atom_i, atom_k, drik);
                         const double rjk = configuration.distance(atom_j, atom_k);
-                        results[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk);
+
+                        // cosine of angle between k--<i>--j atoms
+                        double cost = 0;
+                        for (int d=0; d<3; d++)
+                            cost += drij[d] * drik[d];
+                        const double inv_r = 1.0 / rij / rik;
+                        cost *= inv_r;
+                        // std::cout << cost << std::endl;
+
+                        results[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
                     }
             }
         }

@@ -29,7 +29,7 @@ public:
 class ThreeBodySymmetryFunction: public SymmetryFunction {
 public:
     ThreeBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
-    virtual double function(double rij, double rik, double jk) {}; 
+    virtual double function(double rij, double rik, double rjk, double cost) {}; 
 };
 
 
@@ -40,9 +40,9 @@ public:
 };
 
 
-class G1 : public TwoBodySymmetryFunction {
+class G2 : public TwoBodySymmetryFunction {
 public:
-    G1(std::vector<double> p);
+    G2(std::vector<double> p);
     double function(double rij);
 private:
     double eta, rshift;
@@ -52,18 +52,18 @@ private:
 class G4 : public ThreeBodySymmetryFunction {
 public:
     G4(std::vector<double> p);
-    double function(double rij, double rik, double rjk);
+    double function(double rij, double rik, double rjk, double cost);
 private:
-    double cost, eta, zeta, lambda;
+    double eta, zeta, lambda, rshift;
 };
 
 
 class G5 : public ThreeBodySymmetryFunction {
 private:
-    double cost, eta, zeta, lambda;
+    double eta, zeta, lambda, rshift;
 public:
     G5(std::vector<double> p);
-    double function(double rij, double rik, double rjk);
+    double function(double rij, double rik, double rjk, double cost);
 };
 
 
