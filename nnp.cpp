@@ -69,7 +69,7 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                 }
                 for (auto &element: elements) {
                     descriptors.push_back( ACSF(element) );
-                    std::cout << "new ACSF( " << element << " )" << std::endl;
+                    std::cout << "new ACSF(" << element << ")" << std::endl;
                 }
             }
             else if (sIndvStr == "symfunction_short")
@@ -87,8 +87,8 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                         ss >> ddummy; //eta >> rshift >> rcutoff;
                         params.push_back(ddummy);
                     }
-                    getDescriptorForElement(centralElement).addTwoBodySF(new G1(params), neighborElement1 );
-                    std::cout << "add G1(" << centralElement << ", " << neighborElement1 << "): ";
+                    getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1 );
+                    std::cout << "add G2(" << centralElement << ", " << neighborElement1 << "): ";
                     for (auto& p: params) 
                         std::cout << p << ' ';
                     std::cout << std::endl;
@@ -96,7 +96,6 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
 
                 case 3:
                     ss >> neighborElement1 >> neighborElement2;
-                    params.push_back(0.0); // TODO:: what is this param for?
                     for (int i=0; i<4; i++) {
                         ss >> ddummy; //eta >> rshift >> rcutoff;
                         params.push_back(ddummy);
