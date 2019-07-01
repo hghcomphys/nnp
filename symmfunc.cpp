@@ -55,7 +55,7 @@ double G4::function(double rij, double rik, double rjk, double cost)
 {
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) return 0;
     double res =  pow(2.0, 1.0-zeta) * pow(1.0+lambda*cost, zeta) * exp( -eta * (rij*rij + rik*rik + rjk*rjk) );
-    return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rjk) * cutoffFunction.fc(rik);
+    return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
 }
 
 /* ----------------------------------------------------------------------
@@ -68,7 +68,7 @@ G5::G5(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySym
 
 double G5::function(double rij, double rik, double rjk, double cost)
 {
-    if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) return 0;
+    if ( rij > cutoffRadius || rik > cutoffRadius ) return 0;
     double res =  pow(2.0, 1.0-zeta) * pow(1.0+lambda*cost, zeta) * exp( -eta * (rij*rij + rik*rik) );
-    return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rjk);
+    return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik);
 }
