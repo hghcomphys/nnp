@@ -62,8 +62,9 @@ void ACSF::calculate(Atoms &configuration)
     int n_2b = listOfTwoBodySF.size();
     int n_3b = listOfThreeBodySF.size();
 
-    std::vector<double> results(n_2b+n_3b);
-    std::fill(results.begin(), results.end(), 0.0);
+    values.clear();
+    values.resize(n_2b+n_3b);
+    std::fill(values.begin(), values.end(), 0.0);
     // std::cout << results.size() << std::endl;
 
     auto atoms = configuration.getListOfAtoms();
@@ -79,7 +80,7 @@ void ACSF::calculate(Atoms &configuration)
                     Atom& atom_j = atoms[j];
                     if (atom_j.getIndex() == atom_i.getIndex()) continue;
                     const double rij = configuration.distance(atom_i, atom_j);
-                    results[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
+                    values[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
                 } 
         }
 
@@ -113,18 +114,12 @@ void ACSF::calculate(Atoms &configuration)
                         cost *= inv_r;
                         // std::cout << cost << std::endl;
 
-                        results[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
+                        values[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
                     }
             }
         }
         break;
     }
-
-    // set results to values
-    // TODO: improve assignment
-    values.clear();
-    for (auto it = results.begin(); it != results.end(); it++)
-        values.push_back(*it);
 }
 
 std::vector<double>& ACSF::getValues() { return values; }
