@@ -40,6 +40,8 @@ std::vector<Atom>& Atoms::getListOfAtoms() { return listOfAtoms; }
 
 int Atoms::getNumberOfAtoms() { return listOfAtoms.size(); }
 
+int Atoms::getNumberOfAtomsForElement(const std::string& element) { return getListOfIndexForElement(element).size(); }
+
 std::stringstream readLineToStringStream(std::ifstream& inFile) {
     std::string line;
     std::getline(inFile, line);

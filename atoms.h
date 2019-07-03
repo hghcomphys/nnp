@@ -32,6 +32,7 @@ public:
     void addAtom(const Atom& atom);
     std::vector<Atom>& getListOfAtoms();
     int getNumberOfAtoms();
+    int getNumberOfAtomsForElement(const std::string& element);
     void readFileFormatXYZ(const std::string& filename);
     void readFileFormatRuNNer(const std::string& filename);
     void readFileFormatRuNNer();
@@ -41,6 +42,7 @@ public:
     std::vector<int> getListOfIndexForElement(const std::string &element);
     // const Atom& operator[] (unsigned int i) const;
     bool isPBC();
+
 private:
     bool isAtom;
     bool isCell;
