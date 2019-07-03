@@ -23,7 +23,7 @@ public:
     int getNumberOfThreeBodySF() const;
     int getTotalNumberOfSF() const;
     void calculate(Atoms &configuration);
-    std::vector<double>& getValues();
+    std::vector<std::vector<double>>& getValues();
     std::string getCentralElement();
     
 private:
@@ -33,7 +33,7 @@ private:
     std::vector<ThreeBodySymmetryFunction *> listOfThreeBodySF; /* factory method */
     std::vector<std::string> listOfThreeBodyNeighborElement1, listOfThreeBodyNeighborElement2;
     std::vector<int> listOfTwoBodySFindex, listOfThreeBodySFindex;
-    std::vector<double> values;
+    std::vector<std::vector<double>> values;
 };
 
 

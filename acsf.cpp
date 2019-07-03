@@ -59,19 +59,25 @@ ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index) const {
 void ACSF::calculate(Atoms &configuration)
 {
     // TODO: optimization
-    int n_2b = listOfTwoBodySF.size();
-    int n_3b = listOfThreeBodySF.size();
+    const int n_2b = listOfTwoBodySF.size();
+    const int n_3b = listOfThreeBodySF.size();
+    const int nrow =  configuration.getNumberOfAtomsForElement(centralElement);
+    const int ncol =  n_2b + n_3b;
 
-    values.clear();
-    values.resize(n_2b+n_3b);
-    std::fill(values.begin(), values.end(), 0.0);
-    // std::cout << results.size() << std::endl;
+    values.resize(nrow, std::vector<double>(ncol));
+    for (auto& col: values) // initialize to zero
+        std::fill(col.begin(), col.end(), 0.0);
 
+    int elementIndex = 0;
     auto atoms = configuration.getListOfAtoms();
-    for(int i: configuration.getListOfIndexForElement(centralElement)) 
+    auto listOfIndexForCentralElement = configuration.getListOfIndexForElement(centralElement);
+    for(int i: listOfIndexForCentralElement) 
     {
         // central element
         Atom& atom_i = atoms[i];
+
+        // symmetry function values for each atom with central element type
+        auto& elementValues = values[elementIndex++];
 
         // Loop over all two-body symmetry functions
         for (int n=0; n<n_2b; n++) 
@@ -80,7 +86,7 @@ void ACSF::calculate(Atoms &configuration)
                     Atom& atom_j = atoms[j];
                     if (atom_j.getIndex() == atom_i.getIndex()) continue;
                     const double rij = configuration.distance(atom_i, atom_j);
-                    values[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
+                    elementValues[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
                 } 
         }
 
@@ -114,14 +120,13 @@ void ACSF::calculate(Atoms &configuration)
                         cost *= inv_r;
                         // std::cout << cost << std::endl;
 
-                        values[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
+                        elementValues[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
                     }
             }
         }
-        break;
     }
 }
 
-std::vector<double>& ACSF::getValues() { return values; }
+std::vector<std::vector<double>>& ACSF::getValues() { return values; }
 
 std::string ACSF::getCentralElement() { return centralElement; }

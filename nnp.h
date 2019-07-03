@@ -21,7 +21,7 @@ public:
     int getNumberOfElements();
     std::vector<std::string> &getElements();
     void calculate(Atoms &configuration);
-    std::vector<double>& getDescriptorValuesForElement(const std::string& element);
+    std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
 
 private:
     std::string scriptFileName;

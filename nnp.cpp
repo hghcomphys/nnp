@@ -135,6 +135,6 @@ void NeuralNetworkPotential::calculate(Atoms &configuration) {
         descriptor.calculate(configuration);
 }
 
-std::vector<double>& NeuralNetworkPotential::getDescriptorValuesForElement(const std::string& element) {
+std::vector<std::vector<double>>& NeuralNetworkPotential::getDescriptorValuesForElement(const std::string& element) {
     return getDescriptorForElement(element).getValues();
 }
