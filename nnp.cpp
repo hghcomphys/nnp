@@ -55,7 +55,7 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
 
             if (sIndvStr == "number_of_elements") {
                 ss >> number_of_elements;
-                std::cout << sIndvStr << ' ' << number_of_elements << std::endl;
+                // std::cout << sIndvStr << ' ' << number_of_elements << std::endl;
             }
             else if (sIndvStr == "elements") {
 
@@ -69,7 +69,7 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                 }
                 for (auto &element: elements) {
                     descriptors.push_back( ACSF(element) );
-                    std::cout << "new ACSF(" << element << ")" << std::endl;
+                    std::cout << "ACSF(" << element << ")" << std::endl;
                 }
             }
             else if (sIndvStr == "symfunction_short")
@@ -88,10 +88,10 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                         params.push_back(ddummy);
                     }
                     getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1 );
-                    std::cout << "add G2(<" << centralElement << ">, " << neighborElement1 << "): ";
-                    for (auto& p: params) 
-                        std::cout << p << ' ';
-                    std::cout << std::endl;
+                    // std::cout << "add G2(<" << centralElement << ">, " << neighborElement1 << "): ";
+                    // for (auto& p: params) 
+                    //     std::cout << p << ' ';
+                    // std::cout << std::endl;
                     break;
 
                 case 3:
@@ -101,10 +101,10 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                         params.push_back(ddummy);
                     }
                     getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2 );
-                    std::cout << "add G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
-                    for (auto& p: params) 
-                        std::cout << p << ' ';
-                    std::cout << std::endl;
+                    // std::cout << "add G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    // for (auto& p: params) 
+                    //     std::cout << p << ' ';
+                    // std::cout << std::endl;
                     break;
 
                 case 9:
@@ -114,10 +114,10 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
                         params.push_back(ddummy);
                     }
                     getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2 );
-                    std::cout << "add G5(" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
-                    for (auto& p: params) 
-                        std::cout << p << ' ';
-                    std::cout << std::endl;
+                    // std::cout << "add G5(" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    // for (auto& p: params) 
+                    //     std::cout << p << ' ';
+                    // std::cout << std::endl;
                     break;
                 
                 default:

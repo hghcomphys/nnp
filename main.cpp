@@ -87,9 +87,23 @@ int main()
             cout << "Three-body SF: " << nnp.getDescriptorForElement(element).getNumberOfThreeBodySF() << endl;
             cout << "Total SF: " << nnp.getDescriptorForElement(element).getTotalNumberOfSF() << endl;
 
-            for (auto &sf: nnp.getDescriptorForElement(element).getValues())
-                cout << sf << " ";
-            cout << endl;
+            for (auto &atoms: nnp.getDescriptorForElement(element).getValues() ) {
+                for (auto &sf: atoms)
+                    cout << sf << " ";
+                cout << endl;
+                break;
+            }
+            // cout << endl; // << endl;
+            
+            
+
+            // for (auto &index: nnp.getDescriptorForElement(element).getIndex2() )
+            //     cout << index << " ";
+            // cout << endl;
+
+            // for (auto &index: nnp.getDescriptorForElement(element).getIndex3() )
+            //     cout << index << " ";
+            // cout << endl;
         }
     }
 
