@@ -4,12 +4,30 @@
 #include "atoms.h"
 #include "nnp.h"
 
+// #include <tensorflow/c/c_api.h>
+#include "opennn.h"
+
 using namespace std;
-//using namespace NNP_SF;
+using namespace OpenNN;
 
 int main()
 {
     try {
+
+        // -----------------------------------------------
+        // OpenNN simple example
+        // -----------------------------------------------
+        MultilayerPerceptron mlp(1, 3, 1);
+        cout << "number of inputs: " <<mlp.get_inputs_number() << endl;
+        cout << "number of outputs: " <<mlp.get_outputs_number() << endl;
+        cout << mlp.get_outputs_number() << endl;
+
+        Vector<double> input(1);
+        input[0] = 0.5;
+        Vector<double> output = mlp.calculate_outputs( input );
+        cout << output << endl;
+
+        // std::cout << "TensorFlow Version: " << TF_Version() << std::endl;
 
         // -----------------------------------------------
         // make atomic structure and read data from a file
@@ -93,7 +111,7 @@ int main()
                 cout << endl;
                 break;
             }
-            // cout << endl; // << endl;
+            // cout << endl; // << endl;    
             
             
 
