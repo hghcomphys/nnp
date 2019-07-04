@@ -3,7 +3,7 @@ CXX = icc #g++
 CXXFLAGS = -std=c++11 #-Wall -O3
 LFLAGS = -lopennn -ltinyxml2 #-fopenmp #-ltensorflow
 
-OBJS = main.o acsf.o atoms.o symmfunc.o cutofffunc.o nnp.o
+OBJS = main.o acsf.o atoms.o symmfunc.o cutofffunc.o nnp.o neuralnetwork.o
 
 all: $(OBJS)
 	$(CXX) $(OBJS) -o nnp.x $(LFLAGS)
@@ -25,6 +25,9 @@ cutofffunc.o: cutofffunc.cpp cutofffunc.h
 
 nnp.o: nnp.cpp nnp.h
 	$(CXX) $(CXXFLAGS) -c nnp.cpp
+
+neuralnetwork.o: neuralnetwork.cpp neuralnetwork.h
+	$(CXX) $(CXXFLAGS) -c neuralnetwork.cpp
 
 clean:
 	rm -f *.o nnp.x
