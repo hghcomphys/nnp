@@ -1,5 +1,5 @@
 *.x
-makefile
+#makefile
 *.o
 .idea/
 *.out
