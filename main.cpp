@@ -81,8 +81,8 @@ int main()
         // ------------------------------------------------
 
         NeuralNetworkPotential nnp;
-        nnp.readScript();
-        nnp.calculate(configuration);
+        nnp.initilize();
+        nnp.calculateDescriptor(configuration);
 
         cout << "Number of elements: " << nnp.getNumberOfElements() << endl;
         cout << "Total number of descriptors: " << nnp.getTotalNumberOfDescriptors() << endl;

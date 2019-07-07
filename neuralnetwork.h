@@ -19,7 +19,9 @@ public:
     const OpenNN::MultilayerPerceptron& getNeuralNetwork() const;
     int getNumberOfInputs() const;
     int getNumberOfOutputs() const;
+    int getNumberOfLayers() const;
     int getNumberOfHiddenLayers() const;
+    void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
 
 private:
     OpenNN::MultilayerPerceptron neuralNetwork;

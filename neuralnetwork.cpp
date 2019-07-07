@@ -38,4 +38,21 @@ int NeuralNetwork::getNumberOfInputs() const { return neuralNetwork.get_inputs_n
 
 int NeuralNetwork::getNumberOfOutputs() const { return neuralNetwork.get_outputs_number(); }
 
-int NeuralNetwork::getNumberOfHiddenLayers() const { return neuralNetwork.get_layers_number()-1; } 
+int NeuralNetwork::getNumberOfLayers() const { return neuralNetwork.get_layers_number(); }
+
+int NeuralNetwork::getNumberOfHiddenLayers() const { return getNumberOfLayers()-1; /*exclude the output layer*/} 
+
+void NeuralNetwork::setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType) 
+{
+    OpenNN::Vector<OpenNN::Perceptron::ActivationFunction> activationFunctions;
+    for (auto each: activationFucntionsType) {
+        if( each == "t" )
+             activationFunctions.push_back( OpenNN::Perceptron::ActivationFunction::HyperbolicTangent );
+        else if ( each == "l" )
+            activationFunctions.push_back( OpenNN::Perceptron::ActivationFunction::Linear );
+        else
+            throw runtime_error("Unknown activation function type " + each);
+    }
+    if( activationFunctions.size() != getNumberOfLayers() )
+        throw runtime_error("Inconsistent number of given activation functions");
+}

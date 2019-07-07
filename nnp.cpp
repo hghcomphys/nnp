@@ -36,7 +36,7 @@ int NeuralNetworkPotential::getTotalNumberOfDescriptors() {
     return totDes;
 }
 
-void NeuralNetworkPotential::readScript(const std::string& fileName)
+void NeuralNetworkPotential::initilize(const std::string& fileName)
 {
     scriptFileName = fileName;
     std::ifstream inFile(fileName);
@@ -128,9 +128,9 @@ void NeuralNetworkPotential::readScript(const std::string& fileName)
     }
 }
 
-void NeuralNetworkPotential::readScript() { readScript("input.nn"); }
+void NeuralNetworkPotential::initilize() { initilize("input.nn"); }
 
-void NeuralNetworkPotential::calculate(Atoms &configuration) {
+void NeuralNetworkPotential::calculateDescriptor(Atoms &configuration) {
     for (auto& descriptor: descriptors)
         descriptor.calculate(configuration);
 }
