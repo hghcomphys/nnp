@@ -13,14 +13,17 @@
 class NeuralNetwork {
 public:
     NeuralNetwork();
-    NeuralNetwork::NeuralNetwork(const int& numberOfInputs, const std::vector<int>& hiddenLayersSize);
-    ~NeuralNetwork();
-    // int getNumberOfInputs() const;
-    // int getNumberOfOutputs() const;
-    // const std::vector<int>& getNumberOfHiddenLayers() const;
+    // ~NeuralNetwork();
+    NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize, int outputsSize);
+    NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize);
+    const OpenNN::MultilayerPerceptron& getNeuralNetwork() const;
+    int getNumberOfInputs() const;
+    int getNumberOfOutputs() const;
+    int getNumberOfHiddenLayers() const;
 
 private:
     OpenNN::MultilayerPerceptron neuralNetwork;
+    
 };
 
 

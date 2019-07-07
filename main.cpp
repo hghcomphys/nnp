@@ -4,30 +4,17 @@
 #include "atoms.h"
 #include "nnp.h"
 
+#include "neuralnetwork.h"
+
 // #include <tensorflow/c/c_api.h>
-#include "opennn.h"
+// #include "opennn.h"
 
 using namespace std;
-using namespace OpenNN;
+// using namespace OpenNN;
 
 int main()
 {
     try {
-
-        // -----------------------------------------------
-        // OpenNN simple example
-        // -----------------------------------------------
-        MultilayerPerceptron mlp(1, 3, 1);
-        cout << "number of inputs: " <<mlp.get_inputs_number() << endl;
-        cout << "number of outputs: " <<mlp.get_outputs_number() << endl;
-        cout << mlp.get_outputs_number() << endl;
-
-        Vector<double> input(1);
-        input[0] = 0.5;
-        Vector<double> output = mlp.calculate_outputs( input );
-        cout << output << endl;
-
-        // std::cout << "TensorFlow Version: " << TF_Version() << std::endl;
 
         // -----------------------------------------------
         // make atomic structure and read data from a file
@@ -123,6 +110,39 @@ int main()
             //     cout << index << " ";
             // cout << endl;
         }
+
+        // -----------------------------------------------
+        // Nerural Network
+        // -----------------------------------------------
+        NeuralNetwork nn(10, {25, 25});
+        cout << "size of inputs: " << nn.getNumberOfInputs() << endl;
+        cout << "size of outputs: " << nn.getNumberOfOutputs() << endl;
+        cout << "number of hidden layers: " << nn.getNumberOfHiddenLayers() << endl;  //hidden layers + output layer 
+
+        OpenNN::Vector<double> input(1);
+        input[0] = 0.5;
+        OpenNN::Vector<double> output = nn.getNeuralNetwork().calculate_outputs( input );
+        cout << "output = " << output << endl;
+
+        OpenNN::Matrix<double> jacobian = nn.getNeuralNetwork().calculate_Jacobian ( input );
+        cout << "jacobian = " << jacobian << endl;
+
+        // cout << nn.getNumberOfOutputs() << endl;
+        // for (auto a: nn.getNumberOfHiddenLayers())
+        //     cout << a << " ";
+        // cout << endl; 
+
+        // MultilayerPerceptron mlp(1, 3, 1);
+        // cout << "number of inputs: " <<mlp.get_inputs_number() << endl;
+        // cout << "number of outputs: " <<mlp.get_outputs_number() << endl;
+        // cout << mlp.get_outputs_number() << endl;
+
+        // Vector<double> input(1);
+        // input[0] = 0.5;
+        // Vector<double> output = mlp.calculate_outputs( input );
+        // cout << output << endl;
+
+        // std::cout << "TensorFlow Version: " << TF_Version() << std::endl;
     }
 
     catch (runtime_error e)
