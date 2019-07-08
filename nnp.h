@@ -12,23 +12,24 @@
 
 class NeuralNetworkPotential {
 public:
-    NeuralNetworkPotential();
+    NeuralNetworkPotential(const std::string& directory);
     ~NeuralNetworkPotential();
-    void addDescriptor(const ACSF& descriptor);
     void initilize();
-    void initilize(const std::string& fileName);
     ACSF& getDescriptorForElement(const std::string& element);
-    int getTotalNumberOfDescriptors();
-    int getNumberOfElements();
-    std::vector<std::string> &getElements();
+    NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element);
+    int getNumberOfElements() const;
+    const std::vector<std::string>& getElements() const;
+    const std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
     void calculateDescriptor(Atoms &configuration);
-    std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
 
 private:
-    std::string scriptFileName;
-    std::vector<ACSF> descriptors;
+    std::string directory;
     std::vector<std::string> elements;
-    std::vector<NeuralNetwork> neuralnetworks;
+    std::vector<ACSF> descriptors;
+    std::vector<int> hiddenLayersSize;
+    std::vector<std::string> activationFunctionTypes;
+    std::vector<NeuralNetwork> neuralNetworks;
+    int NeuralNetworkPotential::getIndexForElement(const std::string& element) const;
 };
 
 
