@@ -56,77 +56,149 @@ ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index) const {
     return *(listOfThreeBodySF[index]);
 }
 
-void ACSF::calculate(Atoms &configuration)
+std::vector<std::vector<double>> ACSF::calculateSF(Atoms &configuration)
+{
+    std::vector<std::vector<double>> values;
+    const auto listOfIndexForCentralElement = configuration.getListOfIndexForElement(centralElement);
+    
+    // loop over all atoms
+    for(auto atomIndex: listOfIndexForCentralElement)
+        values.push_back( calculateSF(configuration, atomIndex) );
+
+    return values;
+
+
+    // // TODO: optimization
+    // const int n_2b = listOfTwoBodySF.size();
+    // const int n_3b = listOfThreeBodySF.size();
+    // const int nrow =  configuration.getNumberOfAtomsForElement(centralElement);
+    // const int ncol =  n_2b + n_3b;
+
+    // values.resize(nrow, std::vector<double>(ncol));
+    // for (auto& col: values) // initialize to zero
+    //     std::fill(col.begin(), col.end(), 0.0);
+
+    // int elementIndex = 0;
+    // auto atoms = configuration.getListOfAtoms();
+    // auto listOfIndexForCentralElement = configuration.getListOfIndexForElement(centralElement);
+    // for(int i: listOfIndexForCentralElement) 
+    // {
+    //     // central element
+    //     Atom& atom_i = atoms[i];
+
+    //     // symmetry function values for each atom with central element type
+    //     auto& elementValues = values[elementIndex++];
+
+    //     // Loop over all two-body symmetry functions
+    //     for (int n=0; n<n_2b; n++) 
+    //     {
+    //         for(int j: configuration.getListOfIndexForElement(listOfTwoBodyNeighborElement[n])) {
+    //                 Atom& atom_j = atoms[j];
+    //                 if (atom_j.getIndex() == atom_i.getIndex()) continue;
+    //                 const double rij = configuration.distance(atom_i, atom_j);
+    //                 elementValues[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
+    //             } 
+    //     }
+
+    //     // Loop over all tree-body symmetry functions
+    //     for (int n=0; n<n_3b; n++) 
+    //     {
+    //         // first neighbors
+    //         for(int j: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n])) {
+                    
+    //                 Atom& atom_j = atoms[j];
+    //                 if (atom_j.getIndex() == atom_i.getIndex()) continue;
+                    
+    //                 double drij[3];
+    //                 const double rij = configuration.distance(atom_i, atom_j, drij);
+
+    //                 // second neighbors
+    //                 for(int k: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n])) {
+                        
+    //                     Atom& atom_k = atoms[k];
+    //                     if (atom_k.getIndex() == atom_i.getIndex()) continue;
+
+    //                     double drik[3];
+    //                     const double rik = configuration.distance(atom_i, atom_k, drik);
+    //                     const double rjk = configuration.distance(atom_j, atom_k);
+
+    //                     // cosine of angle between k--<i>--j atoms
+    //                     double cost = 0;
+    //                     for (int d=0; d<3; d++)
+    //                         cost += drij[d] * drik[d];
+    //                     const double inv_r = 1.0 / rij / rik;
+    //                     cost *= inv_r;
+    //                     // std::cout << cost << std::endl;
+
+    //                     elementValues[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
+    //                 }
+    //         }
+    //     }
+    // }
+}
+
+std::vector<double> ACSF::calculateSF(Atoms &configuration, int atomIndex)
 {
     // TODO: optimization
     const int n_2b = listOfTwoBodySF.size();
     const int n_3b = listOfThreeBodySF.size();
-    const int nrow =  configuration.getNumberOfAtomsForElement(centralElement);
-    const int ncol =  n_2b + n_3b;
 
-    values.resize(nrow, std::vector<double>(ncol));
-    for (auto& col: values) // initialize to zero
-        std::fill(col.begin(), col.end(), 0.0);
+    std::vector<double> values(n_2b + n_3b);
+    std::fill(values.begin(), values.end(), 0.0); // initialize to zero
 
-    int elementIndex = 0;
     auto atoms = configuration.getListOfAtoms();
-    auto listOfIndexForCentralElement = configuration.getListOfIndexForElement(centralElement);
-    for(int i: listOfIndexForCentralElement) 
+
+    // central element
+    Atom& atom_i = atoms[atomIndex];
+
+    // Loop over all two-body symmetry functions
+    for (int n=0; n<n_2b; n++) 
     {
-        // central element
-        Atom& atom_i = atoms[i];
+        for(int j: configuration.getListOfIndexForElement(listOfTwoBodyNeighborElement[n])) {
+                Atom& atom_j = atoms[j];
+                if (atom_j.getIndex() == atom_i.getIndex()) continue;
+                const double rij = configuration.distance(atom_i, atom_j);
+                values[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
+            } 
+    }
 
-        // symmetry function values for each atom with central element type
-        auto& elementValues = values[elementIndex++];
+    // Loop over all tree-body symmetry functions
+    for (int n=0; n<n_3b; n++) 
+    {
+        // first neighbors
+        for(int j: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n])) {
+                
+            Atom& atom_j = atoms[j];
+            if (atom_j.getIndex() == atom_i.getIndex()) continue;
+            
+            double drij[3];
+            const double rij = configuration.distance(atom_i, atom_j, drij);
 
-        // Loop over all two-body symmetry functions
-        for (int n=0; n<n_2b; n++) 
-        {
-            for(int j: configuration.getListOfIndexForElement(listOfTwoBodyNeighborElement[n])) {
-                    Atom& atom_j = atoms[j];
-                    if (atom_j.getIndex() == atom_i.getIndex()) continue;
-                    const double rij = configuration.distance(atom_i, atom_j);
-                    elementValues[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
-                } 
-        }
+            // second neighbors
+            for(int k: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n])) {
+                
+                Atom& atom_k = atoms[k];
+                if (atom_k.getIndex() == atom_i.getIndex()) continue;
 
-        // Loop over all tree-body symmetry functions
-        for (int n=0; n<n_3b; n++) 
-        {
-            // first neighbors
-            for(int j: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n])) {
-                    
-                    Atom& atom_j = atoms[j];
-                    if (atom_j.getIndex() == atom_i.getIndex()) continue;
-                    
-                    double drij[3];
-                    const double rij = configuration.distance(atom_i, atom_j, drij);
+                double drik[3];
+                const double rik = configuration.distance(atom_i, atom_k, drik);
+                const double rjk = configuration.distance(atom_j, atom_k);
 
-                    // second neighbors
-                    for(int k: configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n])) {
-                        
-                        Atom& atom_k = atoms[k];
-                        if (atom_k.getIndex() == atom_i.getIndex()) continue;
+                // cosine of angle between k--<i>--j atoms
+                double cost = 0;
+                for (int d=0; d<3; d++)
+                    cost += drij[d] * drik[d];
+                const double inv_r = 1.0 / rij / rik;
+                cost *= inv_r;
+                // std::cout << cost << std::endl;
 
-                        double drik[3];
-                        const double rik = configuration.distance(atom_i, atom_k, drik);
-                        const double rjk = configuration.distance(atom_j, atom_k);
-
-                        // cosine of angle between k--<i>--j atoms
-                        double cost = 0;
-                        for (int d=0; d<3; d++)
-                            cost += drij[d] * drik[d];
-                        const double inv_r = 1.0 / rij / rik;
-                        cost *= inv_r;
-                        // std::cout << cost << std::endl;
-
-                        elementValues[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
-                    }
+                values[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
             }
         }
     }
+
+    // return symmetry function values for given atom.
+    return values;
 }
 
-std::vector<std::vector<double>>& ACSF::getValues() { return values; }
-
-std::string ACSF::getCentralElement() { return centralElement; }
+const std::string& ACSF::getCentralElement() const { return centralElement; }

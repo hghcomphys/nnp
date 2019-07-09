@@ -22,10 +22,10 @@ public:
     int getNumberOfTwoBodySF() const;
     int getNumberOfThreeBodySF() const;
     int getTotalNumberOfSF() const;
-    void calculate(Atoms &configuration);
-    std::vector<std::vector<double>>& getValues();
-    std::string getCentralElement();
-    
+    const std::string& getCentralElement() const;
+    std::vector<std::vector<double>> calculateSF(Atoms &configuration);
+    std::vector<double> calculateSF(Atoms &configuration, int atomIndex);
+
 private:
     std::string centralElement;
     std::vector<TwoBodySymmetryFunction *> listOfTwoBodySF; /* factory method */
