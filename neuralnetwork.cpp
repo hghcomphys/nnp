@@ -56,3 +56,66 @@ void NeuralNetwork::setLayersActivationFunction(const std::vector<std::string>& 
     if( activationFunctions.size() != getNumberOfLayers() )
         throw runtime_error("Inconsistent number of given activation functions");
 }
+
+void NeuralNetwork::readParameters(const std::string& filename) 
+{
+    std::ifstream inFile(filename);
+    if (!inFile)
+        throw std::runtime_error("Unable to open script file " + filename);
+
+    OpenNN::Vector<OpenNN::Matrix<double>> layers_synaptic_weights;
+    OpenNN::Vector<OpenNN::Vector< double >>  layers_biases;
+    for (int i=0; i<getNumberOfLayers(); i++) {
+
+        // synamptic weights
+        const int nrow = neuralNetwork.get_layer(i).get_perceptrons_number();
+        const int ncol = neuralNetwork.get_layers_inputs_number()[i];
+        layers_synaptic_weights.push_back( OpenNN::Matrix<double>(nrow, ncol) );
+        cout << "weight matrix in layer(" << i+1 << "): (" << nrow << ", " << ncol << ")" << endl;
+
+        // biases
+        layers_biases.push_back( OpenNN::Vector<double>(nrow) );
+        cout << "biases vector in layer(" << i+1 << "): (" << nrow << ")" << endl;
+    }
+
+    char cSpace = ' ';
+    std::string line, dummy;
+    double ddummy;
+    int idummy;
+
+    while ( std::getline(inFile, line) ) {
+        std::stringstream ss(line);
+        std::string sIndvStr;
+        while ( std::getline(ss, sIndvStr, cSpace) ) {
+
+            if (sIndvStr == "#")
+                continue;
+
+            double coeff;
+            std::string coeffType;
+            ss >> coeff >> coeffType;
+
+            if (coeffType == "a") {
+
+                const double& weight = coeff; 
+                int index, l_s, n_s, l_e, n_e;
+                ss >> index >> l_s >> n_s >> l_e >> n_e;
+                // std::cout << weight << " a " << index << " " << l_s << " " << n_s << " " << l_e << " " << n_e << std::endl;
+
+                layers_synaptic_weights[l_s][n_s-1, n_e-1] = weight;
+                // cout << layers_synaptic_weights[l_s][n_s, n_e] << " " << weight << endl;
+            }
+            if (coeffType == "b") {
+                
+                const double& bias = coeff;
+                int index, l_s, n_s;
+                ss >> index >> l_s >> n_s;
+                // std::cout << weight << " b " << index << " " << l_s << " " << n_s <<  std::endl;
+                
+                layers_biases[l_s-1][n_s-1] = bias;
+                // cout << layers_biases[l_s-1][n_s-1] << " " << bias << endl;
+            }
+        }           
+    }
+
+}

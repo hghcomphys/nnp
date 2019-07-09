@@ -22,8 +22,10 @@ public:
     int getNumberOfLayers() const;
     int getNumberOfHiddenLayers() const;
     void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
+    void readParameters(const std::string& fullPathFileName);
 
 private:
+    // OpenNN::Vector<int> layersSize; 
     OpenNN::MultilayerPerceptron neuralNetwork;
     
 };
