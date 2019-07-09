@@ -13,14 +13,13 @@
 class NeuralNetworkPotential {
 public:
     NeuralNetworkPotential(const std::string& directory);
-    ~NeuralNetworkPotential();
-    void readSetupFiles();
     ACSF& getDescriptorForElement(const std::string& element);
     NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element);
     int getNumberOfElements() const;
     const std::vector<std::string>& getElements() const;
     const std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
-    void calculateDescriptor(Atoms &configuration);
+    double calculateEnergy(Atoms& configuration, int AtomIndex);
+    double caculateTotalEnergy(Atoms& configuration);
 
 private:
     std::string directory;
@@ -30,6 +29,7 @@ private:
     std::vector<std::string> activationFunctionTypes;
     std::vector<NeuralNetwork> neuralNetworks;
     int NeuralNetworkPotential::getIndexForElement(const std::string& element) const;
+    void readSetupFiles();
 };
 
 

@@ -13,11 +13,7 @@
    setup for Neural Network Potential
 ------------------------------------------------------------------------- */
 
-NeuralNetworkPotential::NeuralNetworkPotential(const std::string& directory): directory(directory) {}
-
-NeuralNetworkPotential::~NeuralNetworkPotential() {}
-
-// void NeuralNetworkPotential::addDescriptor(const ACSF& descriptor) { descriptors.push_back( descriptor ); }
+NeuralNetworkPotential::NeuralNetworkPotential(const std::string& directory): directory(directory) { readSetupFiles(); }
 
 int NeuralNetworkPotential::getNumberOfElements() const { return elements.size(); }
 
@@ -186,11 +182,24 @@ void NeuralNetworkPotential::readSetupFiles()
 
 // void NeuralNetworkPotential::initilize() { initilize(); }
 
-void NeuralNetworkPotential::calculateDescriptor(Atoms &configuration) {
-    for (auto& descriptor: descriptors)
-        descriptor.calculate(configuration);
+// void NeuralNetworkPotential::calculateDescriptor(Atoms &configuration) {
+//     for (auto& descriptor: descriptors)
+//         descriptor.calculate(configuration);
+// }
+
+// const std::vector<std::vector<double>>& NeuralNetworkPotential::getDescriptorValuesForElement(const std::string& element) {
+//     return getDescriptorForElement(element).getValues();
+// }
+
+double NeuralNetworkPotential::calculateEnergy(Atoms& configuration, int atomIndex) {
+    Atom atom = configuration.getListOfAtoms()[atomIndex];
+    std::vector<double> descriptorValues = getDescriptorForElement(atom.getElement()).calculateSF(configuration, atomIndex);
+    return getNeuralNetworkForElement(atom.getElement()).calculateEnergy(descriptorValues);
 }
 
-const std::vector<std::vector<double>>& NeuralNetworkPotential::getDescriptorValuesForElement(const std::string& element) {
-    return getDescriptorForElement(element).getValues();
+double NeuralNetworkPotential::caculateTotalEnergy(Atoms &configuration) {
+    double totalEnergy = 0.0;
+    for(auto atom: configuration.getListOfAtoms())
+        totalEnergy += calculateEnergy(configuration, atom.getIndex());
+    return totalEnergy;
 }
