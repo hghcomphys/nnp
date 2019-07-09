@@ -80,27 +80,25 @@ int main()
         // make neural network potential
         // ------------------------------------------------
 
-        NeuralNetworkPotential nnp;
-        nnp.initilize();
-        nnp.calculateDescriptor(configuration);
+        NeuralNetworkPotential nnp("");
 
         cout << "Number of elements: " << nnp.getNumberOfElements() << endl;
-        cout << "Total number of descriptors: " << nnp.getTotalNumberOfDescriptors() << endl;
-        for (auto& element: nnp.getElements()) {
+        for (auto& element: nnp.getElements()) 
+        {
             cout << "Element: " << element << endl;
             cout << "Two-body SF: " << nnp.getDescriptorForElement(element).getNumberOfTwoBodySF() << endl;
             cout << "Three-body SF: " << nnp.getDescriptorForElement(element).getNumberOfThreeBodySF() << endl;
             cout << "Total SF: " << nnp.getDescriptorForElement(element).getTotalNumberOfSF() << endl;
-
-            for (auto &atoms: nnp.getDescriptorForElement(element).getValues() ) {
-                for (auto &sf: atoms)
-                    cout << sf << " ";
-                cout << endl;
-                break;
-            }
-            // cout << endl; // << endl;    
+            cout << "NN number of inputs: "  << nnp.getNeuralNetworkForElement(element).getNumberOfInputs() << endl;
+            cout << "NN number of hidden layers: "  << nnp.getNeuralNetworkForElement(element).getNumberOfHiddenLayers() << endl;
             
-            
+            // for (auto &atoms: nnp.getDescriptorForElement(element).getValues() ) {
+            //     for (auto &sf: atoms)
+            //         cout << sf << " ";
+            //     cout << endl;
+            //     break;
+            // }
+            // // cout << endl; // << endl;
 
             // for (auto &index: nnp.getDescriptorForElement(element).getIndex2() )
             //     cout << index << " ";
@@ -111,43 +109,34 @@ int main()
             // cout << endl;
         }
 
+        for (int i=0; i<5; i++) {
+            Atom atom = configuration.getListOfAtoms()[i];
+            cout << "Atom[" << atom.getElement() << "] energy: " << nnp.calculateEnergy(configuration, i) << endl;
+        }    
+        // cout << "Total energy: " << nnp.caculateTotalEnergy(configuration) << endl;
+
         // -----------------------------------------------
         // Nerural Network
         // -----------------------------------------------
-        NeuralNetwork nn(10, {25, 25});
-        cout << "size of inputs: " << nn.getNumberOfInputs() << endl;
-        cout << "size of outputs: " << nn.getNumberOfOutputs() << endl;
-        cout << "number of hidden layers: " << nn.getNumberOfHiddenLayers() << endl;  //hidden layers + output layer 
+        // NeuralNetwork nn(10, {25, 25});
+        // cout << "size of inputs: " << nn.getNumberOfInputs() << endl;
+        // cout << "size of outputs: " << nn.getNumberOfOutputs() << endl;
+        // cout << "number of hidden layers: " << nn.getNumberOfHiddenLayers() << endl;  //hidden layers + output layer 
 
-        OpenNN::Vector<double> input(1);
-        input[0] = 0.5;
-        OpenNN::Vector<double> output = nn.getNeuralNetwork().calculate_outputs( input );
-        cout << "output = " << output << endl;
-
-        OpenNN::Matrix<double> jacobian = nn.getNeuralNetwork().calculate_Jacobian ( input );
-        cout << "jacobian = " << jacobian << endl;
-
-        // cout << nn.getNumberOfOutputs() << endl;
-        // for (auto a: nn.getNumberOfHiddenLayers())
-        //     cout << a << " ";
-        // cout << endl; 
-
-        // MultilayerPerceptron mlp(1, 3, 1);
-        // cout << "number of inputs: " <<mlp.get_inputs_number() << endl;
-        // cout << "number of outputs: " <<mlp.get_outputs_number() << endl;
-        // cout << mlp.get_outputs_number() << endl;
-
-        // Vector<double> input(1);
+        // OpenNN::Vector<double> input(1);
         // input[0] = 0.5;
-        // Vector<double> output = mlp.calculate_outputs( input );
-        // cout << output << endl;
+        // OpenNN::Vector<double> output = nn.getNeuralNetwork().calculate_outputs( input );
+        // cout << "output = " << output << endl;
+
+        // OpenNN::Matrix<double> jacobian = nn.getNeuralNetwork().calculate_Jacobian ( input );
+        // cout << "jacobian = " << jacobian << endl;
 
         // std::cout << "TensorFlow Version: " << TF_Version() << std::endl;
     }
 
     catch (runtime_error e)
     {
-        cout << "Runtime Error: " << e.what() << '!' << endl;
+        cout << "Runtime Error: " << e.what() << "!" << endl;
     }
 
 }
