@@ -24,6 +24,8 @@ public:
     void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
     void readParameters(const std::string& fullPathFileName);
 
+    double calculateEnergy(const std::vector<double>& descriptorValues);
+
 private:
     // OpenNN::Vector<int> layersSize; 
     OpenNN::MultilayerPerceptron neuralNetwork;

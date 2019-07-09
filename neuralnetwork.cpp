@@ -22,7 +22,6 @@ NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayer
     for (int i=0; i<numberOfHiddenLayers; i++)
             layersSize[i+1] = hiddenLayersSize[i]; // number of perceptrons at each hidden layer
     layersSize[numberOfHiddenLayers+1] = outputsSize;  //Output layer
-
     // for(int i=0; i< layersSize.size(); i++)
     //     cout << layersSize[i] << " ";
     // cout << endl;
@@ -118,4 +117,17 @@ void NeuralNetwork::readParameters(const std::string& filename)
         }           
     }
 
+}
+
+double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValues) {
+
+    if (descriptorValues.size() != getNumberOfInputs())
+        throw std::runtime_error("Unexpected size of inputs");
+
+    // TODO: optimize the conversion
+    OpenNN::Vector<double> inputs( getNumberOfInputs() );
+    for(int i=0; i<getNumberOfInputs(); i++ )
+        inputs[i] = descriptorValues[i];
+
+    return neuralNetwork.calculate_outputs( inputs )[0]; // last layer has one output perpcetron
 }
