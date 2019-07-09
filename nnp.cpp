@@ -145,10 +145,18 @@ void NeuralNetworkPotential::initilize()
                     // std::cout << hiddenLayersSize[i] << std::endl;
                 }
             }
-            //TODO: read activation functions
+            else if (sIndvStr == "global_activation_short") {
+
+                const int number_of_layers = number_of_hidden_layers + 1; // plus output layer
+                for (int i=0; i<number_of_layers; i++) {
+                    ss >> dummy;
+                    activationFunctionTypes.push_back(dummy);
+                    // std::cout << activationFunctionTypes[i] << std::endl;
+                }
+            }
         }           
     }
-    // create neural network with the deremined number of inputs based on the number of symmetry functions for each element
+    // create neural network for each element
     for (auto &element: elements) {
         neuralNetworks.push_back( NeuralNetwork(getDescriptorForElement(element).getTotalNumberOfSF(), hiddenLayersSize) );
         std::cout << "Neural Network (" << element << "):" << std::endl;
