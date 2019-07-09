@@ -40,10 +40,21 @@ NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::str
     return neuralNetworks[getIndexForElement(element)];
 }
 
-void NeuralNetworkPotential::initilize()
+int elementToAtomicNumber(const std::string& element) 
 {
-    const std::string scriptFile = directory + "/input.nn";
-    std::ifstream inFile(scriptFile);
+    // TODO: extend to all elements
+    if(element == "H")
+        return 1;
+    else if (element == "C")
+        return 6; 
+    else if (element == "O")
+        return 8;
+}
+
+void NeuralNetworkPotential::readSetupFiles()
+{
+    const std::string filename = directory + "input.nn";
+    std::ifstream inFile(filename);
     if (!inFile)
         throw std::runtime_error("Unable to open script file");
 
@@ -156,10 +167,20 @@ void NeuralNetworkPotential::initilize()
             }
         }           
     }
+
     // create neural network for each element
     for (auto &element: elements) {
         neuralNetworks.push_back( NeuralNetwork(getDescriptorForElement(element).getTotalNumberOfSF(), hiddenLayersSize) );
         std::cout << "Neural Network (" << element << "):" << std::endl;
+    }
+
+    // initilize neural network for each element
+    for (auto &element: elements) {
+            char filename[16];
+            sprintf(filename, "weights.%3.3d.data", elementToAtomicNumber(element));
+            const std::string fullPathFileName = directory + std::string(filename);
+            std::cout << fullPathFileName << std::endl;
+            getNeuralNetworkForElement(element).readParameters(fullPathFileName);
     }
 }
 

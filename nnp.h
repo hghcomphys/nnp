@@ -14,7 +14,7 @@ class NeuralNetworkPotential {
 public:
     NeuralNetworkPotential(const std::string& directory);
     ~NeuralNetworkPotential();
-    void initilize();
+    void readSetupFiles();
     ACSF& getDescriptorForElement(const std::string& element);
     NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element);
     int getNumberOfElements() const;
