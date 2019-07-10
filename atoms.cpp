@@ -24,6 +24,17 @@ double Atom::getIndex() { return index; }
 
 std::string Atom::getElement() { return element; }
 
+int Atom::getAtomicNumber(const std::string& element) 
+{
+    // TODO: extend to all elements
+    if(element == "H")
+        return 1;
+    else if (element == "C")
+        return 6; 
+    else if (element == "O")
+        return 8;
+}
+
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */

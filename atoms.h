@@ -17,6 +17,7 @@ public:
     double getZ();
     double getIndex();
     std::string getElement();
+    static int getAtomicNumber(const std::string& element); 
     
 private:
     int index;
