@@ -13,41 +13,11 @@
    setup for Neural Network Potential
 ------------------------------------------------------------------------- */
 
-NeuralNetworkPotential::NeuralNetworkPotential(const std::string& directory): directory(directory) { readSetupFiles(); }
+NeuralNetworkPotential::NeuralNetworkPotential() {}
 
-int NeuralNetworkPotential::getNumberOfElements() const { return elements.size(); }
+NeuralNetworkPotential::~NeuralNetworkPotential() {}
 
-const std::vector<std::string>& NeuralNetworkPotential::getElements() const { return elements; }
-
-int NeuralNetworkPotential::getIndexForElement(const std::string& element) const {
-    // TODO: optimize the finding algorithm
-    int index;
-    for(index = 0; index<element.size(); index++)
-        if (elements[index] == element)
-            break;
-    return index;
-}
-
-ACSF& NeuralNetworkPotential::getDescriptorForElement(const std::string& element) { 
-    return descriptors[getIndexForElement(element)];
-}
-
-NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element) { 
-    return neuralNetworks[getIndexForElement(element)];
-}
-
-int elementToAtomicNumber(const std::string& element) 
-{
-    // TODO: extend to all elements
-    if(element == "H")
-        return 1;
-    else if (element == "C")
-        return 6; 
-    else if (element == "O")
-        return 8;
-}
-
-void NeuralNetworkPotential::readSetupFiles()
+void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 {
     const std::string filename = directory + "input.nn";
     std::ifstream inFile(filename);
@@ -173,23 +143,35 @@ void NeuralNetworkPotential::readSetupFiles()
     // initilize neural network for each element
     for (auto &element: elements) {
             char filename[16];
-            sprintf(filename, "weights.%3.3d.data", elementToAtomicNumber(element));
+            sprintf(filename, "weights.%3.3d.data", Atom::getAtomicNumber(element));
             const std::string fullPathFileName = directory + std::string(filename);
             std::cout << fullPathFileName << std::endl;
             getNeuralNetworkForElement(element).readParameters(fullPathFileName);
     }
 }
 
-// void NeuralNetworkPotential::initilize() { initilize(); }
+void NeuralNetworkPotential::readSetupFiles() { readSetupFiles(""); }
 
-// void NeuralNetworkPotential::calculateDescriptor(Atoms &configuration) {
-//     for (auto& descriptor: descriptors)
-//         descriptor.calculate(configuration);
-// }
+int NeuralNetworkPotential::getNumberOfElements() const { return elements.size(); }
 
-// const std::vector<std::vector<double>>& NeuralNetworkPotential::getDescriptorValuesForElement(const std::string& element) {
-//     return getDescriptorForElement(element).getValues();
-// }
+const std::vector<std::string>& NeuralNetworkPotential::getElements() const { return elements; }
+
+int NeuralNetworkPotential::getIndexForElement(const std::string& element) const {
+    // TODO: optimize the finding algorithm
+    int index;
+    for(index = 0; index<element.size(); index++)
+        if (elements[index] == element)
+            break;
+    return index;
+}
+
+ACSF& NeuralNetworkPotential::getDescriptorForElement(const std::string& element) { 
+    return descriptors[getIndexForElement(element)];
+}
+
+NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element) { 
+    return neuralNetworks[getIndexForElement(element)];
+}
 
 double NeuralNetworkPotential::calculateEnergy(Atoms& configuration, int atomIndex) {
     Atom atom = configuration.getListOfAtoms()[atomIndex];
