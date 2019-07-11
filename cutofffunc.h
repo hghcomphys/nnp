@@ -11,6 +11,7 @@ public:
     CutoffFunction();
     void setCutoffRadius(double cutoffRadius);
     double fc(double r);
+    double dfc(double r);
 
 private:
     double rc;

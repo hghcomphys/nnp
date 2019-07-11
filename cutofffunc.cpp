@@ -5,6 +5,8 @@
 #include <cmath>
 #include "cutofffunc.h"
 
+double const TANH_PRE = pow((M_E + 1 / M_E) / (M_E - 1 / M_E), 3);
+
 /* ----------------------------------------------------------------------
    setup for base cutoff function
 ------------------------------------------------------------------------- */
@@ -21,9 +23,23 @@ double CutoffFunction::fc(double r)
     if ( r > rc ) return 0;
     
     // COS TYPE
-    // return ( cos(M_PI*r*inv_rc) + 1.0 ) * 0.5; 
+    // return ( cos(M_PI * r * inv_rc) + 1.0 ) * 0.5; 
     
     // TANH TYPE
-    double const tanh1 = tanh(1.0 - r * inv_rc);
-    return tanh1 * tanh1 * tanh1;
+    double const tmp = tanh(1.0 - r * inv_rc);
+    return tmp * tmp * tmp;
+}
+
+// TODO: other types of cutoff function
+double CutoffFunction::dfc(double r) 
+{
+    if ( r > rc ) return 0;
+    
+    // COS TYPE
+    // return -M_PI_2 * inv_rc * sin(M_PI * r * inv_rc);
+    
+    // TANH TYPE
+    double tmp = tanh(1.0 - r * inv_rc);
+    tmp *= tmp;
+    return 3.0 * TANH_PRE * tmp * (tmp - 1.0) * inv_rc;
 }
