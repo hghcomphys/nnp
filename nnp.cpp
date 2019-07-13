@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#define REORDER_SYMMETRY_FUNCTIONS // this flag is temporary
 
 /* ----------------------------------------------------------------------
    setup for Neural Network Potential
@@ -22,19 +23,24 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
     const std::string filename = directory + "input.nn";
     std::ifstream inFile(filename);
     if (!inFile)
-        throw std::runtime_error("Unable to open script file");
+        throw std::runtime_error("Unable to open script file " + filename);
 
     char cSpace = ' ';
-    std::string line, dummy;
-    double ddummy;
-    int idummy;
+    std::string line;
+
     int number_of_elements = 0;
     int number_of_hidden_layers = 0;
     
     while ( std::getline(inFile, line) ) {
+
         std::stringstream ss(line);
         std::string sIndvStr;
+
         while ( std::getline(ss, sIndvStr, cSpace) ) {
+
+            std::string dummy;
+            double ddummy;
+            int idummy;
 
             if (sIndvStr == "number_of_elements") {
                 ss >> number_of_elements;
@@ -55,12 +61,14 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     std::cout << "ACSF(" << element << ")" << std::endl;
                 }
             }
+#ifndef REORDER_SYMMETRY_FUNCTIONS
             else if (sIndvStr == "symfunction_short")
             {
                 int sfType;
                 std::string centralElement;
                 std::string neighborElement1, neighborElement2;
                 std::vector<double> params;
+
                 ss >> centralElement >> sfType;
                 switch (sfType)
                 {
@@ -70,7 +78,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                         ss >> ddummy; //eta >> rshift >> rcutoff;
                         params.push_back(ddummy);
                     }
-                    getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1 );
+                    getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1);
                     // std::cout << "add G2(<" << centralElement << ">, " << neighborElement1 << "): ";
                     // for (auto& p: params) 
                     //     std::cout << p << ' ';
@@ -80,10 +88,10 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                 case 3:
                     ss >> neighborElement1 >> neighborElement2;
                     for (int i=0; i<4; i++) {
-                        ss >> ddummy; //eta >> rshift >> rcutoff;
+                        ss >> ddummy; //eta >> lambda >> zeta >> rcutoff;
                         params.push_back(ddummy);
                     }
-                    getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2 );
+                    getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2);
                     // std::cout << "add G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
                     // for (auto& p: params) 
                     //     std::cout << p << ' ';
@@ -93,10 +101,10 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                 case 9:
                     ss >> neighborElement1 >> neighborElement2;
                     for (int i=0; i<4; i++) {
-                        ss >> ddummy; //eta >> rshift >> rcutoff;
+                        ss >> ddummy; //eta >> lambda >> zeta >> rcutoff;
                         params.push_back(ddummy);
                     }
-                    getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2 );
+                    getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2);
                     // std::cout << "add G5(" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
                     // for (auto& p: params) 
                     //     std::cout << p << ' ';
@@ -104,9 +112,11 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     break;
                 
                 default:
+                    throw std::runtime_error("Unexpected symmetry function in " + filename);
                     break;
                 }
             }
+#endif
             else if (sIndvStr == "global_hidden_layers_short") {
                 ss >> number_of_hidden_layers;
                 // std::cout << sIndvStr << ' ' << number_of_elements << std::endl;
@@ -133,6 +143,78 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
             }
         }           
     }
+
+#ifdef REORDER_SYMMETRY_FUNCTIONS
+    for (auto &element: elements) 
+    {
+        const std::string filenameSF = directory + "sfmap.data";
+        std::ifstream inFileSF(filenameSF);
+        if (!inFileSF)
+            throw std::runtime_error("Unable to open script file " + filename);
+
+        while ( std::getline(inFileSF, line) ) {
+
+            int sfIndex, sfType;
+            std::stringstream ss(line);
+            std::string centralElement;
+            std::string neighborElement1, neighborElement2;
+            std::vector<double> params;
+            double eta, zeta, lambda, rshift, rcutoff;
+
+            ss >> sfIndex >> centralElement >> sfType;        
+            if ( element == centralElement) 
+            {
+                switch (sfType)
+                {
+                case 2:
+                    ss >> neighborElement1 >> eta >> rshift >> rcutoff;
+                    params.push_back(eta); 
+                    params.push_back(rshift); 
+                    params.push_back(rcutoff);
+                    getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1);
+                    std::cout << "add G2(<" << centralElement << ">, " << neighborElement1 << "): ";
+                    for (auto& p: params) 
+                        std::cout << p << ' ';
+                    std::cout << std::endl;
+                    break;
+
+                case 3:
+                    ss >> neighborElement1 >> neighborElement2 >> eta >> rshift >> lambda >> zeta >> rcutoff;
+                    params.push_back(eta);
+                    params.push_back(lambda);
+                    params.push_back(zeta);
+                    params.push_back(rcutoff);
+                    // params.push_back(rshift);
+                    getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2);
+                    std::cout << "add G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    for (auto& p: params) 
+                        std::cout << p << ' ';
+                    std::cout << std::endl;
+                break;
+
+                case 9:
+                     ss >> neighborElement1 >> neighborElement2 >> eta >> rshift >> lambda >> zeta >> rcutoff;
+                    params.push_back(eta);
+                    params.push_back(lambda);
+                    params.push_back(zeta);
+                    params.push_back(rcutoff);
+                    // params.push_back(rshift);
+                    getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2);
+                    std::cout << "add G5(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    for (auto& p: params) 
+                        std::cout << p << ' ';
+                    std::cout << std::endl;
+                    break;
+                
+                default:
+                    throw std::runtime_error("Unexpected symmetry function in " + filenameSF);
+                    break;
+                }
+            }       
+        }   
+    }
+    inFile.close();
+#endif
 
     // create neural network for each element
     for (auto &element: elements) {
