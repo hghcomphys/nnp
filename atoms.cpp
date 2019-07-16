@@ -100,7 +100,7 @@ void Atoms::setCell(double cell[])
 void Atoms::applyPBC(double &dx, double &dy, double &dz)
 {
     // TODO: extend it to non-orthogonal box
-    const double lx = cell[1];
+    const double lx = cell[0];
     const double ly = cell[4];
     const double lz = cell[8];
 
