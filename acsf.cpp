@@ -29,14 +29,14 @@ ACSF::~ACSF()
 }
 
 void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1) {
-    listOfTwoBodySFindex.push_back(getTotalNumberOfSF());
+    // listOfTwoBodySFindex.push_back(getTotalNumberOfSF());
     listOfTwoBodySF.push_back(symmetryFunction);
     listOfTwoBodyNeighborElement.push_back(neighborElement1);
 }
 
 void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction,
                             const std::string& neighborElement1, const std::string& neighborElement2) {
-    listOfThreeBodySFindex.push_back(getTotalNumberOfSF());
+    // listOfThreeBodySFindex.push_back(getTotalNumberOfSF());
     listOfThreeBodySF.push_back(symmetryFunction);
     listOfThreeBodyNeighborElement1.push_back(neighborElement1);
     listOfThreeBodyNeighborElement2.push_back(neighborElement2);
@@ -92,7 +92,7 @@ std::vector<double> ACSF::calculateSF(Atoms &configuration, int atomIndex)
                 Atom& atom_j = atoms[j];
                 if (atom_j.getIndex() == atom_i.getIndex()) continue;
                 const double rij = configuration.distance(atom_i, atom_j);
-                values[listOfTwoBodySFindex[n]] += listOfTwoBodySF[n]->function(rij);
+                values[n] += listOfTwoBodySF[n]->function(rij);
             } 
     }
 
@@ -127,7 +127,7 @@ std::vector<double> ACSF::calculateSF(Atoms &configuration, int atomIndex)
                 cost *= inv_r;
                 // std::cout << cost << std::endl;
 
-                values[listOfThreeBodySFindex[n]] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
+                values[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
             }
         }
     }
@@ -145,13 +145,12 @@ std::vector<double> ACSF::calculateSF(Atoms &configuration, int atomIndex)
             Scaler sc = listOfScalers[i];
 
             if (values[i] > sc.sfMax || values[i] < sc.sfMin) {
-                std::cout << "Atom:" <<  atom_i.getIndex() << i+1 << ": " << (values[i] - sc.sfMin) / (sc.sfMax - sc.sfMin) << "\n";
-                throw std::runtime_error("symmetry function values exceeds its min/max value");
+                std::cout << "Atom:" <<  atom_i.getIndex() << ":" << i+1 << ": " << (values[i] - sc.sfMin) / (sc.sfMax - sc.sfMin) << "\n";
+                throw std::runtime_error("symmetry function exceeds its min/max value");
             }
 
             // values[i] = sMin + (sMax - sMin) * (values[i] - sc.sfMin) / (sc.sfMax - sc.sfMin);
-            // values[i] = values[i] - sc.sfMean; 
-            
+            // values[i] = values[i] - (sc.sfMean - sc.sfMin) / (sc.sfMax - sc.sfMin); 
         }  
     }
 

@@ -44,8 +44,8 @@ private:
     std::vector<std::string> listOfTwoBodyNeighborElement;
     std::vector<ThreeBodySymmetryFunction *> listOfThreeBodySF; /* factory method */
     std::vector<std::string> listOfThreeBodyNeighborElement1, listOfThreeBodyNeighborElement2;
-    std::vector<int> listOfTwoBodySFindex, listOfThreeBodySFindex;
-    std::vector<std::vector<double>> values;
+    // std::vector<int> listOfTwoBodySFindex, listOfThreeBodySFindex;
+    // std::vector<std::vector<double>> values;
 
     std::vector<Scaler> listOfScalers;
     bool isScale;
