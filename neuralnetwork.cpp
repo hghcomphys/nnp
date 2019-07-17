@@ -31,6 +31,8 @@ NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayer
 
 NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize): NeuralNetwork(inputsSize, hiddenLayersSize, 1) {}
 
+NeuralNetwork::~NeuralNetwork() {}
+
 const OpenNN::MultilayerPerceptron& NeuralNetwork::getNeuralNetwork() const { return neuralNetwork; }
 
 int NeuralNetwork::getNumberOfInputs() const { return neuralNetwork.get_inputs_number(); }
@@ -66,9 +68,10 @@ void NeuralNetwork::readParameters(const std::string& filename)
     OpenNN::Vector<OpenNN::Vector< double >>  layers_biases;
     for (int i=0; i<getNumberOfLayers(); i++) {
 
-        // synamptic weights
         const int nrow = neuralNetwork.get_layer(i).get_perceptrons_number();
         const int ncol = neuralNetwork.get_layers_inputs_number()[i];
+        
+        // synamptic weights
         layers_synaptic_weights.push_back( OpenNN::Matrix<double>(nrow, ncol) );
         cout << "weight matrix in layer(" << i+1 << "): (" << nrow << ", " << ncol << ")" << endl;
 
@@ -88,15 +91,14 @@ void NeuralNetwork::readParameters(const std::string& filename)
         while ( std::getline(ss, sIndvStr, cSpace) ) {
 
             if (sIndvStr == "#")
-                continue;
+                continue; // skip comments
 
-            double coeff;
-            std::string coeffType;
-            ss >> coeff >> coeffType;
+            double weight;
+            std::string weightType;
+            ss >> weight >> weightType;
 
-            if (coeffType == "a") {
+            if (weightType == "a") {
 
-                const double& weight = coeff; 
                 int index, l_s, n_s, l_e, n_e;
                 ss >> index >> l_s >> n_s >> l_e >> n_e;
                 // std::cout << weight << " a " << index << " " << l_s << " " << n_s << " " << l_e << " " << n_e << std::endl;
@@ -104,19 +106,21 @@ void NeuralNetwork::readParameters(const std::string& filename)
                 layers_synaptic_weights[l_s][n_s-1, n_e-1] = weight;
                 // cout << layers_synaptic_weights[l_s][n_s, n_e] << " " << weight << endl;
             }
-            if (coeffType == "b") {
+
+            if (weightType == "b") {
                 
-                const double& bias = coeff;
                 int index, l_s, n_s;
                 ss >> index >> l_s >> n_s;
                 // std::cout << weight << " b " << index << " " << l_s << " " << n_s <<  std::endl;
                 
-                layers_biases[l_s-1][n_s-1] = bias;
+                layers_biases[l_s-1][n_s-1] = weight;
                 // cout << layers_biases[l_s-1][n_s-1] << " " << bias << endl;
             }
         }           
     }
 
+    neuralNetwork.set_layers_synaptic_weights( layers_synaptic_weights );
+    neuralNetwork.set_layers_biases( layers_biases );
 }
 
 double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValues) {
@@ -129,5 +133,5 @@ double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValue
     for(int i=0; i<getNumberOfInputs(); i++ )
         inputs[i] = descriptorValues[i];
 
-    return neuralNetwork.calculate_outputs( inputs )[0]; // last layer has one output perpcetron
+    return neuralNetwork.calculate_outputs( inputs )[0]; // last layer has one output perceptron
 }
