@@ -12,24 +12,21 @@
 
 class NeuralNetwork {
 public:
-    NeuralNetwork();
-    // ~NeuralNetwork();
     NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize, int outputsSize);
     NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize);
+    ~NeuralNetwork();
+    void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
+    void readParameters(const std::string& fullPathFileName);
     const OpenNN::MultilayerPerceptron& getNeuralNetwork() const;
     int getNumberOfInputs() const;
     int getNumberOfOutputs() const;
     int getNumberOfLayers() const;
     int getNumberOfHiddenLayers() const;
-    void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
-    void readParameters(const std::string& fullPathFileName);
-
     double calculateEnergy(const std::vector<double>& descriptorValues);
 
 private:
     // OpenNN::Vector<int> layersSize; 
     OpenNN::MultilayerPerceptron neuralNetwork;
-    
 };
 
 

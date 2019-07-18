@@ -72,11 +72,11 @@ void NeuralNetwork::readParameters(const std::string& filename)
         const int ncol = neuralNetwork.get_layers_inputs_number()[i];
         
         // synamptic weights
-        layers_synaptic_weights.push_back( OpenNN::Matrix<double>(nrow, ncol) );
+        layers_synaptic_weights.push_back( OpenNN::Matrix<double>(nrow, ncol, 0.0) );
         cout << "weight matrix in layer(" << i+1 << "): (" << nrow << ", " << ncol << ")" << endl;
 
         // biases
-        layers_biases.push_back( OpenNN::Vector<double>(nrow) );
+        layers_biases.push_back( OpenNN::Vector<double>(nrow, 0.0) );
         cout << "biases vector in layer(" << i+1 << "): (" << nrow << ")" << endl;
     }
 
@@ -99,28 +99,31 @@ void NeuralNetwork::readParameters(const std::string& filename)
 
             if (weightType == "a") {
 
-                int index, l_s, n_s, l_e, n_e;
-                ss >> index >> l_s >> n_s >> l_e >> n_e;
-                // std::cout << weight << " a " << index << " " << l_s << " " << n_s << " " << l_e << " " << n_e << std::endl;
+                int index, dummy, inputIndex, layerIndex, neuronIndex;
+                ss >> index >> dummy >> inputIndex >> layerIndex >> neuronIndex;
+                // std::cout << weight << " a " << inputIndex << " " << layerIndex << " " << neuronIndex << std::endl;
 
-                layers_synaptic_weights[l_s][n_s-1, n_e-1] = weight;
-                // cout << layers_synaptic_weights[l_s][n_s, n_e] << " " << weight << endl;
+                layers_synaptic_weights[layerIndex-1][neuronIndex-1, inputIndex-1] = weight;
+                // cout << layers_synaptic_weights[layerIndex-1][neuronIndex-1, inputIndex-1] << " " << weight << endl;
             }
 
             if (weightType == "b") {
                 
-                int index, l_s, n_s;
-                ss >> index >> l_s >> n_s;
-                // std::cout << weight << " b " << index << " " << l_s << " " << n_s <<  std::endl;
+                int index, layerIndex, neuronIndex;
+                ss >> index >> layerIndex >> neuronIndex;
+                // std::cout << weight << " b " << layerIndex << " " << neuronIndex <<  std::endl;
                 
-                layers_biases[l_s-1][n_s-1] = weight;
-                // cout << layers_biases[l_s-1][n_s-1] << " " << bias << endl;
+                layers_biases[layerIndex-1][neuronIndex-1] = weight; 
+                // cout << layers_biases[l_s-1][n_s-1] << " " << weight << endl;
             }
         }           
     }
-
     neuralNetwork.set_layers_synaptic_weights( layers_synaptic_weights );
     neuralNetwork.set_layers_biases( layers_biases );
+
+    for (auto af: neuralNetwork.write_layers_activation_function())
+        std::cout << af << " ";
+    std::cout << std::endl;
 }
 
 double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValues) {
