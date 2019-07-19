@@ -17,7 +17,7 @@ public:
     void readSetupFiles();
     void readSetupFiles(const std::string& directory);
     ACSF& getDescriptorForElement(const std::string& element);
-    NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element);
+    NeuralNetwork& getNeuralNetworkForElement(const std::string& element);
     int getNumberOfElements() const;
     const std::vector<std::string>& getElements() const;
     const std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
@@ -30,7 +30,7 @@ private:
     std::vector<int> hiddenLayersSize;
     std::vector<std::string> activationFunctionTypes;
     std::vector<NeuralNetwork> neuralNetworks;
-    int NeuralNetworkPotential::getIndexForElement(const std::string& element) const;
+    int getIndexForElement(const std::string& element) const;
 };
 
 

@@ -149,8 +149,11 @@ std::vector<double> ACSF::calculateSF(Atoms &configuration, int atomIndex)
                 throw std::runtime_error("symmetry function exceeds its min/max value");
             }
 
-            // values[i] = sMin + (sMax - sMin) * (values[i] - sc.sfMin) / (sc.sfMax - sc.sfMin);
-            // values[i] = values[i] - (sc.sfMean - sc.sfMin) / (sc.sfMax - sc.sfMin); 
+            values[i] = sMin + (sMax - sMin) * (values[i] - sc.sfMean) / (sc.sfMax - sc.sfMin); 
+
+            // const double sfMean_scaled = (sMin + (sMax - sMin) * (sc.sfMean - sc.sfMin) / (sc.sfMax - sc.sfMin));
+            // values[i] = values[i] - sfMean_scaled; 
+            // std::cout << sfMean_scaled << std::endl;
         }  
     }
 

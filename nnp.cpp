@@ -61,7 +61,32 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     std::cout << "ACSF(" << element << ")" << std::endl;
                 }
             }
+            else if (sIndvStr == "global_hidden_layers_short") {
+                ss >> number_of_hidden_layers;
+                // std::cout << sIndvStr << ' ' << number_of_elements << std::endl;
+            } 
+            else if (sIndvStr == "global_nodes_short") {
+
+                if (number_of_hidden_layers == 0)
+                        throw std::runtime_error("Number of hidden layers is zero");
+
+                for (int i=0; i<number_of_hidden_layers; i++) {
+                    ss >> idummy;
+                    hiddenLayersSize.push_back(idummy);
+                    // std::cout << hiddenLayersSize[i] << std::endl;
+                }
+            }
+            else if (sIndvStr == "global_activation_short") {
+
+                const int number_of_layers = number_of_hidden_layers + 1; // plus output layer
+                for (int i=0; i<number_of_layers; i++) {
+                    ss >> dummy;
+                    activationFunctionTypes.push_back(dummy);
+                    // std::cout << activationFunctionTypes[i] << std::endl;
+                }
+            }
 #ifndef REORDER_SYMMETRY_FUNCTIONS
+            // add symmetryc functions from input.nn
             else if (sIndvStr == "symfunction_short")
             {
                 int sfType;
@@ -117,40 +142,18 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                 }
             }
 #endif
-            else if (sIndvStr == "global_hidden_layers_short") {
-                ss >> number_of_hidden_layers;
-                // std::cout << sIndvStr << ' ' << number_of_elements << std::endl;
-            } 
-            else if (sIndvStr == "global_nodes_short") {
-
-                if (number_of_hidden_layers == 0)
-                        throw std::runtime_error("Number of hidden layers is zero");
-
-                for (int i=0; i<number_of_hidden_layers; i++) {
-                    ss >> idummy;
-                    hiddenLayersSize.push_back(idummy);
-                    // std::cout << hiddenLayersSize[i] << std::endl;
-                }
-            }
-            else if (sIndvStr == "global_activation_short") {
-
-                const int number_of_layers = number_of_hidden_layers + 1; // plus output layer
-                for (int i=0; i<number_of_layers; i++) {
-                    ss >> dummy;
-                    activationFunctionTypes.push_back(dummy);
-                    // std::cout << activationFunctionTypes[i] << std::endl;
-                }
-            }
         }           
     }
 
 #ifdef REORDER_SYMMETRY_FUNCTIONS
+    // add symmetryc functions from scaling log
+    // TODO: improve design
     for (auto &element: elements) 
     {
-        const std::string filenameSF = directory + "sfmap.data";
+        const std::string filenameSF = directory + "nnp-scaling.log.0000";
         std::ifstream inFileSF(filenameSF);
         if (!inFileSF)
-            throw std::runtime_error("Unable to open script file " + filename);
+            throw std::runtime_error("Unable to open file " + filenameSF);
 
         while ( std::getline(inFileSF, line) ) {
 
@@ -211,24 +214,54 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     break;
                 }
             }       
-        }   
+        } 
+        inFileSF.close();  
     }
-    inFile.close();
 #endif
+
+    // reading scaling data
+    // TODO: improve design
+    const std::string filenameScale = directory + "scaling.data";
+    std::ifstream inFileScale(filenameScale);
+    if (!inFileScale)
+        throw std::runtime_error("Unable to open file " + filenameScale);
+
+    while ( std::getline(inFileScale, line) ) {
+
+        if( line[0] == '#' ) continue;  // ignore comments
+
+        std::stringstream ss(line);
+        double sfMin, sfMax, sfMean, sfSigma;
+        int elementIndex, sfIndex;
+
+        ss >> elementIndex >> sfIndex >> sfMin >> sfMax >> sfMean >> sfSigma;
+        // std::cout << elements[elementIndex-1] << " " << sfIndex << " " << sfMin << " " << sfMax << " " << sfMean << " " << sfSigma << "\n";
+        getDescriptorForElement(elements[elementIndex-1]).addScaler( Scaler(sfMin, sfMax, sfMean, sfSigma) );
+    } 
+    inFileScale.close(); 
+    // enable scaling
+    for (auto &element: elements)
+        getDescriptorForElement(element).scaleSymmetryFunctions();
 
     // create neural network for each element
     for (auto &element: elements) {
-        neuralNetworks.push_back( NeuralNetwork(getDescriptorForElement(element).getTotalNumberOfSF(), hiddenLayersSize) );
+        const int numberOfInputs = getDescriptorForElement(element).getTotalNumberOfSF();
+        neuralNetworks.push_back( NeuralNetwork(numberOfInputs, hiddenLayersSize) );
         std::cout << "Neural Network (" << element << "):" << std::endl;
     }
 
     // initilize neural network for each element
     for (auto &element: elements) {
+            
+            // read weights
             char filename[16];
             sprintf(filename, "weights.%3.3d.data", Atom::getAtomicNumber(element));
             const std::string fullPathFileName = directory + std::string(filename);
-            std::cout << fullPathFileName << std::endl;
             getNeuralNetworkForElement(element).readParameters(fullPathFileName);
+            std::cout << fullPathFileName << std::endl;
+
+            // set activation functions
+            getNeuralNetworkForElement(element).setLayersActivationFunction(activationFunctionTypes);
     }
 }
 
@@ -241,7 +274,7 @@ const std::vector<std::string>& NeuralNetworkPotential::getElements() const { re
 int NeuralNetworkPotential::getIndexForElement(const std::string& element) const {
     // TODO: optimize the finding algorithm
     int index;
-    for(index = 0; index<element.size(); index++)
+    for(index = 0; index<elements.size(); index++)
         if (elements[index] == element)
             break;
     return index;
@@ -256,7 +289,7 @@ NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::str
 }
 
 double NeuralNetworkPotential::calculateEnergy(Atoms& configuration, int atomIndex) {
-    Atom atom = configuration.getListOfAtoms()[atomIndex];
+    Atom& atom = configuration.getListOfAtoms()[atomIndex];
     std::vector<double> descriptorValues = getDescriptorForElement(atom.getElement()).calculateSF(configuration, atomIndex);
     return getNeuralNetworkForElement(atom.getElement()).calculateEnergy(descriptorValues);
 }

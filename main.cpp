@@ -20,16 +20,15 @@ int main()
         // make atomic structure and read data from a file
         // -----------------------------------------------
         Atoms configuration;
+        configuration.readFileFormatRuNNer();
+
+        cout << "Number of atoms: " << configuration.getNumberOfAtoms() << endl;
+        cout << "Is PBC: " << configuration.isPBC() << endl;
 
         // Note: xyz and cell are in Angstrom but internal unit is in Bohr!
         // configuration.readFileFormatXYZ("water12.xyz");
         // double cell[9] = {4, 0, 0, 0, 4, 0, 0, 0, 4}; // Angstrom
         // configuration.setCell(cell);
-
-        configuration.readFileFormatRuNNer();
-
-        cout << "Number of atoms: " << configuration.getNumberOfAtoms() << endl;
-        cout << "Is PBC: " << configuration.isPBC() << endl;
 
         //    Atom atom(1, 2, 3, "X", 0);
         //    cout << atom.element << " " << atom.x << " " << atom.z << " " << atom.z <<  " " << atom.index << endl;
@@ -80,7 +79,8 @@ int main()
         // make neural network potential
         // ------------------------------------------------
 
-        NeuralNetworkPotential nnp("");
+        NeuralNetworkPotential nnp;
+        nnp.readSetupFiles();
 
         cout << "Number of elements: " << nnp.getNumberOfElements() << endl;
         for (auto& element: nnp.getElements()) 
@@ -91,29 +91,38 @@ int main()
             cout << "Total SF: " << nnp.getDescriptorForElement(element).getTotalNumberOfSF() << endl;
             cout << "NN number of inputs: "  << nnp.getNeuralNetworkForElement(element).getNumberOfInputs() << endl;
             cout << "NN number of hidden layers: "  << nnp.getNeuralNetworkForElement(element).getNumberOfHiddenLayers() << endl;
-            
-            // for (auto &atoms: nnp.getDescriptorForElement(element).getValues() ) {
-            //     for (auto &sf: atoms)
-            //         cout << sf << " ";
-            //     cout << endl;
-            //     break;
-            // }
-            // // cout << endl; // << endl;
-
-            // for (auto &index: nnp.getDescriptorForElement(element).getIndex2() )
-            //     cout << index << " ";
-            // cout << endl;
-
-            // for (auto &index: nnp.getDescriptorForElement(element).getIndex3() )
-            //     cout << index << " ";
-            // cout << endl;
         }
 
-        for (int i=0; i<5; i++) {
-            Atom atom = configuration.getListOfAtoms()[i];
-            cout << "Atom[" << atom.getElement() << "] energy: " << nnp.calculateEnergy(configuration, i) << endl;
+        for (int index=0; index<3; index++) 
+        {
+            Atom atom = configuration.getListOfAtoms()[index];
+            // symmetry functions
+            // cout << "SF--> ";
+            // for(auto sf: nnp.getDescriptorForElement(atom.getElement()).calculateSF(configuration, atom.getIndex()))
+            //     cout << sf << " ";
+            // cout << "\n";
+            // energy
+            cout << "Atom[" << atom.getElement() << "]:(" << atom.getX() << ", " << atom.getY() << ", " << atom.getZ() << ") "
+            << "energy: " << nnp.calculateEnergy(configuration, atom.getIndex()) << endl;
         }    
-        // cout << "Total energy: " << nnp.caculateTotalEnergy(configuration) << endl;
+        cout << "Total energy: " << nnp.caculateTotalEnergy(configuration) << endl;
+
+        // for (auto &atoms: nnp.getDescriptorForElement(element).getValues() ) {
+        //     for (auto &sf: atoms)
+        //         cout << sf << " ";
+        //     cout << endl;
+        //     break;
+        // }
+        // // cout << endl; // << endl;
+
+        // for (auto &index: nnp.getDescriptorForElement(element).getIndex2() )
+        //     cout << index << " ";
+        // cout << endl;
+
+        // for (auto &index: nnp.getDescriptorForElement(element).getIndex3() )
+        //     cout << index << " ";
+        // cout << endl;
+
 
         // -----------------------------------------------
         // Nerural Network
