@@ -31,20 +31,27 @@ NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayer
 
 NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize): NeuralNetwork(inputsSize, hiddenLayersSize, 1) {}
 
+
 NeuralNetwork::~NeuralNetwork() {}
+
 
 const OpenNN::MultilayerPerceptron& NeuralNetwork::getNeuralNetwork() const { return neuralNetwork; }
 
+
 int NeuralNetwork::getNumberOfInputs() const { return neuralNetwork.get_inputs_number(); }
+
 
 int NeuralNetwork::getNumberOfOutputs() const { return neuralNetwork.get_outputs_number(); }
 
+
 int NeuralNetwork::getNumberOfLayers() const { return neuralNetwork.get_layers_number(); }
+
 
 int NeuralNetwork::getNumberOfHiddenLayers() const { return getNumberOfLayers()-1; /*exclude the output layer*/} 
 
-void NeuralNetwork::setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType) 
-{
+
+void NeuralNetwork::setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType) {
+
     OpenNN::Vector<OpenNN::Perceptron::ActivationFunction> activationFunctions;
     for (auto each: activationFucntionsType) {
         if( each == "t" )
@@ -57,6 +64,7 @@ void NeuralNetwork::setLayersActivationFunction(const std::vector<std::string>& 
     if( activationFunctions.size() != getNumberOfLayers() )
         throw runtime_error("Inconsistent number of given activation functions");
 }
+
 
 void NeuralNetwork::readParameters(const std::string& filename) 
 {
@@ -84,6 +92,7 @@ void NeuralNetwork::readParameters(const std::string& filename)
     std::string line, dummy;
     double ddummy;
     int idummy;
+    int count=0;
 
     while ( std::getline(inFile, line) ) {
         std::stringstream ss(line);
@@ -96,15 +105,16 @@ void NeuralNetwork::readParameters(const std::string& filename)
             double weight;
             std::string weightType;
             ss >> weight >> weightType;
+            // std::cout << weight << " " << weightType << "\n";
 
             if (weightType == "a") {
-
                 int index, dummy, inputIndex, layerIndex, neuronIndex;
                 ss >> index >> dummy >> inputIndex >> layerIndex >> neuronIndex;
                 // std::cout << weight << " a " << inputIndex << " " << layerIndex << " " << neuronIndex << std::endl;
 
-                layers_synaptic_weights[layerIndex-1][neuronIndex-1, inputIndex-1] = weight;
+                layers_synaptic_weights[layerIndex-1](neuronIndex-1, inputIndex-1) = weight;
                 // cout << layers_synaptic_weights[layerIndex-1][neuronIndex-1, inputIndex-1] << " " << weight << endl;
+
             }
 
             if (weightType == "b") {
@@ -118,13 +128,27 @@ void NeuralNetwork::readParameters(const std::string& filename)
             }
         }           
     }
+    inFile.close();
+
+    // TODO: error check weight values
+    // for (int i=0; i<getNumberOfLayers(); i++) 
+    //     for (int c=0; c<neuralNetwork.get_layer(i).get_perceptrons_number(); c++)
+    //         for (int r=0; r<neuralNetwork.get_layers_inputs_number()[i]; r++)
+    //             if (layers_synaptic_weights[i][r, c] < -1000)
+    //             {
+    //                 std::cout << layers_synaptic_weights[i-1][r-1, c-1] << "\n";
+    //                 throw std::runtime_error("Error");
+    //             }
+
+    // set all weights and biases
     neuralNetwork.set_layers_synaptic_weights( layers_synaptic_weights );
     neuralNetwork.set_layers_biases( layers_biases );
 
-    for (auto af: neuralNetwork.write_layers_activation_function())
-        std::cout << af << " ";
-    std::cout << std::endl;
+    // for (auto af: neuralNetwork.write_layers_activation_function())
+    //     std::cout << af << " ";
+    // std::cout << std::endl;
 }
+
 
 double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValues) {
 
