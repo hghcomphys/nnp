@@ -8,14 +8,7 @@
 #include <vector>
 #include "symmfunc.h"
 #include "atoms.h"
-
-
-class Scaler {
-public:
-    Scaler(double sfMin, double sfMax, double sfMean, double sfSigma): sfMin(sfMin), sfMax(sfMax), sfMean(sfMean), sfSigma(sfSigma) {};
-    ~Scaler() {};
-    double sfMin, sfMax, sfMean, sfSigma;
-};
+#include "symmfuncscaler.h"
 
 
 class ACSF {
@@ -33,22 +26,13 @@ public:
     const std::string& getCentralElement() const;
     std::vector<std::vector<double>> calculateSF(Atoms &configuration);
     std::vector<double> calculateSF(Atoms &configuration, int atomIndex);
-
-    void addScaler(const Scaler& newScaler) {  listOfScalers.push_back(newScaler); }
-    int getNumberOfScalers() { return listOfScalers.size(); }
-    void scaleSymmetryFunctions() { isScale = true; }
-
+    
 private:
     std::string centralElement;
     std::vector<TwoBodySymmetryFunction *> listOfTwoBodySF; /* factory method */
     std::vector<std::string> listOfTwoBodyNeighborElement;
     std::vector<ThreeBodySymmetryFunction *> listOfThreeBodySF; /* factory method */
     std::vector<std::string> listOfThreeBodyNeighborElement1, listOfThreeBodyNeighborElement2;
-    // std::vector<int> listOfTwoBodySFindex, listOfThreeBodySFindex;
-    // std::vector<std::vector<double>> values;
-
-    std::vector<Scaler> listOfScalers;
-    bool isScale;
 };
 
 

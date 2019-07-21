@@ -13,7 +13,7 @@
 /* ----------------------------------------------------------------------
    setup for ACSF
 ------------------------------------------------------------------------- */
-ACSF::ACSF(std::string element): centralElement(element), isScale(false) {}
+ACSF::ACSF(std::string element): centralElement(element) {}
 
 ACSF::~ACSF()
 {
@@ -29,14 +29,12 @@ ACSF::~ACSF()
 }
 
 void ACSF::addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1) {
-    // listOfTwoBodySFindex.push_back(getTotalNumberOfSF());
     listOfTwoBodySF.push_back(symmetryFunction);
     listOfTwoBodyNeighborElement.push_back(neighborElement1);
 }
 
 void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction,
                             const std::string& neighborElement1, const std::string& neighborElement2) {
-    // listOfThreeBodySFindex.push_back(getTotalNumberOfSF());
     listOfThreeBodySF.push_back(symmetryFunction);
     listOfThreeBodyNeighborElement1.push_back(neighborElement1);
     listOfThreeBodyNeighborElement2.push_back(neighborElement2);
@@ -131,33 +129,8 @@ std::vector<double> ACSF::calculateSF(Atoms &configuration, int atomIndex)
             }
         }
     }
-
-    // scale symmetruc fucntions
-    // optimize design
-    if (isScale) {
-        if( getNumberOfScalers() != getTotalNumberOfSF() )
-            throw std::runtime_error("Inconsistent number of symmetry functions and scalers");
-
-        const double sMin = 0.000;
-        const double sMax = 1.000;
-        for(int i=0; i<getTotalNumberOfSF(); i++) {
-
-            Scaler sc = listOfScalers[i];
-
-            if (values[i] > sc.sfMax || values[i] < sc.sfMin) {
-                std::cout << "Atom:" <<  atom_i.getIndex() << ":" << i+1 << ": " << (values[i] - sc.sfMin) / (sc.sfMax - sc.sfMin) << "\n";
-                throw std::runtime_error("symmetry function exceeds its min/max value");
-            }
-
-            values[i] = sMin + (sMax - sMin) * (values[i] - sc.sfMean) / (sc.sfMax - sc.sfMin); 
-
-            // const double sfMean_scaled = (sMin + (sMax - sMin) * (sc.sfMean - sc.sfMin) / (sc.sfMax - sc.sfMin));
-            // values[i] = values[i] - sfMean_scaled; 
-            // std::cout << sfMean_scaled << std::endl;
-        }  
-    }
-
-    // return symmetry function values for given atom.
+ 
+    // return array of symmetry function values
     return values;
 }
 

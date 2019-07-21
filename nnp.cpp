@@ -1,5 +1,5 @@
 //
-// Created by hossein on 6/13/19.
+// Neural Network Potential
 //
 
 #include "nnp.h"
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#define REORDER_SYMMETRY_FUNCTIONS // this flag is temporary
+#define REORDER_SYMMETRY_FUNCTIONS  // this flag is temporary
 
 /* ----------------------------------------------------------------------
    setup for Neural Network Potential
@@ -57,7 +57,8 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     // std::cout << elements[i] << std::endl;
                 }
                 for (auto &element: elements) {
-                    descriptors.push_back( ACSF(element) );
+                    descriptors.push_back( ACSF(element) );  // add descriptor
+                    scalers.push_back( SymmeryFunctionsScaler() );  // add scaler
                     std::cout << "ACSF(" << element << ")" << std::endl;
                 }
             }
@@ -220,29 +221,10 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 #endif
 
     // reading scaling data
-    // TODO: improve design
-    const std::string filenameScale = directory + "scaling.data";
-    std::ifstream inFileScale(filenameScale);
-    if (!inFileScale)
-        throw std::runtime_error("Unable to open file " + filenameScale);
-
-    while ( std::getline(inFileScale, line) ) {
-
-        if( line[0] == '#' ) continue;  // ignore comments
-
-        std::stringstream ss(line);
-        double sfMin, sfMax, sfMean, sfSigma;
-        int elementIndex, sfIndex;
-
-        ss >> elementIndex >> sfIndex >> sfMin >> sfMax >> sfMean >> sfSigma;
-        // std::cout << elements[elementIndex-1] << " " << sfIndex << " " << sfMin << " " << sfMax << " " << sfMean << " " << sfSigma << "\n";
-        getDescriptorForElement(elements[elementIndex-1]).addScaler( Scaler(sfMin, sfMax, sfMean, sfSigma) );
-    } 
-    inFileScale.close(); 
-    // enable scaling
-    for (auto &element: elements)
-        getDescriptorForElement(element).scaleSymmetryFunctions();
-
+    for (int index=0; index<getNumberOfElements(); index++) {
+         getScalerForElement(elements[index]).readScaling(directory + "scaling.data", index+1);
+    }
+   
     // create neural network for each element
     for (auto &element: elements) {
         const int numberOfInputs = getDescriptorForElement(element).getTotalNumberOfSF();
@@ -252,7 +234,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 
     // initilize neural network for each element
     for (auto &element: elements) {
-            
+
             // read weights
             char filename[16];
             sprintf(filename, "weights.%3.3d.data", Atom::getAtomicNumber(element));
@@ -284,6 +266,10 @@ ACSF& NeuralNetworkPotential::getDescriptorForElement(const std::string& element
     return descriptors[getIndexForElement(element)];
 }
 
+SymmeryFunctionsScaler& NeuralNetworkPotential::getScalerForElement(const std::string& element) {
+    return scalers[getIndexForElement(element)];
+}
+
 NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element) { 
     return neuralNetworks[getIndexForElement(element)];
 }
@@ -291,7 +277,8 @@ NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::str
 double NeuralNetworkPotential::calculateEnergy(Atoms& configuration, int atomIndex) {
     Atom& atom = configuration.getListOfAtoms()[atomIndex];
     std::vector<double> descriptorValues = getDescriptorForElement(atom.getElement()).calculateSF(configuration, atomIndex);
-    return getNeuralNetworkForElement(atom.getElement()).calculateEnergy(descriptorValues);
+    std::vector<double> ScaledDescriptorValues = getScalerForElement(atom.getElement()).scale(descriptorValues);
+    return getNeuralNetworkForElement(atom.getElement()).calculateEnergy(ScaledDescriptorValues);
 }
 
 double NeuralNetworkPotential::caculateTotalEnergy(Atoms &configuration) {

@@ -1,5 +1,5 @@
 //
-// Created by hossein on 6/13/19.
+// Neural Network Potential
 //
 
 #ifndef NNP_NEURALNETWORKPOTENTIAL_H
@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "acsf.h"
+#include "symmfuncscaler.h"
 #include "neuralnetwork.h"
 
 
@@ -17,6 +18,7 @@ public:
     void readSetupFiles();
     void readSetupFiles(const std::string& directory);
     ACSF& getDescriptorForElement(const std::string& element);
+    SymmeryFunctionsScaler& getScalerForElement(const std::string& element);
     NeuralNetwork& getNeuralNetworkForElement(const std::string& element);
     int getNumberOfElements() const;
     const std::vector<std::string>& getElements() const;
@@ -27,6 +29,7 @@ public:
 private:
     std::vector<std::string> elements;
     std::vector<ACSF> descriptors;
+    std::vector<SymmeryFunctionsScaler> scalers;
     std::vector<int> hiddenLayersSize;
     std::vector<std::string> activationFunctionTypes;
     std::vector<NeuralNetwork> neuralNetworks;
