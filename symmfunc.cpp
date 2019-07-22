@@ -32,14 +32,13 @@ double G0::function(double rij) {
 }
 
 std::vector<double>  G0::gradient(double rij, double drij[3]) {
-
     if ( rij > cutoffRadius ) 
         return std::vector<double>({0.0, 0.0, 0.0});
 
     std::vector<double> result(3);
     const double temp = cutoffFunction.dfc(rij) / rij;
     for (int d=0; d<3; d++)
-        result[d] = temp * drij[d];
+        result[d] = drij[d] * temp;
     return result;
 }
 
@@ -56,6 +55,19 @@ double G2::function(double rij) {
     return exp( -eta * (rij-rshift) * (rij-rshift) ) * cutoffFunction.fc(rij);
 }
 
+std::vector<double>  G2::gradient(double rij, double drij[3]) {
+    if ( rij > cutoffRadius ) 
+        return std::vector<double>({0.0, 0.0, 0.0});
+
+    std::vector<double> result(3);
+    const double rp = rij - rshift;
+    const double exptemp = exp( -eta * rp * rp );
+    const double temp = ( cutoffFunction.dfc(rij) - 2.0 * eta * rp * cutoffFunction.fc(rij) ) * exptemp / rij ;
+    for (int d=0; d<3; d++)
+        result[d] = drij[d] * temp;
+    return result;
+}
+
 
 /* ----------------------------------------------------------------------
    setup for G4 symmetry function
@@ -68,8 +80,42 @@ G4::G4(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySym
 double G4::function(double rij, double rik, double rjk, double cost)
 {
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) return 0;
-    double res =  pow(2.0, 1.0-zeta) * pow(1.0+lambda*cost, zeta) * exp( -eta * (rij*rij + rik*rik + rjk*rjk) );
+    const double res =  pow(2.0, 1.0-zeta) * pow(1.0+lambda*cost, zeta) * exp( -eta * (rij*rij + rik*rik + rjk*rjk) );
     return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
+}
+
+std::vector<double> G4::gradient(double rij, double rik, double rjk, double cost, double drij[3], double drik[3]) {
+    if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius )
+        return std::vector<double>({0.0, 0.0, 0.0});
+
+    std::vector<double> result(3);
+    const double coef = pow(2.0, 1.0-zeta);
+    const double inv_rij = 1.0 / rij;
+    const double inv_rik = 1.0 / rik;
+
+    const double term1 = pow(1.0+lambda*cost, zeta);
+    const double coef1 = -lambda * zeta * pow(1.0+lambda*cost, zeta-1) ;
+    double dterm1[3];
+    for (int d=0; d<3; d++)
+        dterm1[d] = coef1 * ( ( XJ * drik[d] + XK * drij[d] ) * inv_rij * inv_rik + 
+            cost * ( drij[d] * inv_rij * inv_rij + drik[d] * inv_rik * inv_rik ) );
+
+    const double term2 = exp( -eta * (rij*rij + rik*rik + rjk*rjk) );
+    double dterm2[3];
+    for (int d=0; d<3; d++)
+        dterm2[d] = -2.0 * eta * ( drij[d] + drik[d] ) * term2;  
+
+    const double term3 = cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
+    const double coef3 = cutoffFunction.fc(rjk);
+    double dterm3[3];
+    for (int d=0; d<3; d++)
+        dterm3[d] = coef3 * ( cutoffFunction.dfc(rij) * cutoffFunction.fc(rik) * drij[d] * inv_rij +
+            cutoffFunction.fc(rij) * cutoffFunction.dfc(rik) * drik[d] * inv_rik );
+
+    for (int d=0; d<3; d++)
+        result[d] = coef * ( dterm1[d] * term1 * term2 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d]);
+    return result;
+
 }
 
 /* ----------------------------------------------------------------------

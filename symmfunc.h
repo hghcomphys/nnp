@@ -39,7 +39,7 @@ class G0 : public TwoBodySymmetryFunction {
 public:
     G0(std::vector<double> p);
     double function(double rij);
-    std::vector<double>  gradient(double rij, double drij[3]);
+    std::vector<double> gradient(double rij, double drij[3]);
 };
 
 
@@ -47,6 +47,7 @@ class G2 : public TwoBodySymmetryFunction {
 public:
     G2(std::vector<double> p);
     double function(double rij);
+    std::vector<double> gradient(double rij, double drij[3]);
 private:
     double eta, rshift;
 };
@@ -56,6 +57,7 @@ class G4 : public ThreeBodySymmetryFunction {
 public:
     G4(std::vector<double> p);
     double function(double rij, double rik, double rjk, double cost);
+    std::vector<double> gradient(double rij, double rik, double rjk, double cost, double drij[3], double drik[3]) {};
 private:
     double eta, zeta, lambda, rshift;
 };
