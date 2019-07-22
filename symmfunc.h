@@ -23,6 +23,7 @@ class TwoBodySymmetryFunction: public SymmetryFunction {
 public:
     TwoBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
     virtual double function(double rij) {}; 
+    virtual std::vector<double> gradient(double rij, double drij[3]) {};
 };
 
 // Three-body
@@ -30,6 +31,7 @@ class ThreeBodySymmetryFunction: public SymmetryFunction {
 public:
     ThreeBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
     virtual double function(double rij, double rik, double rjk, double cost) {}; 
+    virtual std::vector<double> gradient(double rij, double rik, double rjk, double cost, double drij[3], double drik[3]) {};
 };
 
 
@@ -37,6 +39,7 @@ class G0 : public TwoBodySymmetryFunction {
 public:
     G0(std::vector<double> p);
     double function(double rij);
+    std::vector<double>  gradient(double rij, double drij[3]);
 };
 
 

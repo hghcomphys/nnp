@@ -31,6 +31,18 @@ double G0::function(double rij) {
     return cutoffFunction.fc(rij);
 }
 
+std::vector<double>  G0::gradient(double rij, double drij[3]) {
+
+    if ( rij > cutoffRadius ) 
+        return std::vector<double>({0.0, 0.0, 0.0});
+
+    std::vector<double> result(3);
+    const double temp = cutoffFunction.dfc(rij) / rij;
+    for (int d=0; d<3; d++)
+        result[d] = temp * drij[d];
+    return result;
+}
+
 /* ----------------------------------------------------------------------
    setup for G2 symmetry function
 ------------------------------------------------------------------------- */
@@ -43,6 +55,7 @@ double G2::function(double rij) {
     if ( rij > cutoffRadius ) return 0;
     return exp( -eta * (rij-rshift) * (rij-rshift) ) * cutoffFunction.fc(rij);
 }
+
 
 /* ----------------------------------------------------------------------
    setup for G4 symmetry function
