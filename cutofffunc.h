@@ -1,5 +1,5 @@
 //
-// Created by hossein on 6/8/19.
+// Cutoff Function
 //
 
 #ifndef NNP_CUTOFFFUNCTION_H

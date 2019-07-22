@@ -12,8 +12,8 @@
 
 class NeuralNetwork {
 public:
-    NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize, int outputsSize);
-    NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize);
+    NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize, int outputsSize);
+    NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize);
     ~NeuralNetwork();
     void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
     void readParameters(const std::string& fullPathFileName);

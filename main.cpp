@@ -47,6 +47,12 @@ int main()
         // ----------------------------------------------
         // create a descriptor and add symmetry functions
         // ----------------------------------------------
+        G0 des({12.0});
+        double drij[3] = {1.0, 2.0, 3.0};
+        cout << des.function(10) << endl;
+        for (auto x: des.gradient(10, drij))
+        cout << x << endl;
+
         // ACSF descriptor("O");
         // cout << descriptor.getCentralElement() << endl;
 

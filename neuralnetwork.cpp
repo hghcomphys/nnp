@@ -130,16 +130,6 @@ void NeuralNetwork::readParameters(const std::string& filename)
     }
     inFile.close();
 
-    // TODO: error check weight values
-    // for (int i=0; i<getNumberOfLayers(); i++) 
-    //     for (int c=0; c<neuralNetwork.get_layer(i).get_perceptrons_number(); c++)
-    //         for (int r=0; r<neuralNetwork.get_layers_inputs_number()[i]; r++)
-    //             if (layers_synaptic_weights[i][r, c] < -1000)
-    //             {
-    //                 std::cout << layers_synaptic_weights[i-1][r-1, c-1] << "\n";
-    //                 throw std::runtime_error("Error");
-    //             }
-
     // set all weights and biases
     neuralNetwork.set_layers_synaptic_weights( layers_synaptic_weights );
     neuralNetwork.set_layers_biases( layers_biases );
