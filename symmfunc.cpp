@@ -31,14 +31,29 @@ double G0::function(double rij) {
     return cutoffFunction.fc(rij);
 }
 
-std::vector<double>  G0::gradient_ij(double rij, double drij[3]) {
+std::vector<double>  G0::gradient_ii(double rij, double drij[3]) 
+{
     if ( rij > cutoffRadius ) 
         return std::vector<double>({0.0, 0.0, 0.0});
 
+    // gradient of symmytry function of atom i respect to itself
     std::vector<double> result(3);
-    const double temp = -cutoffFunction.dfc(rij) / rij;
+    const double temp = cutoffFunction.dfc(rij) / rij;
     for (int d=0; d<3; d++)
         result[d] = drij[d] * temp;
+    return result;
+}
+
+std::vector<double>  G0::gradient_ij(double rij, double drij[3]) 
+{
+    if ( rij > cutoffRadius ) 
+        return std::vector<double>({0.0, 0.0, 0.0});
+
+    // gradient of symmytry function of atom i respect to other atom j 
+    std::vector<double> result(3);
+    const std::vector<double>& gradient = gradient_ii(rij, drij);
+    for (int d=0; d<3; d++)
+        result[d] = -gradient[d];
     return result;
 }
 
@@ -55,16 +70,31 @@ double G2::function(double rij) {
     return exp( -eta * (rij-rshift) * (rij-rshift) ) * cutoffFunction.fc(rij);
 }
 
-std::vector<double>  G2::gradient_ij(double rij, double drij[3]) {
+std::vector<double> G2::gradient_ii(double rij, double drij[3]) 
+{
     if ( rij > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
+    return std::vector<double>({0.0, 0.0, 0.0});
 
+    // gradient of symmytry function of atom i respect to other atom j
     std::vector<double> result(3);
     const double rp = rij - rshift;
     const double exptemp = exp( -eta * rp * rp );
-    const double temp = ( 2.0 * eta * rp * cutoffFunction.fc(rij) - cutoffFunction.dfc(rij) ) * exptemp / rij ;
+    const double temp = ( cutoffFunction.dfc(rij) - 2.0 * eta * rp * cutoffFunction.fc(rij) ) * exptemp / rij ;
     for (int d=0; d<3; d++)
         result[d] = drij[d] * temp;
+    return result;
+}
+
+std::vector<double> G2::gradient_ij(double rij, double drij[3]) 
+{
+    if ( rij > cutoffRadius ) 
+        return std::vector<double>({0.0, 0.0, 0.0});
+
+    // gradient of symmytry function of atom i respect to other atom j
+    std::vector<double> result(3);
+    const std::vector<double>& gradient = gradient_ii(rij, drij);
+    for (int d=0; d<3; d++)
+        result[d] = -gradient[d];
     return result;
 }
 
@@ -84,12 +114,13 @@ double G4::function(double rij, double rik, double rjk, double cost)
     return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
 }
 
-std::vector<double> G4::gradient_ij(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+std::vector<double> G4::gradient(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
 {
     // TODO: optimize performance
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
         return std::vector<double>({0.0, 0.0, 0.0});
 
+    // gradient of atom i respect to j
     const double coef = pow(2.0, 1.0-zeta);
     const double inv_rij = 1.0 / rij;
     const double inv_rik = 1.0 / rik;
@@ -135,7 +166,8 @@ double G5::function(double rij, double rik, double rjk, double cost)
     return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik);
 }
 
-std::vector<double> G5::gradient_ij(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+std::vector<double> G5::gradient(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
 {
+    // gradient of atom i respect to j
     // TODO: Has to be implemented
 }
