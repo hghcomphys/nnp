@@ -24,8 +24,9 @@ public:
     int getNumberOfThreeBodySF() const;
     int getTotalNumberOfSF() const;
     const std::string& getCentralElement() const;
-    std::vector<std::vector<double>> calculateSF(Atoms &configuration);
-    std::vector<double> calculateSF(Atoms &configuration, int atomIndex);
+    std::vector<std::vector<double>> calculate(Atoms &configuration);
+    std::vector<double> calculate(Atoms &configuration, int atomIndex);
+    std::vector<std::vector<double>> gradient(Atoms &configuration, int atomIndex_i, int atomIndex_j);
     
 private:
     std::string centralElement;
