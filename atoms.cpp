@@ -12,7 +12,11 @@
 /* ----------------------------------------------------------------------
    setup for Atom
 ------------------------------------------------------------------------- */
-Atom::Atom(double x, double y, double z, std::string element, int index): x(x), y(y), z(z), element(element), index(index) {}
+Atom::Atom(double x, double y, double z, std::string element, int index): 
+    x(x), y(y), z(z), element(element), index(index), fx(0.0), fy(0.0), fz(0.0) {}
+
+Atom::Atom(double x, double y, double z, std::string element, int index, double fx, double fy, double fz):
+    x(x), y(y), z(z), element(element), index(index), fx(fx), fy(fy), fz(fz) {}
 
 double Atom::getX() { return x; }
 
@@ -34,6 +38,10 @@ int Atom::getAtomicNumber(const std::string& element)
     else if (element == "O")
         return 8;
 }
+
+double Atom::getFx() const { return fx; }
+double Atom::getFy() const { return fy; }
+double Atom::getFz() const { return fz; }
 
 /* ----------------------------------------------------------------------
    setup for Atoms
@@ -178,8 +186,9 @@ void Atoms::readFileFormatRuNNer(const std::string& filename)
         else if (keyword == "atom") {
             double x, y, z;
             std::string element;
-            ss >> x >> y >> z >> element;
-            addAtom( Atom(x, y, z, element, atomIndex) );
+            double ddummy, fx, fy, fz;
+            ss >> x >> y >> z >> element >> ddummy >> ddummy >> fx >> fy >> fz;
+            addAtom( Atom(x, y, z, element, atomIndex, fx, fy, fz) );
         }
         else if (keyword == "end")
             break; // read only the first frame
