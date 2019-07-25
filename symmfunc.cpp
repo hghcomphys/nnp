@@ -114,7 +114,7 @@ double G4::function(double rij, double rik, double rjk, double cost)
     return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
 }
 
-std::vector<double> G4::gradient(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+std::vector<double> G4::gradient_ii(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
 {
     // TODO: optimize performance
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
@@ -127,29 +127,103 @@ std::vector<double> G4::gradient(double rij, double rik, double rjk, double cost
     const double inv_rjk = 1.0 / rjk;
 
     const double term1 = pow(1.0+lambda*cost, zeta);
-    const double coef1 = -lambda * zeta * pow(1.0+lambda*cost, zeta-1) * inv_rij;
+    const double coef1 = lambda * zeta * pow(1.0+lambda*cost, zeta-1);
     double dterm1[3];
     for (int d=0; d<3; d++)
-        dterm1[d] = coef1 * ( drik[d] * inv_rik + cost * drij[d] * inv_rij );
+        dterm1[d] = coef1 * ( (drij[d] + drik[d]) * inv_rij * inv_rik - cost * (drij[d] * inv_rij * inv_rij + drik[d] * inv_rik * inv_rik) );
 
     const double term2 = exp( -eta * (rij*rij + rik*rik + rjk*rjk) );
-    const double coef2 = 2.0 * eta * term2;
+    const double coef2 = -2.0 * eta * term2;
     double dterm2[3];
     for (int d=0; d<3; d++)
-        dterm2[d] =  coef2 * ( drij[d] - drjk[d] );  
+        dterm2[d] =  coef2 * ( drij[d] + drjk[d] );  
 
     const double term3 = cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
-    const double coef3 = cutoffFunction.fc(rik);
+    const double coef3 = cutoffFunction.fc(rjk);
     double dterm3[3];
     for (int d=0; d<3; d++)
-        dterm3[d] = coef3 * ( cutoffFunction.fc(rij) * cutoffFunction.dfc(rjk) * drjk[d] * inv_rjk -
-            cutoffFunction.dfc(rij) * cutoffFunction.fc(rjk) * drij[d] * inv_rij );
+        dterm3[d] = coef3 * ( cutoffFunction.dfc(rij) * cutoffFunction.fc(rik) * drij[d] * inv_rij - cutoffFunction.fc(rij) * cutoffFunction.dfc(rik) * drik[d] * inv_rik );
 
     std::vector<double> result(3);
     for (int d=0; d<3; d++) 
         result[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d]);
     return result;
 }
+
+
+std::vector<double> G4::gradient_ij(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+{
+    // TODO: optimize performance
+    if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
+        return std::vector<double>({0.0, 0.0, 0.0});
+
+    // gradient of atom i respect to j
+    const double coef = pow(2.0, 1.0-zeta);
+    const double inv_rij = 1.0 / rij;
+    const double inv_rik = 1.0 / rik;
+    const double inv_rjk = 1.0 / rjk;
+
+    const double term1 = pow(1.0+lambda*cost, zeta);
+    const double coef1 = lambda * zeta * pow(1.0+lambda*cost, zeta-1) * inv_rij;
+    double dterm1[3];
+    for (int d=0; d<3; d++)
+        dterm1[d] = coef1 * ( -drik[d] * inv_rik  + cost * drij[d] * inv_rij );
+
+    const double term2 = exp( -eta * (rij*rij + rik*rik + rjk*rjk) );
+    const double coef2 = -2.0 * eta * term2;
+    double dterm2[3];
+    for (int d=0; d<3; d++)
+        dterm2[d] =  coef2 * ( -drij[d] + drjk[d] );  
+
+    const double term3 = cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
+    const double coef3 = cutoffFunction.fc(rik);
+    double dterm3[3];
+    for (int d=0; d<3; d++)
+        dterm3[d] = coef3 * ( -cutoffFunction.dfc(rij) * cutoffFunction.fc(rjk) * drij[d] * inv_rij + cutoffFunction.fc(rij) * cutoffFunction.dfc(rjk) * drjk[d] * inv_rjk );
+
+    std::vector<double> result(3);
+    for (int d=0; d<3; d++) 
+        result[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d]);
+    return result;
+}
+
+
+std::vector<double> G4::gradient_ik(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+{
+        // TODO: optimize performance
+    if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
+        return std::vector<double>({0.0, 0.0, 0.0});
+
+    // gradient of atom i respect to j
+    const double coef = pow(2.0, 1.0-zeta);
+    const double inv_rij = 1.0 / rij;
+    const double inv_rik = 1.0 / rik;
+    const double inv_rjk = 1.0 / rjk;
+
+    const double term1 = pow(1.0+lambda*cost, zeta);
+    const double coef1 = lambda * zeta * pow(1.0+lambda*cost, zeta-1) * inv_rik;
+    double dterm1[3];
+    for (int d=0; d<3; d++)
+        dterm1[d] = coef1 * ( -drij[d] * inv_rij  + cost * drik[d] * inv_rik );
+
+    const double term2 = exp( -eta * (rij*rij + rik*rik + rjk*rjk) );
+    const double coef2 = -2.0 * eta * term2;
+    double dterm2[3];
+    for (int d=0; d<3; d++)
+        dterm2[d] =  coef2 * ( -drik[d] - drjk[d] );  
+
+    const double term3 = cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
+    const double coef3 = cutoffFunction.fc(rij);
+    double dterm3[3];
+    for (int d=0; d<3; d++)
+        dterm3[d] = coef3 * ( -cutoffFunction.dfc(rik) * cutoffFunction.fc(rjk) * drik[d] * inv_rik - cutoffFunction.fc(rik) * cutoffFunction.dfc(rjk) * drjk[d] * inv_rjk );
+
+    std::vector<double> result(3);
+    for (int d=0; d<3; d++) 
+        result[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d]);
+    return result;
+}
+
 
 /* ----------------------------------------------------------------------
    setup for G5 symmetry function
@@ -166,8 +240,3 @@ double G5::function(double rij, double rik, double rjk, double cost)
     return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik);
 }
 
-std::vector<double> G5::gradient(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
-{
-    // gradient of atom i respect to j
-    // TODO: Has to be implemented
-}
