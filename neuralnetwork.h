@@ -23,6 +23,7 @@ public:
     int getNumberOfLayers() const;
     int getNumberOfHiddenLayers() const;
     double calculateEnergy(const std::vector<double>& descriptorValues);
+    OpenNN::Vector<double> calculateJacobian(const std::vector<double>& descriptorValues);
 
 private:
     // OpenNN::Vector<int> layersSize; 

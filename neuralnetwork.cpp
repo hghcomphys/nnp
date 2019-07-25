@@ -139,7 +139,6 @@ void NeuralNetwork::readParameters(const std::string& filename)
     // std::cout << std::endl;
 }
 
-
 double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValues) {
 
     if (descriptorValues.size() != getNumberOfInputs())
@@ -151,4 +150,17 @@ double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValue
         inputs[i] = descriptorValues[i];
 
     return neuralNetwork.calculate_outputs( inputs )[0]; // last layer has one output perceptron
+}
+
+OpenNN::Vector<double> NeuralNetwork::calculateJacobian(const std::vector<double>& descriptorValues) {
+
+    if (descriptorValues.size() != getNumberOfInputs())
+        throw std::runtime_error("Unexpected size of inputs");
+
+    // TODO: optimize the conversion
+    OpenNN::Vector<double> inputs( getNumberOfInputs() );
+    for(int i=0; i<getNumberOfInputs(); i++ )
+        inputs[i] = descriptorValues[i];
+
+    return neuralNetwork.calculate_Jacobian( inputs ).to_vector();
 }
