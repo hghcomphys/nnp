@@ -78,8 +78,7 @@ std::vector<double> G2::gradient_ii(double rij, double drij[3])
     // gradient of symmytry function of atom i respect to other atom j
     std::vector<double> result(3);
     const double rp = rij - rshift;
-    const double exptemp = exp( -eta * rp * rp );
-    const double temp = ( cutoffFunction.dfc(rij) - 2.0 * eta * rp * cutoffFunction.fc(rij) ) * exptemp / rij ;
+    const double temp = ( cutoffFunction.dfc(rij) - 2.0 * eta * rp * cutoffFunction.fc(rij) ) * exp( -eta * rp * rp ) / rij ;
     for (int d=0; d<3; d++)
         result[d] = drij[d] * temp;
     return result;
@@ -120,8 +119,7 @@ std::vector<double> G4::gradient_ii(double rij, double rik, double rjk, double c
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
         return std::vector<double>({0.0, 0.0, 0.0});
 
-    // gradient of atom i respect to j
-    const double coef = pow(2.0, 1.0-zeta);
+    // gradient of atom i respect to j 
     const double inv_rij = 1.0 / rij;
     const double inv_rik = 1.0 / rik;
     const double inv_rjk = 1.0 / rjk;
@@ -136,14 +134,15 @@ std::vector<double> G4::gradient_ii(double rij, double rik, double rjk, double c
     const double coef2 = -2.0 * eta * term2;
     double dterm2[3];
     for (int d=0; d<3; d++)
-        dterm2[d] =  coef2 * ( drij[d] + drjk[d] );  
+        dterm2[d] =  coef2 * ( drij[d] + drik[d] );  
 
     const double term3 = cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
     const double coef3 = cutoffFunction.fc(rjk);
     double dterm3[3];
     for (int d=0; d<3; d++)
-        dterm3[d] = coef3 * ( cutoffFunction.dfc(rij) * cutoffFunction.fc(rik) * drij[d] * inv_rij - cutoffFunction.fc(rij) * cutoffFunction.dfc(rik) * drik[d] * inv_rik );
+        dterm3[d] = coef3 * ( cutoffFunction.dfc(rij) * cutoffFunction.fc(rik) * drij[d] * inv_rij + cutoffFunction.fc(rij) * cutoffFunction.dfc(rik) * drik[d] * inv_rik );
 
+    const double coef = pow(2.0, 1.0-zeta);
     std::vector<double> result(3);
     for (int d=0; d<3; d++) 
         result[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d]);
