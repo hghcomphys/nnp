@@ -21,10 +21,13 @@ public:
     void setScalingMinValue(double value);
     void setScalingMaxValue(double value);
     double scale(double value) const;
+    void setScalingFactor();
+    double getScalingFactor() const;
 
 private:
     double min, max, mean, sigma;
     double smin, smax;
+    double scalingFactor;
 };
 
 
@@ -38,7 +41,7 @@ public:
     std::vector<double> scale(const std::vector<double>& values);
     void setMaxNumberOfWarnings(double number);
     int getMaxNumberOfWarnings() const;
-
+    std::vector<double> getScalingFactors() const;
 
 private:
     std::vector<Scaler> listOfScalers;

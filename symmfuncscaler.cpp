@@ -16,7 +16,7 @@
 ------------------------------------------------------------------------- */
 Scaler::Scaler(double min, double max, double mean, double sigma):
             min(min), max(max), mean(mean), sigma(sigma),
-            smin(0.0), smax(1.0) {}
+            smin(0.0), smax(1.0) { setScalingFactor(); }
 
 double Scaler::getMin() const { return min; }
 double Scaler::getMax() const { return max; }
@@ -26,9 +26,14 @@ double Scaler::getScalingMinValue() const { return smin; }
 double Scaler::getScalingMaxValue() const { return smax; }
 void Scaler::setScalingMinValue(double value) { smin = value; }
 void Scaler::setScalingMaxValue(double value) { smax = value; }
+double Scaler::getScalingFactor() const { return scalingFactor; }
+
+void Scaler::setScalingFactor() { 
+    scalingFactor = (smax - smin) / (max - min); 
+}
 
 double Scaler::scale(double value) const {
-    return smin + (smax - smin) * (value - mean) / (max - min); 
+    return smin +  scalingFactor * (value - mean) ; 
 }
 
 
@@ -69,7 +74,6 @@ void SymmeryFunctionsScaler::readScaling(const std::string& filename, int elemen
 
         if (elementIndex == elemIndex)
             addScaler( Scaler(min, max, mean, sigma) );
-
     } 
     inFile.close(); 
 }
@@ -93,13 +97,19 @@ std::vector<double> SymmeryFunctionsScaler::scale(const std::vector<double>& val
             // std::cout << "Atom:" <<  atom_i.getIndex() << ":" << i+1 << ": " << (values[i] - sc.sfMin) / (sc.sfMax - sc.sfMin) << "\n";
             
             if (numberOfWarnings > maxNumberOfWarnings)
-                throw std::runtime_error("Exceeds max number of scaler warnings");
+                throw std::runtime_error("Exceeds maximum number of symmetry function scaler warnings");
         }
         scaledValues[i] = sc.scale(value);
     }  
     return scaledValues;
 }
 
+std::vector<double> SymmeryFunctionsScaler::getScalingFactors() const {
+    std::vector<double> scalingFactors;
+    for (const Scaler& each: listOfScalers)
+        scalingFactors.push_back( each.getScalingFactor() );
+    return scalingFactors;
+}
 
 void SymmeryFunctionsScaler::setMaxNumberOfWarnings(double number) { 
     maxNumberOfWarnings=number; 
