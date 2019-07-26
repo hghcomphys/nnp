@@ -276,9 +276,9 @@ NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::str
 
 double NeuralNetworkPotential::calculateEnergy(Atoms& configuration, int atomIndex) {
     Atom& atom = configuration.getListOfAtoms()[atomIndex];
-    std::vector<double> descriptorValues = getDescriptorForElement(atom.getElement()).calculateSF(configuration, atomIndex);
-    std::vector<double> ScaledDescriptorValues = getScalerForElement(atom.getElement()).scale(descriptorValues);
-    return getNeuralNetworkForElement(atom.getElement()).calculateEnergy(ScaledDescriptorValues);
+    std::vector<double> descriptorValues = getDescriptorForElement(atom.getElement()).calculate(configuration, atomIndex);
+    std::vector<double> scaledDescriptorValues = getScalerForElement(atom.getElement()).scale(descriptorValues);
+    return getNeuralNetworkForElement(atom.getElement()).calculateEnergy(scaledDescriptorValues);
 }
 
 double NeuralNetworkPotential::caculateTotalEnergy(Atoms &configuration) {
@@ -286,4 +286,33 @@ double NeuralNetworkPotential::caculateTotalEnergy(Atoms &configuration) {
     for(auto atom: configuration.getListOfAtoms())
         totalEnergy += calculateEnergy(configuration, atom.getIndex());
     return totalEnergy;
+}
+
+std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration, int atomIndex) 
+{
+    Atom& atom_i = configuration.getListOfAtoms()[atomIndex];
+    std::vector<double> force(3);
+
+    // sum over atoms
+    for (auto atom_j:configuration.getListOfAtoms()) 
+    {       
+        // gradient of neural network respect to symmetry functions
+        const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.getElement()).calculate(configuration, atom_j.getIndex());
+        const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j.getElement()).scale(descriptorValues);
+        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j.getElement()).calculateJacobian(scaledDescriptorValues);
+        const std::vector<double>& scalingFactors = getScalerForElement(atom_j.getElement()).getScalingFactors();          
+
+        // gradient of symmetry functions respect to atomic positions
+        const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j.getElement()).gradient(configuration, atom_j.getIndex(), atom_i.getIndex());
+       
+        // sum over symmetry functions
+        for (int n=0; n<scaledDescriptorValues.size(); n++ ) 
+        {
+            for (int d=0; d<3; d++)
+                force[d] +=  -networkGradient[n] * descriptorGradient[n][d] * scalingFactors[n];
+        }
+    }
+
+    // return force vector applied on atomIndex
+    return force;
 }

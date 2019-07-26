@@ -25,6 +25,7 @@ public:
     const std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
     double calculateEnergy(Atoms& configuration, int AtomIndex);
     double caculateTotalEnergy(Atoms& configuration);
+    std::vector<double> calculateForce(Atoms& configuration, int atomIndex);
 
 private:
     std::vector<std::string> elements;
