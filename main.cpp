@@ -47,11 +47,10 @@ int main()
         // ----------------------------------------------
         // create a descriptor and add symmetry functions
         // ----------------------------------------------
-        G0 des({12.0});
-        double drij[3] = {1.0, 2.0, 3.0};
-        cout << des.function(10) << endl;
-        for (auto x: des.gradient(10, drij))
-        cout << x << endl;
+        // G4 G({0.5, 0.07,  1.0, 12.00000});
+        // double drij[3] = {1.0, 2.0, 0.5};
+        // for (auto x: G.gradient(1, 1, 1, 0.5, drij, drij, drij))
+        //     cout << x << endl;
 
         // ACSF descriptor("O");
         // cout << descriptor.getCentralElement() << endl;
@@ -99,27 +98,39 @@ int main()
             cout << "NN number of hidden layers: "  << nnp.getNeuralNetworkForElement(element).getNumberOfHiddenLayers() << endl;
         }
 
-        for (int index=0; index<3; index++) 
+        for (int index=140; index<160; index++) 
         {
             Atom atom = configuration.getListOfAtoms()[index];
+            double energy = nnp.calculateEnergy(configuration, atom.getIndex());
+            std::vector<double> force = nnp.calculateForce(configuration, atom.getIndex());
+            
             // symmetry functions
-            // cout << "SF--> ";
-            // for(auto sf: nnp.getDescriptorForElement(atom.getElement()).calculateSF(configuration, atom.getIndex()))
-            //     cout << sf << " ";
-            // cout << "\n";
-            // energy
-            cout << "Atom[" << atom.getElement() << "]:(" << atom.getX() << ", " << atom.getY() << ", " << atom.getZ() << ") "
-            << "energy: " << nnp.calculateEnergy(configuration, atom.getIndex()) << endl;
+            cout << "SF--> ";
+            for(auto sf: nnp.getDescriptorForElement(atom.getElement()).calculate(configuration, atom.getIndex()))
+                cout << sf << " ";
+            cout << "\n";
+
+            cout << "Atom[" << atom.getElement() << "," << index+1 << "]:(" << atom.getX() << ", " << atom.getY() << ", " << atom.getZ() << ") " 
+                // << "energy: " << energy
+                << " Force: " << force[0] << " (" << atom.getFx() << "), " << force[1] << " (" << atom.getFy() << "), " << force[2] << " (" << atom.getFz() << ")"
+                << endl;
         }    
         cout << "Total energy: " << nnp.caculateTotalEnergy(configuration) << endl;
+        
 
-        // for (auto &atoms: nnp.getDescriptorForElement(element).getValues() ) {
-        //     for (auto &sf: atoms)
-        //         cout << sf << " ";
+        // for (auto& element: nnp.getElements()) 
+        // {
+        //     std::vector<std::vector<double>> gradient= nnp.getDescriptorForElement(element).gradient(configuration, 0, 1);
+        //     for (auto sf: gradient) 
+        //     {
+        //         for(auto d: sf)
+        //             cout << d << " ";
+        //         cout << endl;
+        //     }
         //     cout << endl;
         //     break;
         // }
-        // // cout << endl; // << endl;
+        // cout << endl; // << endl;
 
         // for (auto &index: nnp.getDescriptorForElement(element).getIndex2() )
         //     cout << index << " ";

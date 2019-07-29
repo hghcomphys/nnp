@@ -291,7 +291,7 @@ double NeuralNetworkPotential::caculateTotalEnergy(Atoms &configuration) {
 std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration, int atomIndex) 
 {
     Atom& atom_i = configuration.getListOfAtoms()[atomIndex];
-    std::vector<double> force(3);
+    std::vector<double> force({0, 0, 0});
 
     // sum over all atoms
     for (auto atom_j:configuration.getListOfAtoms()) 
@@ -311,14 +311,14 @@ std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration,
         const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j.getElement()).gradient(configuration, atom_j.getIndex(), atom_i.getIndex());
        
         // sum over symmetry functions
-        double force_j[3] = {0, 0, 0};
+        // double force_j[3] = {0, 0, 0};
         for (int n=0; n<descriptorValues.size(); n++ ) 
         {
             for (int d=0; d<3; d++)
-                force_j[d] -=  scalingFactors[n] * networkGradient[n] * descriptorGradient[n][d];          
+                force[d] -=  scalingFactors[n] * networkGradient[n] * descriptorGradient[n][d];          
         }
-        for (int d=0; d<3; d++)
-            force[d] += force_j[d];
+        // for (int d=0; d<3; d++)
+        //     force[d] += force_j[d];
         
         // std::cout << "Atom[" << atom_j.getIndex() << ", " << atom_j.getElement() << "]"
         //     << " (" << rij << "): "
