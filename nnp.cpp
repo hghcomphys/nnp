@@ -293,9 +293,14 @@ std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration,
     Atom& atom_i = configuration.getListOfAtoms()[atomIndex];
     std::vector<double> force(3);
 
-    // sum over atoms
+    // sum over all atoms
     for (auto atom_j:configuration.getListOfAtoms()) 
     {       
+
+        // TODO: improve 
+        const double rij = configuration.distance(atom_i, atom_j);
+        if (rij > 12.0) continue; // TODO: fix it!
+
         // gradient of neural network respect to symmetry functions
         const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.getElement()).calculate(configuration, atom_j.getIndex());
         const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j.getElement()).scale(descriptorValues);
@@ -306,11 +311,19 @@ std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration,
         const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j.getElement()).gradient(configuration, atom_j.getIndex(), atom_i.getIndex());
        
         // sum over symmetry functions
-        for (int n=0; n<scaledDescriptorValues.size(); n++ ) 
+        double force_j[3] = {0, 0, 0};
+        for (int n=0; n<descriptorValues.size(); n++ ) 
         {
             for (int d=0; d<3; d++)
-                force[d] +=  -networkGradient[n] * descriptorGradient[n][d] * scalingFactors[n];
+                force_j[d] -=  scalingFactors[n] * networkGradient[n] * descriptorGradient[n][d];          
         }
+        for (int d=0; d<3; d++)
+            force[d] += force_j[d];
+        
+        // std::cout << "Atom[" << atom_j.getIndex() << ", " << atom_j.getElement() << "]"
+        //     << " (" << rij << "): "
+        //     << force_j[0] << " " << force_j[1] << " " << force_j[2]
+        //     << "\n";
     }
 
     // return force vector applied on atomIndex

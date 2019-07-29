@@ -178,14 +178,17 @@ std::vector<std::vector<double>> ACSF::gradient(Atoms &configuration, int atomIn
         // list of atom index for a specific element
         const std::vector<int>& listOfAtomIndexForElement = configuration.getListOfIndexForElement(listOfTwoBodyNeighborElement[n]);
         
-        // check whether the gradient is respect to atom itself or other atoms
-        if ( atomIndex_ip == atomIndex_i)
+        // check whether gradient is respect to atom itself or neighbor atom
+        if ( atomIndex_ip == atomIndex_i )
         {
-            for(int j: listOfAtomIndexForElement) {
+            for (int j: listOfAtomIndexForElement) {
+
                 if ( j == atomIndex_i ) continue;  
                 Atom& atom_j = atoms[j];
+                
                 double drij[3];
                 const double rij = configuration.distance(atom_i, atom_j, drij);
+
                 const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ii(rij, drij);
                 for (int d=0; d<3; d++)
                     values[n][d] += gradient[d]; 
@@ -194,9 +197,12 @@ std::vector<std::vector<double>> ACSF::gradient(Atoms &configuration, int atomIn
         else
         {
             if ( isInList(listOfAtomIndexForElement, atomIndex_ip) ) {
+                
                 Atom& atom_j = atoms[atomIndex_ip];
+                
                 double drij[3];
                 const double rij = configuration.distance(atom_i, atom_j, drij);
+
                 const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ij(rij, drij);
                 for (int d=0; d<3; d++)
                     values[n][d] = gradient[d]; 
@@ -212,7 +218,7 @@ std::vector<std::vector<double>> ACSF::gradient(Atoms &configuration, int atomIn
         const std::vector<int>& listOfAtomIndexForElement2 = configuration.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n]);
 
         // check whether the gradient is respect to atom itself or other atoms
-        if ( atomIndex_ip == atomIndex_i)
+        if ( atomIndex_ip == atomIndex_i )
         {
             // first neighbors
             for(int j: listOfAtomIndexForElement1) {
@@ -259,7 +265,7 @@ std::vector<std::vector<double>> ACSF::gradient(Atoms &configuration, int atomIn
                     Atom& atom_k = atoms[k];
                     if (atom_k.getIndex() == atom_i.getIndex()) continue;
                     if (atom_k.getIndex() <= atom_j.getIndex()) continue;
-
+                    
                     double drik[3], drjk[3];
                     const double rik = configuration.distance(atom_i, atom_k, drik);
                     const double rjk = configuration.distance(atom_j, atom_k, drjk);
@@ -275,7 +281,6 @@ std::vector<std::vector<double>> ACSF::gradient(Atoms &configuration, int atomIn
 
             if ( isInList(listOfAtomIndexForElement2, atomIndex_ip) ) {
 
-                // first neighbors
                 for(int j: listOfAtomIndexForElement1) {
                 
                     Atom& atom_j = atoms[j];
@@ -286,6 +291,7 @@ std::vector<std::vector<double>> ACSF::gradient(Atoms &configuration, int atomIn
   
                     Atom& atom_k = atoms[atomIndex_ip];
                     if (atom_k.getIndex() == atom_i.getIndex()) continue;
+                    // std::cout << "IK YES " << atom_k.getIndex() << " " << atom_j.getIndex() << "\n";
                     if (atom_k.getIndex() <= atom_j.getIndex()) continue;
 
                     double drik[3], drjk[3];
