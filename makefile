@@ -1,5 +1,5 @@
 
-CXX = icc #g++
+CXX = g++
 CXXFLAGS = -std=c++11 #-Wall -O3
 LFLAGS = -lopennn -ltinyxml2 #-fopenmp #-ltensorflow
 

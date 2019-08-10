@@ -298,8 +298,8 @@ std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration,
     {       
 
         // TODO: improve 
-        const double rij = configuration.distance(atom_i, atom_j);
-        if (rij > 12.0) continue; // TODO: fix it!
+        // const double rij = configuration.distance(atom_i, atom_j);
+        // if (rij > 12.0) continue; // TODO: fix it!
 
         // gradient of neural network respect to symmetry functions
         const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.getElement()).calculate(configuration, atom_j.getIndex());

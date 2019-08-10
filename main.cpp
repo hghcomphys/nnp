@@ -105,10 +105,10 @@ int main()
             std::vector<double> force = nnp.calculateForce(configuration, atom.getIndex());
             
             // symmetry functions
-            cout << "SF--> ";
-            for(auto sf: nnp.getDescriptorForElement(atom.getElement()).calculate(configuration, atom.getIndex()))
-                cout << sf << " ";
-            cout << "\n";
+            // cout << "SF--> ";
+            // for(auto sf: nnp.getDescriptorForElement(atom.getElement()).calculate(configuration, atom.getIndex()))
+            //     cout << sf << " ";
+            // cout << "\n";
 
             cout << "Atom[" << atom.getElement() << "," << index+1 << "]:(" << atom.getX() << ", " << atom.getY() << ", " << atom.getZ() << ") " 
                 // << "energy: " << energy
