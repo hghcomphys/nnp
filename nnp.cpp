@@ -16,7 +16,10 @@
 
 NeuralNetworkPotential::NeuralNetworkPotential() {}
 
-NeuralNetworkPotential::~NeuralNetworkPotential() {}
+NeuralNetworkPotential::~NeuralNetworkPotential() {
+    for (auto each: neuralNetworks)
+        delete each;    
+}
 
 void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 {
@@ -228,7 +231,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
     // create neural network for each element
     for (auto &element: elements) {
         const int numberOfInputs = getDescriptorForElement(element).getTotalNumberOfSF();
-        neuralNetworks.push_back( NeuralNetwork(numberOfInputs, hiddenLayersSize) );
+        neuralNetworks.push_back( new NeuralNetwork(numberOfInputs, hiddenLayersSize) );
         std::cout << "Neural Network (" << element << "):" << std::endl;
     }
 
@@ -239,11 +242,17 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
             char filename[32];
             sprintf(filename, "weights.%3.3d.data", Atom::getAtomicNumber(element));
             const std::string fullPathFileName = directory + std::string(filename);
-            getNeuralNetworkForElement(element).readParameters(fullPathFileName);
             std::cout << fullPathFileName << std::endl;
 
+            // read parameters file into neural network
+            getNeuralNetworkForElement(element)->readParameters(fullPathFileName);
+
             // set activation functions
-            getNeuralNetworkForElement(element).setLayersActivationFunction(activationFunctionTypes);
+            getNeuralNetworkForElement(element)->setLayersActivationFunction(activationFunctionTypes);
+
+            for(auto each: neuralNetworks)
+                cout << each->getPerceptron() << " ";
+            cout << "\n";
     }
 }
 
@@ -270,7 +279,8 @@ SymmeryFunctionsScaler& NeuralNetworkPotential::getScalerForElement(const std::s
     return scalers[getIndexForElement(element)];
 }
 
-NeuralNetwork& NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element) { 
+NeuralNetwork* NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element) { 
+    // cout << "get NN: " << neuralNetworks[getIndexForElement(element)]->getNumberOfInputs() << "\n";
     return neuralNetworks[getIndexForElement(element)];
 }
 
@@ -278,7 +288,7 @@ double NeuralNetworkPotential::calculateEnergy(Atoms& configuration, int atomInd
     Atom& atom = configuration.getListOfAtoms()[atomIndex];
     std::vector<double> descriptorValues = getDescriptorForElement(atom.getElement()).calculate(configuration, atomIndex);
     std::vector<double> scaledDescriptorValues = getScalerForElement(atom.getElement()).scale(descriptorValues);
-    return getNeuralNetworkForElement(atom.getElement()).calculateEnergy(scaledDescriptorValues);
+    return getNeuralNetworkForElement(atom.getElement())->calculateEnergy(scaledDescriptorValues);
 }
 
 double NeuralNetworkPotential::caculateTotalEnergy(Atoms &configuration) {
@@ -296,7 +306,6 @@ std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration,
     // sum over all atoms
     for (auto atom_j:configuration.getListOfAtoms()) 
     {       
-
         // TODO: improve 
         // const double rij = configuration.distance(atom_i, atom_j);
         // if (rij > 12.0) continue; // TODO: fix it!
@@ -304,7 +313,7 @@ std::vector<double> NeuralNetworkPotential::calculateForce(Atoms& configuration,
         // gradient of neural network respect to symmetry functions
         const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.getElement()).calculate(configuration, atom_j.getIndex());
         const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j.getElement()).scale(descriptorValues);
-        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j.getElement()).calculateJacobian(scaledDescriptorValues);
+        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j.getElement())->calculateJacobian(scaledDescriptorValues);
         const std::vector<double>& scalingFactors = getScalerForElement(atom_j.getElement()).getScalingFactors();          
 
         // gradient of symmetry functions respect to atomic positions

@@ -94,28 +94,29 @@ int main()
             cout << "Two-body SF: " << nnp.getDescriptorForElement(element).getNumberOfTwoBodySF() << endl;
             cout << "Three-body SF: " << nnp.getDescriptorForElement(element).getNumberOfThreeBodySF() << endl;
             cout << "Total SF: " << nnp.getDescriptorForElement(element).getTotalNumberOfSF() << endl;
-            cout << "NN number of inputs: "  << nnp.getNeuralNetworkForElement(element).getNumberOfInputs() << endl;
-            cout << "NN number of hidden layers: "  << nnp.getNeuralNetworkForElement(element).getNumberOfHiddenLayers() << endl;
+            cout << "NN number of inputs: "  << nnp.getNeuralNetworkForElement(element)->getNumberOfInputs() << endl;
+            cout << "NN number of hidden layers: "  << nnp.getNeuralNetworkForElement(element)->getNumberOfHiddenLayers() << endl;
+            cout << "NN (main): " << nnp.getNeuralNetworkForElement(element)->getPerceptron() << "\n";
         }
 
-        for (int index=140; index<160; index++) 
-        {
-            Atom atom = configuration.getListOfAtoms()[index];
-            double energy = nnp.calculateEnergy(configuration, atom.getIndex());
-            std::vector<double> force = nnp.calculateForce(configuration, atom.getIndex());
+        // for (int index=140; index<160; index++) 
+        // {
+        //     Atom atom = configuration.getListOfAtoms()[index];
+        //     double energy = nnp.calculateEnergy(configuration, atom.getIndex());
+        //     std::vector<double> force = nnp.calculateForce(configuration, atom.getIndex());
             
-            // symmetry functions
-            // cout << "SF--> ";
-            // for(auto sf: nnp.getDescriptorForElement(atom.getElement()).calculate(configuration, atom.getIndex()))
-            //     cout << sf << " ";
-            // cout << "\n";
+        //     // symmetry functions
+        //     // cout << "SF--> ";
+        //     // for(auto sf: nnp.getDescriptorForElement(atom.getElement()).calculate(configuration, atom.getIndex()))
+        //     //     cout << sf << " ";
+        //     // cout << "\n";
 
-            cout << "Atom[" << atom.getElement() << "," << index+1 << "]:(" << atom.getX() << ", " << atom.getY() << ", " << atom.getZ() << ") " 
-                // << "energy: " << energy
-                << " Force: " << force[0] << " (" << atom.getFx() << "), " << force[1] << " (" << atom.getFy() << "), " << force[2] << " (" << atom.getFz() << ")"
-                << endl;
-        }    
-        cout << "Total energy: " << nnp.caculateTotalEnergy(configuration) << endl;
+        //     cout << "Atom[" << atom.getElement() << "," << index+1 << "]:(" << atom.getX() << ", " << atom.getY() << ", " << atom.getZ() << ") " 
+        //         // << "energy: " << energy
+        //         << " Force: " << force[0] << " (" << atom.getFx() << "), " << force[1] << " (" << atom.getFy() << "), " << force[2] << " (" << atom.getFz() << ")"
+        //         << endl;
+        // }    
+        // cout << "Total energy: " << nnp.caculateTotalEnergy(configuration) << endl;
         
 
         // for (auto& element: nnp.getElements()) 
