@@ -27,14 +27,14 @@ NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayer
     // cout << endl;
 
     multilayerPerceptron = new OpenNN::MultilayerPerceptron(layersSize);
-    std::cout << "NN allocate " << multilayerPerceptron << " " << getNumberOfInputs() << "\n";
+    // std::cout << "NN allocate " << multilayerPerceptron << " " << getNumberOfInputs() << "\n";
 }
 
 NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize): NeuralNetwork(inputsSize, hiddenLayersSize, 1) {}
 
 
 NeuralNetwork::~NeuralNetwork() { 
-    std::cout << "NN delete " << multilayerPerceptron << "\n"; 
+    // std::cout << "NN delete " << multilayerPerceptron << "\n"; 
     delete multilayerPerceptron;
 }
 
@@ -56,12 +56,12 @@ int NeuralNetwork::getNumberOfHiddenLayers() const { return getNumberOfLayers()-
 
 void NeuralNetwork::setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType) {
 
-    OpenNN::Vector<OpenNN::PerceptronLayer::ActivationFunction> activationFunctions;
+    OpenNN::Vector<OpenNN::Perceptron::ActivationFunction> activationFunctions;
     for (auto each: activationFucntionsType) {
         if( each == "t" )
-             activationFunctions.push_back( OpenNN::PerceptronLayer::ActivationFunction::HyperbolicTangent );
+             activationFunctions.push_back( OpenNN::Perceptron::ActivationFunction::HyperbolicTangent );
         else if ( each == "l" )
-            activationFunctions.push_back( OpenNN::PerceptronLayer::ActivationFunction::Linear );
+            activationFunctions.push_back( OpenNN::Perceptron::ActivationFunction::Linear );
         else
             throw runtime_error("Unknown activation function type " + each);
     }
@@ -155,11 +155,11 @@ double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValue
     }
 
     // TODO: optimize the conversion
-    OpenNN::Matrix<double> inputs(getNumberOfInputs(), 1);
+    OpenNN::Vector<double> inputs(getNumberOfInputs(), 1);
     for(int i=0; i<getNumberOfInputs(); i++ )
-        inputs(i, 0) = descriptorValues[i];
+        inputs[i] = descriptorValues[i];
 
-    return multilayerPerceptron->calculate_outputs( inputs )(0, 0); // last layer has one output perceptron
+    return multilayerPerceptron->calculate_outputs( inputs )[0]; // last layer has one output perceptron
 }
 
 OpenNN::Vector<double> NeuralNetwork::calculateJacobian(const std::vector<double>& descriptorValues) {
@@ -168,9 +168,9 @@ OpenNN::Vector<double> NeuralNetwork::calculateJacobian(const std::vector<double
         throw std::runtime_error("Unexpected size of inputs (force calculation)");
 
     // TODO: optimize the conversion
-    OpenNN::Matrix<double> inputs( getNumberOfInputs(), 1 );
+    OpenNN::Vector<double> inputs( getNumberOfInputs(), 1 );
     for(int i=0; i<getNumberOfInputs(); i++ )
-        inputs(i, 0) = descriptorValues[i];
+        inputs[i] = descriptorValues[i];
 
-    return multilayerPerceptron->calculate_Jacobian( inputs )[0].to_vector();
+    return multilayerPerceptron->calculate_Jacobian( inputs ).to_vector();
 }

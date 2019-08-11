@@ -250,9 +250,9 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
             // set activation functions
             getNeuralNetworkForElement(element)->setLayersActivationFunction(activationFunctionTypes);
 
-            for(auto each: neuralNetworks)
-                cout << each->getPerceptron() << " ";
-            cout << "\n";
+            // for(auto each: neuralNetworks)
+            //     cout << each->getPerceptron() << " ";
+            // cout << "\n";
     }
 }
 
