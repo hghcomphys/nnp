@@ -17,7 +17,7 @@ public:
     ~NeuralNetwork();
     void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
     void readParameters(const std::string& fullPathFileName);
-    const OpenNN::MultilayerPerceptron* getPerceptron() const;
+    // const OpenNN::MultilayerPerceptron* getPerceptron() const;
     int getNumberOfInputs() const;
     int getNumberOfOutputs() const;
     int getNumberOfLayers() const;

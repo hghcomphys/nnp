@@ -39,7 +39,7 @@ NeuralNetwork::~NeuralNetwork() {
 }
 
 
-const OpenNN::MultilayerPerceptron* NeuralNetwork::getPerceptron() const { return multilayerPerceptron; }
+// const OpenNN::MultilayerPerceptron* NeuralNetwork::getPerceptron() const { return multilayerPerceptron; }
 
 
 int NeuralNetwork::getNumberOfInputs() const { return multilayerPerceptron->get_inputs_number(); }
