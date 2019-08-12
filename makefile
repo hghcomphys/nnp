@@ -1,9 +1,9 @@
 
 CXX = g++
-CXXFLAGS = -std=c++11 #-Wall -O3
+CXXFLAGS = -std=c++11 #-Wall -O3 #-D__PURE_INTEL_C99_HEADERS__ 
 LFLAGS = -lopennn -ltinyxml2 #-fopenmp #-ltensorflow
 
-OBJS = main.o acsf.o atoms.o symmfunc.o cutofffunc.o nnp.o neuralnetwork.o symmfuncscaler.o
+OBJS = main.o acsf.o atoms.o symmfunc.o cutofffunc.o nnp.o neuralnetwork.o symmfuncscaler.o logger.o
 
 all: $(OBJS)
 	$(CXX) $(OBJS) -o nnp.x $(LFLAGS)
@@ -31,6 +31,9 @@ neuralnetwork.o: neuralnetwork.cpp neuralnetwork.h
 
 symmfuncscaler.o: symmfuncscaler.cpp symmfuncscaler.h
 	$(CXX) $(CXXFLAGS) -c symmfuncscaler.cpp
+
+logger.o: logger.cpp logger.h
+	$(CXX) $(CXXFLAGS) -c logger.cpp
 
 clean:
 	rm -f *.o nnp.x
