@@ -11,12 +11,12 @@ enum LOG_t {
     ERROR 
 };
 
-class LOG {
+class Log {
 public:
-    LOG();
-    LOG(LOG_t level);
-    ~LOG();
-    LOG& operator<< (const std::string& message);
+    Log();
+    Log(LOG_t level);
+    ~Log();
+    Log& operator<< (const std::string& message);
     const std::string toString() const;
 
 private:

@@ -1,6 +1,6 @@
 
 
-#include "logger.h"
+#include "log.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -8,9 +8,9 @@
    setup for class Logger  
 ------------------------------------------------------------------------- */
 
-LOG::LOG(): LOG(INFO) {}
+Log::Log(): Log(INFO) {}
 
-LOG::LOG(LOG_t level):  isOpened(false), messageLevel(DEBUG)
+Log::Log(LOG_t level):  isOpened(false), messageLevel(DEBUG)
 {
     messageLevel = level;
     if( isHeader ) {
@@ -18,7 +18,7 @@ LOG::LOG(LOG_t level):  isOpened(false), messageLevel(DEBUG)
     }
 }
 
-LOG::~LOG() 
+Log::~Log() 
 {
     if(isOpened) {
 
@@ -36,7 +36,7 @@ LOG::~LOG()
     isOpened = false;
 }
 
-LOG& LOG::operator<< (const std::string& message) 
+Log& Log::operator<< (const std::string& message) 
 {
     if( messageLevel >= verbosity ) {
         buffer << message;
@@ -45,7 +45,7 @@ LOG& LOG::operator<< (const std::string& message)
     return *this;
 }
 
-inline std::string LOG::getLabel(LOG_t level) 
+inline std::string Log::getLabel(LOG_t level) 
 {
     std::string label;
     switch(level) {
@@ -57,6 +57,6 @@ inline std::string LOG::getLabel(LOG_t level)
     return label;
 }
 
-const std::string LOG::toString() const {
+const std::string Log::toString() const {
     return buffer.str();
 }
