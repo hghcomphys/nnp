@@ -3,6 +3,7 @@
 #include "log.h"
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 /* ----------------------------------------------------------------------
    setup for class Logger  
@@ -13,16 +14,13 @@ Log::Log(): Log(INFO) {}
 Log::Log(LOG_t level):  isOpened(false), messageLevel(DEBUG)
 {
     messageLevel = level;
-    if( isHeader ) {
-        operator << ("["+getLabel(level)+"] ");
-    }
+    setLable();
 }
 
 Log::~Log() 
 {
-    if(isOpened) {
-
-        buffer << "\n";
+    if ( isOpened ) {
+        endl(); // go next line
         switch ( messageLevel )
         {
         case ERROR:
@@ -45,6 +43,16 @@ Log& Log::operator<< (const std::string& message)
     return *this;
 }
 
+Log& Log::operator<< (int message) { 
+    operator<< (std::to_string(message)); 
+    return *this;
+} 
+
+Log& Log::operator<< (double message) { 
+    operator<< (std::to_string(message)); 
+    return *this;
+} 
+
 inline std::string Log::getLabel(LOG_t level) 
 {
     std::string label;
@@ -57,6 +65,19 @@ inline std::string Log::getLabel(LOG_t level)
     return label;
 }
 
+void Log::setLable() {
+    if( isHeader ) {
+        operator << ("["+getLabel(messageLevel)+"] ");
+    }
+}
+
 const std::string Log::toString() const {
     return buffer.str();
 }
+
+void Log::clear() { 
+    buffer.clear(); 
+    setLable();
+}
+
+void Log::endl() { buffer << "\n"; }

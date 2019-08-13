@@ -17,15 +17,21 @@ public:
     Log(LOG_t level);
     ~Log();
     Log& operator<< (const std::string& message);
+    Log& operator<< (int message);
+    Log& operator<< (double message);
     const std::string toString() const;
+    void clear();
+    void endl();
 
 private:
     bool isOpened;
     LOG_t messageLevel;
-    std::string getLabel(LOG_t level);
     std::stringstream buffer;
+    std::string getLabel(LOG_t level);
+    void setLable();
+    bool isBlank();
     // TODO: set outside the class
-    LOG_t verbosity = INFO;
+    LOG_t verbosity = DEBUG;
     bool isHeader = true;
 };
 
