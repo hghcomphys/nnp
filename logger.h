@@ -2,6 +2,7 @@
 #define LOGGER_H
 
 #include <iostream>
+#include <sstream>  
 
 enum LOG_t { 
     DEBUG, 
@@ -13,16 +14,19 @@ enum LOG_t {
 class LOG {
 public:
     LOG();
-    LOG(LOG_t type);
+    LOG(LOG_t level);
     ~LOG();
-    LOG& operator<< (const std::string& msg);
+    LOG& operator<< (const std::string& message);
+    const std::string toString() const;
 
 private:
-    bool opened = false;
-    LOG_t msglevel = LOG_t::DEBUG;
-    std::string getLabel(LOG_t type);
+    bool isOpened;
+    LOG_t messageLevel;
+    std::string getLabel(LOG_t level);
+    std::stringstream buffer;
     // TODO: set outside the class
-    LOG_t verbosity = LOG_t::INFO;
+    LOG_t verbosity = INFO;
+    bool isHeader = true;
 };
 
 #endif 
