@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
+#include "log.h"
 
 #define REORDER_SYMMETRY_FUNCTIONS  // this flag is temporary
 
@@ -26,7 +27,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
     const std::string filename = directory + "input.nn";
     std::ifstream inFile(filename);
     if (!inFile)
-        throw std::runtime_error("Unable to open script file " + filename);
+        throw std::runtime_error( (Log(ERROR) << "Unable to open script file " + filename).toString() );
 
     char cSpace = ' ';
     std::string line;
@@ -47,37 +48,37 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 
             if (sIndvStr == "number_of_elements") {
                 ss >> number_of_elements;
-                // std::cout << sIndvStr << ' ' << number_of_elements << std::endl;
+                Log(DEBUG) << sIndvStr + ": " << number_of_elements;
             }
             else if (sIndvStr == "elements") {
 
                 if (number_of_elements == 0)
-                        throw std::runtime_error("Number of elemets is zero");
+                        throw std::runtime_error( (Log(ERROR) << "Number of elemets is zero").toString() );
 
                 for (int i=0; i<number_of_elements; i++) {
                     ss >> dummy;
                     elements.push_back(dummy);
-                    // std::cout << elements[i] << std::endl;
+                    Log(DEBUG) << "element: " << elements[i];
                 }
                 for (auto &element: elements) {
                     descriptors.push_back( ACSF(element) );  // add descriptor
                     scalers.push_back( SymmeryFunctionsScaler() );  // add scaler
-                    std::cout << "ACSF(" << element << ")" << std::endl;
+                    Log(INFO) << "ACSF(" << element << ")";// << std::endl;
                 }
             }
             else if (sIndvStr == "global_hidden_layers_short") {
                 ss >> number_of_hidden_layers;
-                // std::cout << sIndvStr << ' ' << number_of_elements << std::endl;
+                Log(DEBUG) << sIndvStr + ": " << number_of_elements;
             } 
             else if (sIndvStr == "global_nodes_short") {
 
                 if (number_of_hidden_layers == 0)
-                        throw std::runtime_error("Number of hidden layers is zero");
+                        throw std::runtime_error( (Log(ERROR) << "Number of hidden layers is zero").toString() );
 
                 for (int i=0; i<number_of_hidden_layers; i++) {
                     ss >> idummy;
                     hiddenLayersSize.push_back(idummy);
-                    // std::cout << hiddenLayersSize[i] << std::endl;
+                    Log(DEBUG) << sIndvStr + ": " << hiddenLayersSize[i];
                 }
             }
             else if (sIndvStr == "global_activation_short") {
@@ -86,7 +87,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                 for (int i=0; i<number_of_layers; i++) {
                     ss >> dummy;
                     activationFunctionTypes.push_back(dummy);
-                    // std::cout << activationFunctionTypes[i] << std::endl;
+                    Log(DEBUG) << sIndvStr + ": " << activationFunctionTypes[i];
                 }
             }
 #ifndef REORDER_SYMMETRY_FUNCTIONS
@@ -152,12 +153,13 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 #ifdef REORDER_SYMMETRY_FUNCTIONS
     // add symmetryc functions from scaling log
     // TODO: improve design
+    Log log(DEBUG);
     for (auto &element: elements) 
     {
         const std::string filenameSF = directory + "nnp-scaling.log.0000";
         std::ifstream inFileSF(filenameSF);
         if (!inFileSF)
-            throw std::runtime_error("Unable to open file " + filenameSF);
+            throw std::runtime_error( (Log(ERROR) << "Unable to open file " + filenameSF).toString() );
 
         while ( std::getline(inFileSF, line) ) {
 
@@ -179,10 +181,12 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     params.push_back(rshift); 
                     params.push_back(rcutoff);
                     getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1);
-                    std::cout << "add G2(<" << centralElement << ">, " << neighborElement1 << "): ";
+                    // log 
+                    log << "G2(<" << centralElement << ">, " << neighborElement1 << "): ";
                     for (auto& p: params) 
-                        std::cout << p << ' ';
-                    std::cout << std::endl;
+                        log << p << " ";
+                    log.endl();
+                    log.clear();
                     break;
 
                 case 3:
@@ -192,11 +196,13 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     params.push_back(zeta);
                     params.push_back(rcutoff);
                     // params.push_back(rshift);
+                    // log
                     getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2);
-                    std::cout << "add G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    log << "G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
                     for (auto& p: params) 
-                        std::cout << p << ' ';
-                    std::cout << std::endl;
+                        log << p << ' ';
+                    log.endl();
+                    log.clear();
                 break;
 
                 case 9:
@@ -206,11 +212,13 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     params.push_back(zeta);
                     params.push_back(rcutoff);
                     // params.push_back(rshift);
+                    // log
                     getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2);
-                    std::cout << "add G5(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    log << "add G5(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
                     for (auto& p: params) 
-                        std::cout << p << ' ';
-                    std::cout << std::endl;
+                        log << p << ' ';
+                    log.endl();
+                    log.clear();
                     break;
                 
                 default:
@@ -232,7 +240,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
     for (auto &element: elements) {
         const int numberOfInputs = getDescriptorForElement(element).getTotalNumberOfSF();
         neuralNetworks.push_back( new NeuralNetwork(numberOfInputs, hiddenLayersSize) );
-        std::cout << "Neural Network (" << element << "):" << std::endl;
+        Log(INFO) << "Neural Network (" + element + ")";
     }
 
     // initilize neural network for each element
@@ -242,7 +250,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
             char filename[32];
             sprintf(filename, "weights.%3.3d.data", Atom::getAtomicNumber(element));
             const std::string fullPathFileName = directory + std::string(filename);
-            std::cout << fullPathFileName << std::endl;
+            Log(INFO) << fullPathFileName;
 
             // read parameters file into neural network
             getNeuralNetworkForElement(element)->readParameters(fullPathFileName);
