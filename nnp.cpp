@@ -3,18 +3,17 @@
 //
 
 #include "nnp.h"
+#include "log.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
-#include "log.h"
 
 #define REORDER_SYMMETRY_FUNCTIONS  // this flag is temporary
 
 /* ----------------------------------------------------------------------
    setup for Neural Network Potential
 ------------------------------------------------------------------------- */
-
 NeuralNetworkPotential::NeuralNetworkPotential() {}
 
 NeuralNetworkPotential::~NeuralNetworkPotential() {
@@ -98,6 +97,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                 std::string centralElement;
                 std::string neighborElement1, neighborElement2;
                 std::vector<double> params;
+                Log log(DEBUG);
 
                 ss >> centralElement >> sfType;
                 switch (sfType)
@@ -109,10 +109,10 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                         params.push_back(ddummy);
                     }
                     getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1);
-                    // std::cout << "add G2(<" << centralElement << ">, " << neighborElement1 << "): ";
-                    // for (auto& p: params) 
-                    //     std::cout << p << ' ';
-                    // std::cout << std::endl;
+                    // log
+                    log << "G2(<" << centralElement << ">, " << neighborElement1 << "): ";
+                    for (auto& p: params) 
+                        log << p << " ";
                     break;
 
                 case 3:
@@ -122,10 +122,10 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                         params.push_back(ddummy);
                     }
                     getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2);
-                    // std::cout << "add G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
-                    // for (auto& p: params) 
-                    //     std::cout << p << ' ';
-                    // std::cout << std::endl;
+                    // log
+                    log << "add G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    for (auto& p: params) 
+                        log << p << " ";
                     break;
 
                 case 9:
@@ -135,14 +135,14 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                         params.push_back(ddummy);
                     }
                     getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2);
-                    // std::cout << "add G5(" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
-                    // for (auto& p: params) 
-                    //     std::cout << p << ' ';
-                    // std::cout << std::endl;
+                    // log
+                    log << "add G5(" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
+                    for (auto& p: params) 
+                        log << p << " ";
                     break;
                 
                 default:
-                    throw std::runtime_error("Unexpected symmetry function in " + filename);
+                    throw std::runtime_error(  (Log(ERROR) << "Unexpected symmetry function in " + filename).toString() );
                     break;
                 }
             }
@@ -153,7 +153,6 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 #ifdef REORDER_SYMMETRY_FUNCTIONS
     // add symmetryc functions from scaling log
     // TODO: improve design
-    Log log(DEBUG);
     for (auto &element: elements) 
     {
         const std::string filenameSF = directory + "nnp-scaling.log.0000";
@@ -173,6 +172,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
             ss >> sfIndex >> centralElement >> sfType;        
             if ( element == centralElement) 
             {
+                Log log(DEBUG);
                 switch (sfType)
                 {
                 case 2:
@@ -185,8 +185,6 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     log << "G2(<" << centralElement << ">, " << neighborElement1 << "): ";
                     for (auto& p: params) 
                         log << p << " ";
-                    log.endl();
-                    log.clear();
                     break;
 
                 case 3:
@@ -200,9 +198,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2);
                     log << "G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
                     for (auto& p: params) 
-                        log << p << ' ';
-                    log.endl();
-                    log.clear();
+                        log << p << " ";
                 break;
 
                 case 9:
@@ -216,9 +212,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2);
                     log << "add G5(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
                     for (auto& p: params) 
-                        log << p << ' ';
-                    log.endl();
-                    log.clear();
+                        log << p << " ";
                     break;
                 
                 default:
