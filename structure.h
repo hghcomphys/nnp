@@ -1,13 +1,12 @@
 //
-// Atomic Configuration
+// Atomic Structure
 //
 
-#ifndef NNP_ATOMS_H
-#define NNP_ATOMS_H
+#ifndef NNP_STRUCTURE_H
+#define NNP_STRUCTURE_H
 
 #include <string>
 #include <vector>
-
 
 class Atom {
 public:
@@ -31,10 +30,10 @@ private:
 };
 
 
-class Atoms {
+class AtomicStructure {
 public:
-    Atoms();
-    ~Atoms();
+    AtomicStructure();
+    ~AtomicStructure();
     void addAtom(const Atom& atom);
     std::vector<Atom>& getListOfAtoms();
     int getNumberOfAtoms();
@@ -59,4 +58,4 @@ private:
 };
 
 
-#endif //NNP_ATOMS_H
+#endif //NNP_STRUCTURE_H
