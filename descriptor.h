@@ -6,10 +6,9 @@
 #define NNP_ACSF_H
 
 #include <vector>
-#include "symmfunc.h"
-#include "atoms.h"
-#include "symmfuncscaler.h"
-
+#include "structure.h"
+#include "symmetry_function.h"
+#include "symmetry_function_scaler.h"
 
 class ACSF {
 public:
@@ -24,9 +23,9 @@ public:
     int getNumberOfThreeBodySF() const;
     int getTotalNumberOfSF() const;
     const std::string& getCentralElement() const;
-    std::vector<std::vector<double>> calculate(Atoms &configuration);
-    std::vector<double> calculate(Atoms &configuration, int atomIndex);
-    std::vector<std::vector<double>> gradient(Atoms &configuration, int atomIndex_i, int atomIndex_j);
+    std::vector<std::vector<double>> calculate(AtomicStructure &structure);
+    std::vector<double> calculate(AtomicStructure &structure, int atomIndex);
+    std::vector<std::vector<double>> gradient(AtomicStructure &structure, int atomIndex_i, int atomIndex_j);
     
 private:
     std::string centralElement;

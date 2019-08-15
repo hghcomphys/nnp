@@ -1,21 +1,16 @@
 
 
 #include "log.h"
-#include <iostream>
 #include <stdexcept>
 #include <string>
+#include <iostream>
 
 /* ----------------------------------------------------------------------
    setup for class Logger  
 ------------------------------------------------------------------------- */
+Log::Log(): Log(DEBUG) {}
 
-Log::Log(): Log(INFO) {}
-
-Log::Log(LOG_t level):  isOpened(false), messageLevel(DEBUG)
-{
-    messageLevel = level;
-    setLable();
-}
+Log::Log(LOG_t level):  isOpened(false), messageLevel(level) { setLable(); }
 
 Log::~Log() 
 {
@@ -71,9 +66,7 @@ void Log::setLable() {
     }
 }
 
-const std::string Log::toString() const {
-    return buffer.str();
-}
+const std::string Log::toString() const { return buffer.str(); }
 
 void Log::clear() { 
     buffer.clear(); 

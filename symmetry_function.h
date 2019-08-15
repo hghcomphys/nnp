@@ -7,7 +7,7 @@
 #define NNP_SYMMETRY_FUNCTION_H
 
 #include <vector>
-#include "cutofffunc.h"
+#include "cutoff_function.h"
 
 class SymmetryFunction {
 public:
@@ -18,7 +18,7 @@ protected:
     double cutoffRadius;
 };
 
-// Two-body base class
+// Two-body symmetry function base class
 class TwoBodySymmetryFunction: public SymmetryFunction { 
 public:
     TwoBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
@@ -27,7 +27,7 @@ public:
     virtual std::vector<double> gradient_ij(double rij, double drij[3]) {};
 };
 
-// Three-body base class
+// Three-body symmetry function base class
 class ThreeBodySymmetryFunction: public SymmetryFunction {
 public:
     ThreeBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
@@ -37,8 +37,7 @@ public:
     virtual std::vector<double> gradient_ik(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) {}; 
 };
 
-
-// ------------------------------------------------------------ two-body derived classes
+// ------------------------- two-body symmetry function derived classes
 
 class G0 : public TwoBodySymmetryFunction {
 public:
@@ -59,8 +58,7 @@ private:
     double eta, rshift;
 };
 
-
-// ------------------------------------------------------------- three-body derived classes
+// ------------------------- three-body symmetry function derived classes
 
 class G4 : public ThreeBodySymmetryFunction {
 public:

@@ -5,8 +5,8 @@
 #include <cmath>
 #include <vector>
 #include <stdexcept>
-#include "symmfunc.h"
-#include <iostream>
+#include "symmetry_function.h"
+#include "log.h"
 
 /* ----------------------------------------------------------------------
    setup for base symmetry function base
@@ -23,7 +23,7 @@ double SymmetryFunction::getCutoffRadius() { return cutoffRadius; }
 ------------------------------------------------------------------------- */
 G0::G0(std::vector<double> p): TwoBodySymmetryFunction(p[0]) {
     if ( p.size()!=1 ) 
-        throw std::runtime_error("Expected rcutoff argument");
+        throw std::runtime_error( (Log(ERROR) << "Expected rcutoff argument").toString() );
 }
 
 double G0::function(double rij) {
@@ -62,7 +62,7 @@ std::vector<double>  G0::gradient_ij(double rij, double drij[3])
 ------------------------------------------------------------------------- */
 G2::G2(std::vector<double> p): eta(p[0]), rshift(p[1]), TwoBodySymmetryFunction(p[2]) {
     if ( p.size()<3 ) 
-        throw std::runtime_error("Expected eta, rshift, and rcutoff arguments");
+        throw std::runtime_error( (Log(ERROR) << "Expected eta, rshift, and rcutoff arguments").toString() );
 }
 
 double G2::function(double rij) {
@@ -103,7 +103,7 @@ std::vector<double> G2::gradient_ij(double rij, double drij[3])
 ------------------------------------------------------------------------ */
 G4::G4(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySymmetryFunction(p[3]), rshift(0) {
     if ( p.size()<4 ) 
-        throw std::runtime_error("Expected eta, lambda, zeta, and rcutoff arguments");
+        throw std::runtime_error( (Log(ERROR) << "Expected eta, lambda, zeta, and rcutoff arguments").toString() );
 }
 
 double G4::function(double rij, double rik, double rjk, double cost)
@@ -232,7 +232,7 @@ std::vector<double> G4::gradient_ik(double rij, double rik, double rjk, double c
 ------------------------------------------------------------------------- */
 G5::G5(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySymmetryFunction(p[3]), rshift(0) {
      if ( p.size()<4 ) 
-        throw std::runtime_error("Expected eta, lambda, zeta, and rcutoff arguments");
+        throw std::runtime_error( (Log(ERROR) << "Expected eta, lambda, zeta, and rcutoff arguments").toString() );
 }
 
 double G5::function(double rij, double rik, double rjk, double cost) 

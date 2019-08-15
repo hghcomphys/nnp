@@ -1,9 +1,9 @@
 
 CXX = g++
-CXXFLAGS = -std=c++11 #-Wall -O3 #-D__PURE_INTEL_C99_HEADERS__ 
-LFLAGS = -lopennn -ltinyxml2 #-fopenmp #-ltensorflow
+CXXFLAGS = #-Wall #-pg  #-O3 #-D__PURE_INTEL_C99_HEADERS__  # -std=c++11
+LFLAGS = -lopennn -ltinyxml2 #-pg #-fopenmp #-ltensorflow
 
-OBJS = main.o acsf.o atoms.o symmfunc.o cutofffunc.o nnp.o neuralnetwork.o symmfuncscaler.o log.o
+OBJS = main.o descriptor.o structure.o symmetry_function.o cutoff_function.o neural_network_potential.o neural_network.o symmetry_function_scaler.o log.o
 
 all: $(OBJS)
 	$(CXX) $(OBJS) -o nnp.x $(LFLAGS)
@@ -11,28 +11,28 @@ all: $(OBJS)
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-acsf.o: acsf.cpp acsf.h
-	$(CXX) $(CXXFLAGS) -c acsf.cpp
+descriptor.o: descriptor.cpp descriptor.h
+	$(CXX) $(CXXFLAGS) -c descriptor.cpp
 
-atoms.o: atoms.cpp atoms.h
-	$(CXX) $(CXXFLAGS) -c atoms.cpp
+structure.o: structure.cpp structure.h
+	$(CXX) $(CXXFLAGS) -c structure.cpp
 
-symmfunc.o: symmfunc.cpp symmfunc.h
-	$(CXX) $(CXXFLAGS) -c symmfunc.cpp
+symmetry_function.o: symmetry_function.cpp symmetry_function.h
+	$(CXX) $(CXXFLAGS) -c symmetry_function.cpp
 
-cutofffunc.o: cutofffunc.cpp cutofffunc.h
-	$(CXX) $(CXXFLAGS) -c cutofffunc.cpp
+cutoff_function.o: cutoff_function.cpp cutoff_function.h
+	$(CXX) $(CXXFLAGS) -c cutoff_function.cpp
 
-nnp.o: nnp.cpp nnp.h
-	$(CXX) $(CXXFLAGS) -c nnp.cpp
+neural_network_potential.o: neural_network_potential.cpp neural_network_potential.h
+	$(CXX) $(CXXFLAGS) -c neural_network_potential.cpp
 
-neuralnetwork.o: neuralnetwork.cpp neuralnetwork.h
-	$(CXX) $(CXXFLAGS) -c neuralnetwork.cpp
+neural_network.o: neural_network.cpp neural_network.h
+	$(CXX) $(CXXFLAGS) -c neural_network.cpp
 
-symmfuncscaler.o: symmfuncscaler.cpp symmfuncscaler.h
-	$(CXX) $(CXXFLAGS) -c symmfuncscaler.cpp
+symmetry_function_scaler.o: symmetry_function_scaler.cpp symmetry_function_scaler.h
+	$(CXX) $(CXXFLAGS) -c symmetry_function_scaler.cpp
 
-logger.o: log.cpp log.h
+log.o: log.cpp log.h
 	$(CXX) $(CXXFLAGS) -c log.cpp
 
 clean:

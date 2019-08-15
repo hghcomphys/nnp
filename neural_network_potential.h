@@ -6,10 +6,9 @@
 #define NNP_NEURALNETWORKPOTENTIAL_H
 
 #include <vector>
-#include "acsf.h"
-#include "symmfuncscaler.h"
-#include "neuralnetwork.h"
-
+#include "descriptor.h"
+#include "symmetry_function_scaler.h"
+#include "neural_network.h"
 
 class NeuralNetworkPotential {
 public:
@@ -23,9 +22,9 @@ public:
     int getNumberOfElements() const;
     const std::vector<std::string>& getElements() const;
     const std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
-    double calculateEnergy(Atoms& configuration, int AtomIndex);
-    double caculateTotalEnergy(Atoms& configuration);
-    std::vector<double> calculateForce(Atoms& configuration, int atomIndex);
+    double calculateEnergy(AtomicStructure& structure, int AtomIndex);
+    double caculateTotalEnergy(AtomicStructure& structure);
+    std::vector<double> calculateForce(AtomicStructure& structure, int atomIndex);
 
 private:
     std::vector<std::string> elements;

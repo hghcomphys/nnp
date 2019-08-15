@@ -2,17 +2,15 @@
 // Symmetric Funciton Scaler
 //
 
+#include "symmetry_function_scaler.h"
+#include "log.h"
 #include <cmath>
-#include "symmfuncscaler.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 
-#include <iostream>
-
-
 /* ----------------------------------------------------------------------
-   setup for scaler
+   setup for scaler 
 ------------------------------------------------------------------------- */
 Scaler::Scaler(double min, double max, double mean, double sigma):
             min(min), max(max), mean(mean), sigma(sigma),
@@ -36,9 +34,8 @@ double Scaler::scale(double value) const {
     return smin +  scalingFactor * (value - mean) ; 
 }
 
-
 /* ----------------------------------------------------------------------
-   setup for fymmetry function scaler
+   setup for symmetry function scaler
 ------------------------------------------------------------------------- */
 SymmeryFunctionsScaler::SymmeryFunctionsScaler(): numberOfWarnings(0), maxNumberOfWarnings(100) {}
 
@@ -59,10 +56,10 @@ void SymmeryFunctionsScaler::readScaling(const std::string& filename, int elemen
     std::string line;
     std::ifstream inFile(filename);
     if (!inFile)
-        throw std::runtime_error("Unable to open file " + filename);
+        throw std::runtime_error( (Log(ERROR) << "Unable to open file " + filename).toString() );
 
-    while ( std::getline(inFile, line) ) {
-
+    while ( std::getline(inFile, line) ) 
+    {
         if( line[0] == '#' ) continue;  // skip comments
 
         std::stringstream ss(line);
@@ -70,7 +67,7 @@ void SymmeryFunctionsScaler::readScaling(const std::string& filename, int elemen
         int elemIndex, index;
 
         ss >> elemIndex >> index >> min >> max >> mean >> sigma;
-        // std::cout << << index << " " << min << " " << max << " " << mean << " " << sigma << "\n";
+        Log(DEBUG) << "SF-scaler (" << index << "): " << min << " " << max << " " << mean << " " << sigma;
 
         if (elementIndex == elemIndex)
             addScaler( Scaler(min, max, mean, sigma) );
@@ -78,26 +75,34 @@ void SymmeryFunctionsScaler::readScaling(const std::string& filename, int elemen
     inFile.close(); 
 }
 
-
 std::vector<double> SymmeryFunctionsScaler::scale(const std::vector<double>& values) 
 {
-    if (values.size() != getNumberOfScalers()) {
-        std::cout << values.size() << " " << getNumberOfScalers() << "\n";
-        throw std::runtime_error("Inconsistent number of symmetry functions and scalers");
-    }
+    const int numberOfScalers = getNumberOfScalers();
+    const int valuesSize = values.size();
+    if (valuesSize != numberOfScalers) 
+        throw std::runtime_error(
+            (Log(ERROR) << "Inconsistent number of symmetry functions (" << valuesSize
+            << ") and scalers (" << numberOfScalers << ")").toString()
+            );
 
-    std::vector<double> scaledValues( getNumberOfScalers() );
-    for(int i=0; i<getNumberOfScalers(); i++) {
+    std::vector<double> scaledValues( numberOfScalers );
+    for(int i=0; i<numberOfScalers; i++) {
 
         const Scaler& sc = listOfScalers[i];
         const double value = values[i];
 
-        if ( value > sc.getMax() || value < sc.getMin() ) {
+        if ( value > sc.getMax() || value < sc.getMin() ) 
+        {
+            // increase number of warrning
             numberOfWarnings++;
-            // std::cout << "Atom:" <<  atom_i.getIndex() << ":" << i+1 << ": " << (values[i] - sc.sfMin) / (sc.sfMax - sc.sfMin) << "\n";
-            
+            Log(WARN) << "Exceed symmetry function scaler (index=" << i+1 << ")";
+              
+            // raise error if it exceeds maximum number of warnings
             if (numberOfWarnings > maxNumberOfWarnings)
-                throw std::runtime_error("Exceeds maximum number of symmetry function scaler warnings");
+                throw std::runtime_error(
+                    (Log(ERROR) << "Exceed maximum number of symmetry function scaler warnings ("
+                    << maxNumberOfWarnings << ")").toString()
+                    );
         }
         scaledValues[i] = sc.scale(value);
     }  

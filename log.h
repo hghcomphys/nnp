@@ -31,7 +31,7 @@ private:
     void setLable();
     bool isBlank();
     // TODO: set outside the class
-    LOG_t verbosity = DEBUG;
+    LOG_t verbosity = INFO;
     bool isHeader = true;
 };
 

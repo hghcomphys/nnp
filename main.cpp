@@ -1,10 +1,9 @@
 #include <iostream>
 #include <sstream>
-#include "acsf.h"
-#include "atoms.h"
-#include "nnp.h"
-
-#include "neuralnetwork.h"
+#include "descriptor.h"
+#include "structure.h"
+#include "neural_network_potential.h"
+#include "log.h"
 
 // #include <tensorflow/c/c_api.h>
 // #include "opennn.h"
@@ -19,11 +18,11 @@ int main()
         // -----------------------------------------------
         // make atomic structure and read data from a file
         // -----------------------------------------------
-        Atoms configuration;
-        configuration.readFileFormatRuNNer();
+        AtomicStructure structure;
+        structure.readFileFormatRuNNer();
 
-        cout << "Number of atoms: " << configuration.getNumberOfAtoms() << endl;
-        cout << "Is PBC: " << configuration.isPBC() << endl;
+        // cout << "Number of atoms: " << structure.getNumberOfAtoms() << endl;
+        // cout << "Is PBC: " << structure.isPBC() << endl;
 
         // Note: xyz and cell are in Angstrom but internal unit is in Bohr!
         // configuration.readFileFormatXYZ("water12.xyz");
@@ -87,23 +86,23 @@ int main()
         NeuralNetworkPotential nnp;
         nnp.readSetupFiles();
 
-        cout << "Number of elements: " << nnp.getNumberOfElements() << endl;
-        for (auto& element: nnp.getElements()) 
-        {
-            cout << "Element: " << element << endl;
-            cout << "Two-body SF: " << nnp.getDescriptorForElement(element).getNumberOfTwoBodySF() << endl;
-            cout << "Three-body SF: " << nnp.getDescriptorForElement(element).getNumberOfThreeBodySF() << endl;
-            cout << "Total SF: " << nnp.getDescriptorForElement(element).getTotalNumberOfSF() << endl;
-            cout << "NN number of inputs: "  << nnp.getNeuralNetworkForElement(element)->getNumberOfInputs() << endl;
-            cout << "NN number of hidden layers: "  << nnp.getNeuralNetworkForElement(element)->getNumberOfHiddenLayers() << endl;
-            // cout << "NN (main): " << nnp.getNeuralNetworkForElement(element)->getPerceptron() << "\n";
-        }
+        // cout << "Number of elements: " << nnp.getNumberOfElements() << endl;
+        // for (auto& element: nnp.getElements()) 
+        // {
+        //     cout << "Element: " << element << endl;
+        //     cout << "Two-body SF: " << nnp.getDescriptorForElement(element).getNumberOfTwoBodySF() << endl;
+        //     cout << "Three-body SF: " << nnp.getDescriptorForElement(element).getNumberOfThreeBodySF() << endl;
+        //     cout << "Total SF: " << nnp.getDescriptorForElement(element).getTotalNumberOfSF() << endl;
+        //     cout << "NN number of inputs: "  << nnp.getNeuralNetworkForElement(element)->getNumberOfInputs() << endl;
+        //     cout << "NN number of hidden layers: "  << nnp.getNeuralNetworkForElement(element)->getNumberOfHiddenLayers() << endl;
+        //     // cout << "NN (main): " << nnp.getNeuralNetworkForElement(element)->getPerceptron() << "\n";
+        // }
 
-        for (int index=140; index<155; index++) 
+        for (int index=140; index<140; index++) 
         {
-            Atom atom = configuration.getListOfAtoms()[index];
-            double energy = nnp.calculateEnergy(configuration, atom.getIndex());
-            std::vector<double> force = nnp.calculateForce(configuration, atom.getIndex());
+            Atom atom = structure.getListOfAtoms()[index];
+            double energy = nnp.calculateEnergy(structure, atom.getIndex());
+            std::vector<double> force = nnp.calculateForce(structure, atom.getIndex());
             
             // symmetry functions
             // cout << "SF--> ";
@@ -116,7 +115,7 @@ int main()
                 << " Force: " << force[0] << " (" << atom.getFx() << "), " << force[1] << " (" << atom.getFy() << "), " << force[2] << " (" << atom.getFz() << ")"
                 << endl;
         }    
-        cout << "Total energy: " << nnp.caculateTotalEnergy(configuration) << endl;
+        cout << "Total energy: " << nnp.caculateTotalEnergy(structure) << endl;
         
 
         // for (auto& element: nnp.getElements()) 
