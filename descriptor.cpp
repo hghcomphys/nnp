@@ -84,7 +84,8 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     // Loop over all two-body symmetry functions
     for (int n=0; n<n_2b; n++) 
     {
-        for(int j: structure.getListOfIndexForElement(listOfTwoBodyNeighborElement[n])) {
+        const std::vector<int>& listOfIndexForElement = structure.getListOfIndexForElement(listOfTwoBodyNeighborElement[n]);
+        for(int j: listOfIndexForElement) {
                 Atom& atom_j = atoms[j];
                 if (atom_j.getIndex() == atom_i.getIndex()) continue;
                 const double rij = structure.distance(atom_i, atom_j);
@@ -95,8 +96,11 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     // Loop over all tree-body symmetry functions
     for (int n=0; n<n_3b; n++) 
     {
+        const std::vector<int>& listOfIndexForElement1 = structure.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n]);
+        const std::vector<int>& listOfIndexForElement2 = structure.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n]);
+
         // first neighbors
-        for(int j: structure.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n])) {
+        for(int j: listOfIndexForElement1) {
                 
             Atom& atom_j = atoms[j];
             if (atom_j.getIndex() == atom_i.getIndex()) continue;  
@@ -105,7 +109,7 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
             const double rij = structure.distance(atom_i, atom_j, drij);
 
             // second neighbors
-            for(int k: structure.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n])) {
+            for(int k: listOfIndexForElement2) {
                 
                 Atom& atom_k = atoms[k];
                 if (atom_k.getIndex() == atom_i.getIndex()) continue;
