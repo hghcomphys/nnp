@@ -87,7 +87,7 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
         const std::vector<int>& listOfIndexForElement = structure.getListOfIndexForElement(listOfTwoBodyNeighborElement[n]);
         for(int j: listOfIndexForElement) {
                 Atom& atom_j = atoms[j];
-                if (atom_j.getIndex() == atom_i.getIndex()) continue;
+                if (atom_j.index == atom_i.index) continue;
                 const double rij = structure.distance(atom_i, atom_j);
                 values[n] += listOfTwoBodySF[n]->function(rij);
             } 
@@ -103,7 +103,7 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
         for(int j: listOfIndexForElement1) {
                 
             Atom& atom_j = atoms[j];
-            if (atom_j.getIndex() == atom_i.getIndex()) continue;  
+            if (atom_j.index == atom_i.index) continue;  
 
             double drij[3];
             const double rij = structure.distance(atom_i, atom_j, drij);
@@ -112,8 +112,8 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
             for(int k: listOfIndexForElement2) {
                 
                 Atom& atom_k = atoms[k];
-                if (atom_k.getIndex() == atom_i.getIndex()) continue;
-                if (atom_k.getIndex() <= atom_j.getIndex()) continue;
+                if (atom_k.index == atom_i.index) continue;
+                if (atom_k.index <= atom_j.index) continue;
 
                 double drik[3];
                 const double rik = structure.distance(atom_i, atom_k, drik);
@@ -223,7 +223,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
             for(int j: listOfAtomIndexForElement1) {
                     
                 Atom& atom_j = atoms[j];
-                if (atom_j.getIndex() == atom_i.getIndex()) continue;  
+                if (atom_j.index == atom_i.index) continue;  
 
                 double drij[3];
                 const double rij = structure.distance(atom_i, atom_j, drij);
@@ -232,8 +232,8 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 for(int k: listOfAtomIndexForElement2) {
                     
                     Atom& atom_k = atoms[k];
-                    if (atom_k.getIndex() == atom_i.getIndex()) continue;
-                    if (atom_k.getIndex() <= atom_j.getIndex()) continue;
+                    if (atom_k.index == atom_i.index) continue;
+                    if (atom_k.index <= atom_j.index) continue;
 
                     double drik[3], drjk[3];
                     const double rik = structure.distance(atom_i, atom_k, drik);
@@ -253,7 +253,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
             if ( isInList(listOfAtomIndexForElement1, atomIndex_ip) ) {
 
                 Atom& atom_j = atoms[atomIndex_ip];
-                if (atom_j.getIndex() == atom_i.getIndex()) continue;  
+                if (atom_j.index == atom_i.index) continue;  
 
                 double drij[3];
                 const double rij = structure.distance(atom_i, atom_j, drij);
@@ -262,8 +262,8 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 for(int k: listOfAtomIndexForElement2) {
                     
                     Atom& atom_k = atoms[k];
-                    if (atom_k.getIndex() == atom_i.getIndex()) continue;
-                    if (atom_k.getIndex() <= atom_j.getIndex()) continue;
+                    if (atom_k.index == atom_i.index) continue;
+                    if (atom_k.index <= atom_j.index) continue;
                     
                     double drik[3], drjk[3];
                     const double rik = structure.distance(atom_i, atom_k, drik);
@@ -283,14 +283,14 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 for(int j: listOfAtomIndexForElement1) {
                 
                     Atom& atom_j = atoms[j];
-                    if (atom_j.getIndex() == atom_i.getIndex()) continue;  
+                    if (atom_j.index == atom_i.index) continue;  
 
                     double drij[3];
                     const double rij = structure.distance(atom_i, atom_j, drij);
   
                     Atom& atom_k = atoms[atomIndex_ip];
-                    if (atom_k.getIndex() == atom_i.getIndex()) continue;
-                    if (atom_k.getIndex() <= atom_j.getIndex()) continue;
+                    if (atom_k.index == atom_i.index) continue;
+                    if (atom_k.index <= atom_j.index) continue;
 
                     double drik[3], drjk[3];
                     const double rik = structure.distance(atom_i, atom_k, drik);

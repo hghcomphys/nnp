@@ -163,7 +163,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
         std::ifstream inFileSF(filenameSF);
         if (!inFileSF)
             throw std::runtime_error( (Log(ERROR) << "Unable to open file " + filenameSF).toString() );
-        Log(INFO) << "Read " << filenameSF << "for element " + element;
+        Log(INFO) << "Read " << filenameSF << " (" + element + ")";
 
         while ( std::getline(inFileSF, line) ) {
 
@@ -241,7 +241,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
         const std::string filename = "scaling.data";
         const std::string element = elements[index];
         getScalerForElement(element).readScaling(directory + filename , index+1);
-        Log(INFO) << "Read " + filename + " for element " + element;
+        Log(INFO) << "Read " + filename + " (" + element + ")";
     }
    
     // create neural network for each element
@@ -303,16 +303,16 @@ NeuralNetwork* NeuralNetworkPotential::getNeuralNetworkForElement(const std::str
 double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, int atomIndex) 
 {
     Atom& atom = structure.getListOfAtoms()[atomIndex];
-    std::vector<double> descriptorValues = getDescriptorForElement(atom.getElement()).calculate(structure, atomIndex);
-    std::vector<double> scaledDescriptorValues = getScalerForElement(atom.getElement()).scale(descriptorValues);
-    return getNeuralNetworkForElement(atom.getElement())->calculateEnergy(scaledDescriptorValues);
+    std::vector<double> descriptorValues = getDescriptorForElement(atom.element).calculate(structure, atomIndex);
+    std::vector<double> scaledDescriptorValues = getScalerForElement(atom.element).scale(descriptorValues);
+    return getNeuralNetworkForElement(atom.element)->calculateEnergy(scaledDescriptorValues);
 }
 
 double NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure) 
 {
     double totalEnergy = 0.0;
     for(auto atom: structure.getListOfAtoms())
-        totalEnergy += calculateEnergy(structure, atom.getIndex());
+        totalEnergy += calculateEnergy(structure, atom.index);
     return totalEnergy;
 }
 
@@ -329,13 +329,13 @@ std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& stru
         if (rij > 12.0) continue; // TODO: fix it!
 
         // gradient of neural network respect to symmetry functions
-        const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.getElement()).calculate(structure, atom_j.getIndex());
-        const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j.getElement()).scale(descriptorValues);
-        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j.getElement())->calculateJacobian(scaledDescriptorValues);
-        const std::vector<double>& scalingFactors = getScalerForElement(atom_j.getElement()).getScalingFactors();          
+        const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.element).calculate(structure, atom_j.index);
+        const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j.element).scale(descriptorValues);
+        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j.element)->calculateJacobian(scaledDescriptorValues);
+        const std::vector<double>& scalingFactors = getScalerForElement(atom_j.element).getScalingFactors();          
 
         // gradient of symmetry functions respect to atomic positions
-        const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j.getElement()).gradient(structure, atom_j.getIndex(), atom_i.getIndex());
+        const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j.element).gradient(structure, atom_j.index, atom_i.index);
        
         // sum over symmetry functions
         for (int n=0; n<descriptorValues.size(); n++ ) 
