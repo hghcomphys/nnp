@@ -20,15 +20,15 @@ Atom::Atom(double x, double y, double z, std::string element, int index):
 Atom::Atom(double x, double y, double z, std::string element, int index, double fx, double fy, double fz):
     x(x), y(y), z(z), element(element), index(index), fx(fx), fy(fy), fz(fz) {}
 
-double Atom::getX() { return x; }
+// inline double Atom::getX() { return x; }
 
-double Atom::getY() { return y; }
+// inline double Atom::getY() { return y; }
 
-double Atom::getZ() { return z; }
+// inline double Atom::getZ() { return z; }
 
-double Atom::getIndex() { return index; }
+// inline double Atom::getIndex() { return index; }
 
-std::string Atom::getElement() { return element; }
+// inline std::string Atom::getElement() { return element; }
 
 int Atom::getAtomicNumber(const std::string& element) 
 {
@@ -41,9 +41,9 @@ int Atom::getAtomicNumber(const std::string& element)
         return 8;
 }
 
-double Atom::getFx() const { return fx; }
-double Atom::getFy() const { return fy; }
-double Atom::getFz() const { return fz; }
+// double Atom::getFx() const { return fx; }
+// double Atom::getFy() const { return fy; }
+// double Atom::getFz() const { return fz; }
 
 /* ----------------------------------------------------------------------
    setup for Atoms
@@ -132,18 +132,18 @@ void AtomicStructure::applyPBC(double &dx, double &dy, double &dz)
 
 double AtomicStructure::distance(Atom &atom_i, Atom &atom_j)
 {
-    double xij = atom_i.getX() - atom_j.getX();
-    double yij = atom_i.getY() - atom_j.getY();
-    double zij = atom_i.getZ() - atom_j.getZ();
+    double xij = atom_i.x - atom_j.x;
+    double yij = atom_i.y - atom_j.y;
+    double zij = atom_i.z - atom_j.z;
     applyPBC(xij, yij, zij);
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
 double AtomicStructure::distance(Atom &atom_i, Atom &atom_j, double drij[3])
 {
-    double xij = atom_i.getX() - atom_j.getX();
-    double yij = atom_i.getY() - atom_j.getY();
-    double zij = atom_i.getZ() - atom_j.getZ();
+    double xij = atom_i.x - atom_j.x;
+    double yij = atom_i.y - atom_j.y;
+    double zij = atom_i.z - atom_j.z;;
     applyPBC(xij, yij, zij);
     drij[0] = xij; drij[1] = yij; drij[2] = zij; 
     return  sqrt( xij*xij + yij*yij + zij*zij );
@@ -153,8 +153,8 @@ std::vector<int> AtomicStructure::getListOfIndexForElement(const std::string &el
 {
     std::vector<int> listOfindexForElement;
     for (Atom &atom: listOfAtoms) {
-        if( atom.getElement() == element )
-            listOfindexForElement.push_back( atom.getIndex() );
+        if( atom.element == element )
+            listOfindexForElement.push_back( atom.index );
     }
 
     if ( listOfindexForElement.size() == 0 )
