@@ -5,6 +5,7 @@
 #ifndef NNP_CUTOFFFUNCTION_H
 #define NNP_CUTOFFFUNCTION_H
 
+#include <cmath>
 
 class CutoffFunction {
 public:
@@ -17,6 +18,5 @@ private:
     double rc;
     double inv_rc;
 };
-
 
 #endif //NNP_CUTOFFFUNCTION_H

@@ -2,7 +2,6 @@
 // Cutoff Function
 //
 
-#include <cmath>
 #include "cutoff_function.h"
 
 /* ----------------------------------------------------------------------
@@ -16,6 +15,7 @@ void CutoffFunction::setCutoffRadius(double cutoffRadius) {
 }
 
 // TODO: other types of cutoff function
+// TODO: using inline can reduce computational time
 double CutoffFunction::fc(double r) 
 {
     if ( r > rc ) return 0;
@@ -29,6 +29,7 @@ double CutoffFunction::fc(double r)
 }
 
 // TODO: other types of cutoff function
+// TODO: using inline can reduce computational time
 double CutoffFunction::dfc(double r) 
 {
     if ( r > rc ) return 0;
