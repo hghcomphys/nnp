@@ -13,16 +13,7 @@ public:
     Atom(double x, double y, double z, std::string element, int index);
     Atom(double x, double y, double z, std::string element, int index, double fx, double fy, double fz);
     static int getAtomicNumber(const std::string& element);
-    // double getX();
-    // double getY();
-    // double getZ();
-    // double getIndex();
-    // std::string getElement(); 
-    // double getFx() const;
-    // double getFy() const;
-    // double getFz() const; 
-
-public:
+public: /*used to be private*/
     int index;
     double x, y, z;
     double fx, fy, fz;

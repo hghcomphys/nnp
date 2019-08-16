@@ -12,40 +12,6 @@
 const double ANGSTROM_TO_BOHR = 1.88973;
 
 /* ----------------------------------------------------------------------
-   setup for Atom
-------------------------------------------------------------------------- */
-Atom::Atom(double x, double y, double z, std::string element, int index): 
-    x(x), y(y), z(z), element(element), index(index), fx(0.0), fy(0.0), fz(0.0) {}
-
-Atom::Atom(double x, double y, double z, std::string element, int index, double fx, double fy, double fz):
-    x(x), y(y), z(z), element(element), index(index), fx(fx), fy(fy), fz(fz) {}
-
-// inline double Atom::getX() { return x; }
-
-// inline double Atom::getY() { return y; }
-
-// inline double Atom::getZ() { return z; }
-
-// inline double Atom::getIndex() { return index; }
-
-// inline std::string Atom::getElement() { return element; }
-
-int Atom::getAtomicNumber(const std::string& element) 
-{
-    // TODO: extend to all elements
-    if(element == "H")
-        return 1;
-    else if (element == "C")
-        return 6; 
-    else if (element == "O")
-        return 8;
-}
-
-// double Atom::getFx() const { return fx; }
-// double Atom::getFy() const { return fy; }
-// double Atom::getFz() const { return fz; }
-
-/* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
 AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), atomIndex(0) {}
