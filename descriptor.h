@@ -26,7 +26,8 @@ public:
     std::vector<std::vector<double>> calculate(AtomicStructure &structure);
     std::vector<double> calculate(AtomicStructure &structure, int atomIndex);
     std::vector<std::vector<double>> gradient(AtomicStructure &structure, int atomIndex_i, int atomIndex_j);
-    
+    double getGlobalCutOffRadius() const;
+
 private:
     std::string centralElement;
     std::vector<TwoBodySymmetryFunction *> listOfTwoBodySF; /* factory method */
