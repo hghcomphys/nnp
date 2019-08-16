@@ -6,6 +6,8 @@
 #include "descriptor.h"
 #include <iostream>
 
+#include "log.h"
+
 /* ----------------------------------------------------------------------
    setup for ACSF
 ------------------------------------------------------------------------- */
@@ -58,10 +60,10 @@ ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index) const {
 std::vector<std::vector<double>> ACSF::calculate(AtomicStructure &structure)
 {
     std::vector<std::vector<double>> values;
-    const auto listOfIndexForCentralElement = structure.getListOfIndexForElement(centralElement);
+    const auto& listOfIndexForCentralElement = structure.getListOfAtomIndexForElement(centralElement);
     
     // loop over all atoms
-    for(auto atomIndex: listOfIndexForCentralElement)
+    for(int atomIndex: listOfIndexForCentralElement)
         values.push_back( calculate(structure, atomIndex) );
 
     return values;
@@ -76,33 +78,34 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     std::vector<double> values(n_2b + n_3b);
     std::fill(values.begin(), values.end(), 0.0); // initialize to zero
 
-    auto atoms = structure.getListOfAtoms();
+    // list of index of atom
+    const auto& listOfAtomIndex = structure.getListOfAtomIndex();
 
     // central element
-    Atom& atom_i = atoms[atomIndex];
+    Atom& atom_i = structure.getAtom(atomIndex);
 
     // Loop over all two-body symmetry functions
     for (int n=0; n<n_2b; n++) 
     {
-        const std::vector<int>& listOfIndexForElement = structure.getListOfIndexForElement(listOfTwoBodyNeighborElement[n]);
-        for(int j: listOfIndexForElement) {
-                Atom& atom_j = atoms[j];
+        const auto& listOfAtomIndexForElement = structure.getListOfAtomIndexForElement(listOfTwoBodyNeighborElement[n]);
+        for(auto j: listOfAtomIndexForElement) {
+                Atom& atom_j = structure.getAtom(j);
                 if (atom_j.index == atom_i.index) continue;
                 const double rij = structure.distance(atom_i, atom_j);
                 values[n] += listOfTwoBodySF[n]->function(rij);
             } 
     }
-
+    
     // Loop over all tree-body symmetry functions
     for (int n=0; n<n_3b; n++) 
     {
-        const std::vector<int>& listOfIndexForElement1 = structure.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n]);
-        const std::vector<int>& listOfIndexForElement2 = structure.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n]);
+        const auto& listOfIndexForElement1 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement1[n]);
+        const auto& listOfIndexForElement2 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement2[n]);
 
         // first neighbors
         for(int j: listOfIndexForElement1) {
                 
-            Atom& atom_j = atoms[j];
+            Atom& atom_j = structure.getAtom(j);
             if (atom_j.index == atom_i.index) continue;  
 
             double drij[3];
@@ -111,7 +114,7 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
             // second neighbors
             for(int k: listOfIndexForElement2) {
                 
-                Atom& atom_k = atoms[k];
+                Atom& atom_k = structure.getAtom(k);
                 if (atom_k.index == atom_i.index) continue;
                 if (atom_k.index <= atom_j.index) continue;
 
@@ -165,17 +168,17 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     for (auto& value: values)
         std::fill(value.begin(), value.end(), 0.0); // initialize to zero
 
-    // list of atoms in structural configuration
-    auto atoms = structure.getListOfAtoms();
+    // list of index of atom
+    const auto& listOfAtomIndex = structure.getListOfAtomIndex();
 
     // atoms with index i & j
-    Atom& atom_i = atoms[atomIndex_i];
+    Atom& atom_i = structure.getAtom(atomIndex_i);
 
     // Loop over all two-body symmetry functions
     for (int n=0; n<n_2b; n++) 
     { 
         // list of atom index for a specific element
-        const std::vector<int>& listOfAtomIndexForElement = structure.getListOfIndexForElement(listOfTwoBodyNeighborElement[n]);
+        const auto& listOfAtomIndexForElement = structure.getListOfAtomIndexForElement(listOfTwoBodyNeighborElement[n]);
         
         // check whether gradient is respect to atom itself or neighbor atom
         if ( atomIndex_ip == atomIndex_i )
@@ -183,7 +186,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
             for (int j: listOfAtomIndexForElement) {
 
                 if ( j == atomIndex_i ) continue;  
-                Atom& atom_j = atoms[j];
+                Atom& atom_j = structure.getAtom(j);
                 
                 double drij[3];
                 const double rij = structure.distance(atom_i, atom_j, drij);
@@ -197,7 +200,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
         {
             if ( isInList(listOfAtomIndexForElement, atomIndex_ip) ) {
                 
-                Atom& atom_j = atoms[atomIndex_ip];
+                Atom& atom_j = structure.getAtom(atomIndex_ip);
                 
                 double drij[3];
                 const double rij = structure.distance(atom_i, atom_j, drij);
@@ -213,8 +216,8 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     for (int n=0; n<n_3b; n++) 
     {
         // list of atom index for specific elements
-        const std::vector<int>& listOfAtomIndexForElement1 = structure.getListOfIndexForElement(listOfThreeBodyNeighborElement1[n]);
-        const std::vector<int>& listOfAtomIndexForElement2 = structure.getListOfIndexForElement(listOfThreeBodyNeighborElement2[n]);
+        const auto& listOfAtomIndexForElement1 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement1[n]);
+        const auto& listOfAtomIndexForElement2 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement2[n]);
 
         // check whether the gradient is respect to atom itself or other atoms
         if ( atomIndex_ip == atomIndex_i )
@@ -222,7 +225,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
             // first neighbors
             for(int j: listOfAtomIndexForElement1) {
                     
-                Atom& atom_j = atoms[j];
+                Atom& atom_j = structure.getAtom(j);
                 if (atom_j.index == atom_i.index) continue;  
 
                 double drij[3];
@@ -231,7 +234,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 // second neighbors
                 for(int k: listOfAtomIndexForElement2) {
                     
-                    Atom& atom_k = atoms[k];
+                    Atom& atom_k = structure.getAtom(k);
                     if (atom_k.index == atom_i.index) continue;
                     if (atom_k.index <= atom_j.index) continue;
 
@@ -252,7 +255,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
         {
             if ( isInList(listOfAtomIndexForElement1, atomIndex_ip) ) {
 
-                Atom& atom_j = atoms[atomIndex_ip];
+                Atom& atom_j = structure.getAtom(atomIndex_ip);
                 if (atom_j.index == atom_i.index) continue;  
 
                 double drij[3];
@@ -261,7 +264,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 // second neighbors
                 for(int k: listOfAtomIndexForElement2) {
                     
-                    Atom& atom_k = atoms[k];
+                    Atom& atom_k = structure.getAtom(k);
                     if (atom_k.index == atom_i.index) continue;
                     if (atom_k.index <= atom_j.index) continue;
                     
@@ -282,13 +285,13 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
 
                 for(int j: listOfAtomIndexForElement1) {
                 
-                    Atom& atom_j = atoms[j];
+                    Atom& atom_j = structure.getAtom(j);
                     if (atom_j.index == atom_i.index) continue;  
 
                     double drij[3];
                     const double rij = structure.distance(atom_i, atom_j, drij);
   
-                    Atom& atom_k = atoms[atomIndex_ip];
+                    Atom& atom_k = structure.getAtom(atomIndex_ip);
                     if (atom_k.index == atom_i.index) continue;
                     if (atom_k.index <= atom_j.index) continue;
 

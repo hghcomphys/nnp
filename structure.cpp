@@ -16,18 +16,22 @@ const double ANGSTROM_TO_BOHR = 1.88973;
 ------------------------------------------------------------------------- */
 AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), atomIndex(0) {}
 
-AtomicStructure::~AtomicStructure() { listOfAtoms.clear(); }
+AtomicStructure::~AtomicStructure() { 
+    for (auto atom: listOfAtoms)
+        delete atom;
+    listOfAtoms.clear(); 
+}
 
-void AtomicStructure::addAtom(const Atom& atom) {
+void AtomicStructure::addAtom(Atom* atom) {
     listOfAtoms.push_back( atom );
     atomIndex++;
 }
 
-std::vector<Atom>& AtomicStructure::getListOfAtoms() { return listOfAtoms; }
+// std::vector<Atom*> AtomicStructure::getListOfAtoms() { return listOfAtoms; }
 
 int AtomicStructure::getNumberOfAtoms() { return listOfAtoms.size(); }
 
-int AtomicStructure::getNumberOfAtomsForElement(const std::string& element) { return getListOfIndexForElement(element).size(); }
+int AtomicStructure::getNumberOfAtomsForElement(const std::string& element) { return getListOfAtomIndexForElement(element).size(); }
 
 std::stringstream readLineToStringStream(std::ifstream& inFile) {
     std::string line;
@@ -53,7 +57,7 @@ void AtomicStructure::readFileFormatXYZ(const std::string& filename)
         double x, y, z;
         std::string element;
         readLineToStringStream(inFile) >> element >> x >> y >> z;
-        addAtom( Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, atomIndex) );
+        addAtom( new Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, atomIndex) );
     }
     inFile.close();
 
@@ -64,7 +68,7 @@ void AtomicStructure::readFileFormatXYZ(const std::string& filename)
     Log(INFO) << "Read " + filename << " (" << getNumberOfAtoms() << " atoms)";
 }
 
-void AtomicStructure::setCell(double cell[])
+void AtomicStructure::setCell(double cell[9])
 {
     for(int d=0; d<9; d++)
         this->cell[d] = cell[d]*ANGSTROM_TO_BOHR;
@@ -115,23 +119,32 @@ double AtomicStructure::distance(Atom &atom_i, Atom &atom_j, double drij[3])
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
-std::vector<int> AtomicStructure::getListOfIndexForElement(const std::string &element)
+std::vector<int> AtomicStructure::getListOfAtomIndexForElement(const std::string &element)
 {
-    std::vector<int> listOfindexForElement;
-    for (Atom &atom: listOfAtoms) {
-        if( atom.element == element )
-            listOfindexForElement.push_back( atom.index );
+    std::vector<int> listOfAtomindexForElement;
+    for (auto it: listOfAtoms) {
+        if( it->element == element )
+            listOfAtomindexForElement.push_back( it->index );
     }
 
-    if ( listOfindexForElement.size() == 0 )
+    if ( listOfAtomindexForElement.size() == 0 )
         throw std::runtime_error( (Log(ERROR) << "Cannot find the element in list of atoms").toString());
 
-    return listOfindexForElement;
+    return listOfAtomindexForElement;
+}
+
+std::vector<int> AtomicStructure::getListOfAtomIndex()
+{
+    std::vector<int> listOfAtomIndex;
+    for (auto it: listOfAtoms)
+            listOfAtomIndex.push_back( it->index );
+
+    return listOfAtomIndex;
 }
 
 // const Atom& Atoms::operator [] (unsigned int i) const { return listOfAtoms[i]; }
 
-bool AtomicStructure::isPBC() { return isCell; } 
+bool AtomicStructure::isPBC() const { return isCell; } 
 
 void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
 {
@@ -159,7 +172,7 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
             std::string element;
             double ddummy, fx, fy, fz;
             ss >> x >> y >> z >> element >> ddummy >> ddummy >> fx >> fy >> fz;
-            addAtom( Atom(x, y, z, element, atomIndex, fx, fy, fz) );
+            addAtom( new Atom(x, y, z, element, atomIndex, fx, fy, fz) );
         }
         else if (keyword == "end")
             break; // read only the first frame

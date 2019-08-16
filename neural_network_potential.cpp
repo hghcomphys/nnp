@@ -18,6 +18,7 @@ NeuralNetworkPotential::NeuralNetworkPotential() {}
 NeuralNetworkPotential::~NeuralNetworkPotential() {
     for (auto each: neuralNetworks)
         delete each;    
+    neuralNetworks.clear();
 }
 
 void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
@@ -302,7 +303,7 @@ NeuralNetwork&  NeuralNetworkPotential::getNeuralNetworkForElement(const std::st
 
 double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, int atomIndex) 
 {
-    Atom& atom = structure.getListOfAtoms()[atomIndex];
+    Atom& atom = structure.getAtom(atomIndex);
     std::vector<double> descriptorValues = getDescriptorForElement(atom.element).calculate(structure, atomIndex);
     std::vector<double> scaledDescriptorValues = getScalerForElement(atom.element).scale(descriptorValues);
     return getNeuralNetworkForElement(atom.element).calculateEnergy(scaledDescriptorValues);
@@ -311,19 +312,27 @@ double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, int a
 double NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure) 
 {
     double totalEnergy = 0.0;
-    for(auto atom: structure.getListOfAtoms())
-        totalEnergy += calculateEnergy(structure, atom.index);
+    const auto listOfAtomIndex = structure.getListOfAtomIndex();
+    for(auto Atomindex: listOfAtomIndex)
+         totalEnergy += calculateEnergy(structure, Atomindex);
+   
     return totalEnergy;
 }
 
 std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& structure, int atomIndex) 
 {
-    Atom& atom_i = structure.getListOfAtoms()[atomIndex];
+    Atom& atom_i = structure.getAtom(atomIndex);
     std::vector<double> force({0, 0, 0});
 
+    // list of index of atoms
+    const auto& listofAtomIndex = structure.getListOfAtomIndex();
+
     // sum over all atoms
-    for (auto atom_j:structure.getListOfAtoms()) 
+    for (auto j: listofAtomIndex) 
     {       
+        // refer to atom
+        Atom& atom_j = structure.getAtom(j);
+
         // TODO: improve 
         const double rij = structure.distance(atom_i, atom_j);
         if (rij > 12.0) continue; // TODO: fix it!

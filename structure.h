@@ -5,47 +5,36 @@
 #ifndef NNP_STRUCTURE_H
 #define NNP_STRUCTURE_H
 
-#include <string>
+#include "atom.h"
 #include <vector>
-
-class Atom {
-public:
-    Atom(double x, double y, double z, std::string element, int index);
-    Atom(double x, double y, double z, std::string element, int index, double fx, double fy, double fz);
-    static int getAtomicNumber(const std::string& element);
-public: /*used to be private*/
-    int index;
-    double x, y, z;
-    double fx, fy, fz;
-    std::string element;
-};
-
 
 class AtomicStructure {
 public:
     AtomicStructure();
     ~AtomicStructure();
-    void addAtom(const Atom& atom);
-    std::vector<Atom>& getListOfAtoms();
     int getNumberOfAtoms();
     int getNumberOfAtomsForElement(const std::string& element);
     void readFileFormatXYZ(const std::string& filename);
     void readFileFormatRuNNer(const std::string& filename);
     void readFileFormatRuNNer();
-    void setCell(double cell[]);
+    void setCell(double cell[9]);
+    bool isPBC() const;
     double distance(Atom &atom_i, Atom &atom_j, double drij[3]);
     double distance(Atom &atom_i, Atom &atom_j);
-    std::vector<int> getListOfIndexForElement(const std::string &element);
     // const Atom& operator[] (unsigned int i) const;
-    bool isPBC();
+    // std::vector<Atom*> getListOfAtoms();
+    std::vector<int> getListOfAtomIndexForElement(const std::string &element);
+    std::vector<int> getListOfAtomIndex();
+    inline Atom& getAtom(int index) { return *listOfAtoms[index]; }
 
 private:
     bool isAtom;
     bool isCell;
-    void applyPBC(double &dx, double &dy, double &dz);
     double cell[9];
-    std::vector<Atom> listOfAtoms;
     int atomIndex; //TODO: improve the method for indexing atoms
+    std::vector<Atom*> listOfAtoms;
+    void addAtom(Atom* atom);
+    void applyPBC(double &dx, double &dy, double &dz);
 };
 
 
