@@ -99,7 +99,7 @@ int main()
         //     // cout << "NN (main): " << nnp.getNeuralNetworkForElement(element)->getPerceptron() << "\n";
         // }
 
-        for (int index=140; index<140; index++) 
+        for (int index=140; index<145; index++) 
         {
             Atom& atom = structure.getAtom(index);
             double energy = nnp.calculateEnergy(structure, atom.index);

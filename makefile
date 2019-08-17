@@ -1,15 +1,18 @@
 
 CXX = g++
-CXXFLAGS = #-Wall #-pg  #-O3 #-D__PURE_INTEL_C99_HEADERS__  # -std=c++11
-LFLAGS = -lopennn -ltinyxml2 #-pg #-fopenmp #-ltensorflow
+CXXFLAGS = -Wall -pg  #-O3 #-D__PURE_INTEL_C99_HEADERS__  # -std=c++11
+LFLAGS = -lopennn -ltinyxml2 -pg #-fopenmp #-ltensorflow
 
-OBJS = main.o descriptor.o structure.o symmetry_function.o cutoff_function.o neural_network_potential.o neural_network.o symmetry_function_scaler.o log.o
+OBJS = main.o atom.o descriptor.o structure.o symmetry_function.o cutoff_function.o neural_network_potential.o neural_network.o symmetry_function_scaler.o log.o
 
 all: $(OBJS)
 	$(CXX) $(OBJS) -o nnp.x $(LFLAGS)
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
+
+atom.o: atom.cpp atom.h
+	$(CXX) $(CXXFLAGS) -c atom.cpp
 
 descriptor.o: descriptor.cpp descriptor.h
 	$(CXX) $(CXXFLAGS) -c descriptor.cpp

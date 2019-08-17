@@ -6,8 +6,6 @@
 #include "descriptor.h"
 #include <iostream>
 
-#include "log.h"
-
 /* ----------------------------------------------------------------------
    setup for ACSF
 ------------------------------------------------------------------------- */
@@ -75,133 +73,133 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     const int n_2b = getNumberOfTwoBodySF();
     const int n_3b = getNumberOfThreeBodySF();
 
+    // initialize values for array of symmetry functions
     std::vector<double> values(n_2b + n_3b);
     std::fill(values.begin(), values.end(), 0.0); // initialize to zero
 
     // get central atom i
-    const int i = atomIndex;
-    Atom& atom_i = structure.getAtom(i);
-
-    // list of index for all atoms
-    const auto& listOfAtomIndex = structure.getListOfAtomIndex();
+    Atom& atom_i = structure.getAtom(atomIndex);
 
     // global cutoff radius
     const double rcGlobal = getGlobalCutOffRadius();
-    // Log(INFO) << "Global cutoff radius: " << rcGlobal;
 
     // ===================================================================
 
-    // loop over fist neighbors
-    for(auto j: listOfAtomIndex) 
-    {
-        // get neighbor atom j
-        Atom& atom_j = structure.getAtom(j);
-        if ( atom_j.index == atom_i.index ) continue;
+    // // list of index for all atoms
+    // // const auto& listOfAtomIndex = structure.getListOfAtomIndex();
+    // const int nAtoms = structure.getNumberOfAtoms(); 
 
-        // get distance between atom i & j from table of distances
-        Distance& distance_ij = structure.tableOfDistances[i][j];
-        if ( distance_ij.dr > rcGlobal ) continue;
-
-        // Loop over all two-body symmetry functions
-        for (int n=0; n<n_2b; n++) 
-        {
-            if ( atom_j.element == listOfTwoBodyNeighborElement[n] )
-            {
-                values[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
-            }
-        }
-
-        // loop over second neighbors
-        for(auto k: listOfAtomIndex) 
-        {
-            Atom& atom_k = structure.getAtom(k);
-            if ( atom_k.index == atom_i.index ) continue;
-            if ( atom_k.index <= atom_j.index ) continue;
-
-            // get distance between atom i & k from table of distances
-            Distance& distance_ik = structure.tableOfDistances[i][k];
-            if ( distance_ik.dr > rcGlobal ) continue;
-
-            // get distance between atom j & k from table of distances
-            Distance& distance_jk = structure.tableOfDistances[j][k];
-            if ( distance_jk.dr > rcGlobal ) continue;
-
-            // Loop over all tree-body symmetry functions
-            for (int n=0; n<n_3b; n++) 
-            {
-                if ( atom_j.element == listOfThreeBodyNeighborElement1[n] && 
-                    atom_k.element == listOfThreeBodyNeighborElement2[n] )
-                {
-                    // cosine of angle between k--<i>--j atoms
-                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
-                    
-                    // add value of symmetry function
-                    values[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
-                } 
-            }
-        }
-    } 
-
-    // ===================================================================
-
-    // // Loop over all two-body symmetry functions
-    // for (int n=0; n<n_2b; n++) 
+    // // loop over fist neighbors
+    // for(int j=0; j<nAtoms; j++) 
     // {
-    //     const auto& listOfAtomIndexForElement = structure.getListOfAtomIndexForElement(listOfTwoBodyNeighborElement[n]);
-    //     for(auto j: listOfAtomIndexForElement) 
+    //     // get neighbor atom j
+    //     const Atom& atom_j = structure.getAtom(j);
+    //     if ( atom_j.index == atom_i.index ) continue;
+
+    //     // get distance between atom i & j from table of distances
+    //     const Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
+    //     if ( distance_ij.dr > rcGlobal ) continue;
+
+    //     // Loop over all two-body symmetry functions
+    //     for (int n=0; n<n_2b; n++) 
     //     {
-    //         Atom& atom_j = structure.getAtom(j);
-    //         if (atom_j.index == atom_i.index) continue;
-
-    //         // const double rij = structure.distance(atom_i, atom_j);
-    //         Distance& distance_ij = structure.tableOfDistances[atomIndex][j];
-    //         if ( distance_ij.dr > rcGlobal ) continue;
-
-    //         values[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
-    //     } 
-    // }
-    
-    // // loop over all tree-body symmetry functions
-    // for (int n=0; n<n_3b; n++) 
-    // {
-    //     const auto& listOfIndexForElement1 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement1[n]);
-    //     const auto& listOfIndexForElement2 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement2[n]);
-
-    //     // first neighbors
-    //     for(int j: listOfIndexForElement1) {
-                
-    //         Atom& atom_j = structure.getAtom(j);
-    //         if (atom_j.index == atom_i.index) continue;  
-
-    //         // double drij[3];
-    //         // const double rij = structure.distance(atom_i, atom_j, drij);
-    //         Distance& distance_ij = structure.tableOfDistances[atomIndex][j];
-    //         if ( distance_ij.dr > rcGlobal ) continue;
-
-    //         // second neighbors
-    //         for(int k: listOfIndexForElement2) 
+    //         if ( atom_j.element == listOfTwoBodyNeighborElement[n] )
     //         {
-    //             Atom& atom_k = structure.getAtom(k);
-    //             if (atom_k.index == atom_i.index) continue;
-    //             if (atom_k.index <= atom_j.index) continue;
-
-    //             // double drik[3];
-    //             // const double rik = structure.distance(atom_i, atom_k, drik);
-    //             Distance& distance_ik = structure.tableOfDistances[atomIndex][k];
-    //             if ( distance_ik.dr > rcGlobal ) continue;
-
-    //             // const double rjk = structure.distance(atom_j, atom_k);
-    //             Distance& distance_jk = structure.tableOfDistances[j][k];
-    //             if ( distance_jk.dr > rcGlobal ) continue;
-
-    //             // cosine of angle between k--<i>--j atoms
-    //             const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
-                
-    //             // add value of symmetry function
-    //             values[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
+    //             values[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
     //         }
     //     }
-    // }
+
+    //     // loop over second neighbors
+    //     for(int k=0; k<nAtoms; k++) 
+    //     {
+    //         const Atom& atom_k = structure.getAtom(k);
+    //         if ( atom_k.index == atom_i.index ) continue;
+    //         if ( atom_k.index <= atom_j.index ) continue;
+
+    //         // get distance between atom i & k from table of distances
+    //         const Distance& distance_ik = structure.tableOfDistances[atom_i.index][atom_k.index];
+    //         if ( distance_ik.dr > rcGlobal ) continue;
+
+    //         // get distance between atom j & k from table of distances
+    //         const Distance& distance_jk = structure.tableOfDistances[atom_j.index][atom_k.index];
+    //         if ( distance_jk.dr > rcGlobal ) continue;
+
+    //         // Loop over all tree-body symmetry functions
+    //         for (int n=0; n<n_3b; n++) 
+    //         {
+    //             if ( atom_j.element == listOfThreeBodyNeighborElement1[n] && 
+    //                 atom_k.element == listOfThreeBodyNeighborElement2[n] )
+    //             {
+    //                 // cosine of angle between k--<i>--j atoms
+    //                 const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+                    
+    //                 // add value of symmetry function
+    //                 values[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
+    //             } 
+    //         }
+    //     }
+    // } 
+
+    // ===================================================================
+
+    // Loop over all two-body symmetry functions
+    for (int n=0; n<n_2b; n++) 
+    {
+        const auto& listOfAtomIndexForElement = structure.getListOfAtomIndexForElement(listOfTwoBodyNeighborElement[n]);
+        for(auto j: listOfAtomIndexForElement) 
+        {
+            Atom& atom_j = structure.getAtom(j);
+            if (atom_j.index == atom_i.index) continue;
+
+            // const double rij = structure.distance(atom_i, atom_j);
+            Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
+            if ( distance_ij.dr > rcGlobal ) continue;
+
+            values[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
+        } 
+    }
+    
+    // loop over all tree-body symmetry functions
+    for (int n=0; n<n_3b; n++) 
+    {
+        const auto& listOfIndexForElement1 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement1[n]);
+        const auto& listOfIndexForElement2 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement2[n]);
+
+        // first neighbors
+        for(int j: listOfIndexForElement1) 
+        {        
+            Atom& atom_j = structure.getAtom(j);
+            if (atom_j.index == atom_i.index) continue;  
+
+            // double drij[3];
+            // const double rij = structure.distance(atom_i, atom_j, drij);
+            Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
+            if ( distance_ij.dr > rcGlobal ) continue;
+
+            // second neighbors
+            for(int k: listOfIndexForElement2) 
+            {
+                Atom& atom_k = structure.getAtom(k);
+                if (atom_k.index == atom_i.index) continue;
+                if (atom_k.index <= atom_j.index) continue;
+
+                // double drik[3];
+                // const double rik = structure.distance(atom_i, atom_k, drik);
+                Distance& distance_ik = structure.tableOfDistances[atom_i.index][atom_k.index];
+                if ( distance_ik.dr > rcGlobal ) continue;
+
+                // const double rjk = structure.distance(atom_j, atom_k);
+                Distance& distance_jk = structure.tableOfDistances[atom_j.index][atom_k.index];
+                if ( distance_jk.dr > rcGlobal ) continue;
+
+                // cosine of angle between k--<i>--j atoms
+                const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+                
+                // add value of symmetry function
+                values[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
+            }
+        }
+    }
 
     // ===================================================================
  
@@ -209,7 +207,7 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     return values;
 }
 
-bool isInList(const std::vector<int>& list, int item) 
+inline bool isInList(const std::vector<int>& list, int item) 
 {
     bool find = false;
     for(auto each: list)
@@ -271,7 +269,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 
                 // get distance between atom i & j from table of distances
                 Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
-                // if ( distance_ij.dr > rcGlobal ) continue;
+                if ( distance_ij.dr > rcGlobal ) continue;
 
                 const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ij(distance_ij.dr, distance_ij.drVec);
                 for (int d=0; d<3; d++)

@@ -335,7 +335,7 @@ std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& stru
 
         // TODO: improve 
         const double rij = structure.distance(atom_i, atom_j);
-        if (rij > 12.0) continue; // TODO: fix it!
+        if ( rij > getDescriptorForElement(atom_j.element).getGlobalCutOffRadius() ) continue; // TODO: fix it!
 
         // gradient of neural network respect to symmetry functions
         const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.element).calculate(structure, atom_j.index);

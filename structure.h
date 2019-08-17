@@ -12,6 +12,7 @@ class Distance {
 public:
     double dr;
     double drVec[3];
+    double inv_dr;
     Distance();
     Distance(double r, double vec[3]); 
     void set_drVec(double vec[3], double factor=1.0);
@@ -37,7 +38,6 @@ public:
     std::vector<int> getListOfAtomIndexForElement(const std::string &element); //TODO: improve design
     std::vector<int> getListOfAtomIndex(); // TODO: improve design
     inline Atom& getAtom(int index) { return *listOfAtoms[index]; }
-
     void calculateTableOfDistances();
     Distance** tableOfDistances;
 
