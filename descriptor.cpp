@@ -230,10 +230,14 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     for (auto& value: values)
         std::fill(value.begin(), value.end(), 0.0); // initialize to zero
 
+    // global cutoff radius
+    const double rcGlobal = getGlobalCutOffRadius();
+    // Log(INFO) << "Global cutoff radius: " << rcGlobal;
+
     // list of index of atom
     const auto& listOfAtomIndex = structure.getListOfAtomIndex();
 
-    // atoms with index i & j
+    // get central atom i
     Atom& atom_i = structure.getAtom(atomIndex_i);
 
     // Loop over all two-body symmetry functions
@@ -249,11 +253,12 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
 
                 if ( j == atomIndex_i ) continue;  
                 Atom& atom_j = structure.getAtom(j);
-                
-                double drij[3];
-                const double rij = structure.distance(atom_i, atom_j, drij);
 
-                const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ii(rij, drij);
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i.index][j];
+                // if ( distance_ij.dr > rcGlobal ) continue;
+
+                const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ii(distance_ij.dr, distance_ij.drVec);
                 for (int d=0; d<3; d++)
                     values[n][d] += gradient[d]; 
             }
@@ -264,10 +269,11 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 
                 Atom& atom_j = structure.getAtom(atomIndex_ip);
                 
-                double drij[3];
-                const double rij = structure.distance(atom_i, atom_j, drij);
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
+                // if ( distance_ij.dr > rcGlobal ) continue;
 
-                const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ij(rij, drij);
+                const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ij(distance_ij.dr, distance_ij.drVec);
                 for (int d=0; d<3; d++)
                     values[n][d] = gradient[d]; 
             }
@@ -290,8 +296,9 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 Atom& atom_j = structure.getAtom(j);
                 if (atom_j.index == atom_i.index) continue;  
 
-                double drij[3];
-                const double rij = structure.distance(atom_i, atom_j, drij);
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
+                if ( distance_ij.dr > rcGlobal ) continue;
 
                 // second neighbors
                 for(int k: listOfAtomIndexForElement2) {
@@ -300,14 +307,20 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                     if (atom_k.index == atom_i.index) continue;
                     if (atom_k.index <= atom_j.index) continue;
 
-                    double drik[3], drjk[3];
-                    const double rik = structure.distance(atom_i, atom_k, drik);
-                    const double rjk = structure.distance(atom_j, atom_k, drjk);
+                    // get distance between atom i & k from table of distances
+                    Distance& distance_ik = structure.tableOfDistances[atom_i.index][k];
+                    if ( distance_ik.dr > rcGlobal ) continue;
+
+                    // get distance between atom j & k from table of distances
+                    Distance& distance_jk = structure.tableOfDistances[j][k];
+                    if ( distance_jk.dr > rcGlobal ) continue;
 
                     // cosine of angle between k--<i>--j atoms
-                    const double cost = calculateCosine(rij, rik, drij, drik);
-
-                    const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ii(rij, rik, rjk, cost, drij, drik, drjk);
+                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+            
+                    // add gradient vector 
+                    const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ii(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
+                            cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
                     for (int d=0; d<3; d++)
                         values[n+n_2b][d] += gradient[d];
                 }
@@ -320,8 +333,9 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                 Atom& atom_j = structure.getAtom(atomIndex_ip);
                 if (atom_j.index == atom_i.index) continue;  
 
-                double drij[3];
-                const double rij = structure.distance(atom_i, atom_j, drij);
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
+                if ( distance_ij.dr > rcGlobal ) continue;
 
                 // second neighbors
                 for(int k: listOfAtomIndexForElement2) {
@@ -330,14 +344,20 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                     if (atom_k.index == atom_i.index) continue;
                     if (atom_k.index <= atom_j.index) continue;
                     
-                    double drik[3], drjk[3];
-                    const double rik = structure.distance(atom_i, atom_k, drik);
-                    const double rjk = structure.distance(atom_j, atom_k, drjk);
+                    // get distance between atom i & k from table of distances
+                    Distance& distance_ik = structure.tableOfDistances[atom_i.index][k];
+                    if ( distance_ik.dr > rcGlobal ) continue;
+
+                    // get distance between atom j & k from table of distances
+                    Distance& distance_jk = structure.tableOfDistances[atom_j.index][k];
+                    if ( distance_jk.dr > rcGlobal ) continue;
 
                     // cosine of angle between k--<i>--j atoms
-                    const double cost = calculateCosine(rij, rik, drij, drik);
-
-                    const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ij(rij, rik, rjk, cost, drij, drik, drjk);
+                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+            
+                    // add gradient vector 
+                    const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ij(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
+                            cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
                     for (int d=0; d<3; d++)
                         values[n+n_2b][d] += gradient[d];
                 }
@@ -350,21 +370,28 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                     Atom& atom_j = structure.getAtom(j);
                     if (atom_j.index == atom_i.index) continue;  
 
-                    double drij[3];
-                    const double rij = structure.distance(atom_i, atom_j, drij);
+                    // get distance between atom i & j from table of distances
+                    Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
+                    if ( distance_ij.dr > rcGlobal ) continue;
   
                     Atom& atom_k = structure.getAtom(atomIndex_ip);
                     if (atom_k.index == atom_i.index) continue;
                     if (atom_k.index <= atom_j.index) continue;
 
-                    double drik[3], drjk[3];
-                    const double rik = structure.distance(atom_i, atom_k, drik);
-                    const double rjk = structure.distance(atom_j, atom_k, drjk);
+                    // get distance between atom i & k from table of distances
+                    Distance& distance_ik = structure.tableOfDistances[atom_i.index][atom_k.index];
+                    if ( distance_ik.dr > rcGlobal ) continue;
+
+                    // get distance between atom j & k from table of distances
+                    Distance& distance_jk = structure.tableOfDistances[j][atom_k.index];
+                    if ( distance_jk.dr > rcGlobal ) continue;
 
                     // cosine of angle between k--<i>--j atoms
-                    const double cost = calculateCosine(rij, rik, drij, drik);
-
-                    const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ik(rij, rik, rjk, cost, drij, drik, drjk);
+                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+            
+                    // add gradient vector 
+                    const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ik(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
+                            cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
                     for (int d=0; d<3; d++)
                         values[n+n_2b][d] += gradient[d];
                 }
