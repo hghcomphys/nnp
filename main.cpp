@@ -20,6 +20,7 @@ int main()
         // -----------------------------------------------
         AtomicStructure structure;
         structure.readFileFormatRuNNer();
+        structure.calculateTableOfDistances();
 
         // cout << "Number of atoms: " << structure.getNumberOfAtoms() << endl;
         // cout << "Is PBC: " << structure.isPBC() << endl;
@@ -100,9 +101,9 @@ int main()
 
         for (int index=140; index<140; index++) 
         {
-            Atom atom = structure.getListOfAtoms()[index];
-            double energy = nnp.calculateEnergy(structure, atom.getIndex());
-            std::vector<double> force = nnp.calculateForce(structure, atom.getIndex());
+            Atom& atom = structure.getAtom(index);
+            double energy = nnp.calculateEnergy(structure, atom.index);
+            std::vector<double> force = nnp.calculateForce(structure, atom.index);
             
             // symmetry functions
             // cout << "SF--> ";
@@ -110,9 +111,9 @@ int main()
             //     cout << sf << " ";
             // cout << "\n";
 
-            cout << "Atom[" << atom.getElement() << "," << index+1 << "]:(" << atom.getX() << ", " << atom.getY() << ", " << atom.getZ() << ") " 
+            cout << "Atom[" << atom.element << "," << index+1 << "]:(" << atom.x << ", " << atom.y << ", " << atom.z << ") " 
                 // << "energy: " << energy
-                << " Force: " << force[0] << " (" << atom.getFx() << "), " << force[1] << " (" << atom.getFy() << "), " << force[2] << " (" << atom.getFz() << ")"
+                << " Force: " << force[0] << " (" << atom.fx << "), " << force[1] << " (" << atom.fy << "), " << force[2] << " (" << atom.fz << ")"
                 << endl;
         }    
         cout << "Total energy: " << nnp.caculateTotalEnergy(structure) << endl;

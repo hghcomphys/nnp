@@ -69,15 +69,6 @@ std::vector<std::vector<double>> ACSF::calculate(AtomicStructure &structure)
     return values;
 }
 
-double calculateCosine(double rij, double rik, double drij[3], double drik[3]) 
-{
-    // cosine of angle between k--<i>--j atoms
-    double cost = 0;
-    for (int d=0; d<3; d++)
-        cost += drij[d] * drik[d];
-    return cost / rij / rik;
-}
-
 std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
 {
     // TODO: optimization
@@ -105,16 +96,17 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
         Atom& atom_j = structure.getAtom(j);
         if ( atom_j.index == atom_i.index ) continue;
 
-        double drij[3];
-        const double rij = structure.distance(atom_i, atom_j, drij);
-        if ( rij > rcGlobal ) continue;
+        // const double drij[3];
+        // const double rij = structure.distance(atom_i, atom_j, drij);
+        Distance& distance_ij = structure.tableOfDistances[atomIndex][j];
+        if ( distance_ij.dr > rcGlobal ) continue;
 
         // Loop over all two-body symmetry functions
         for (int n=0; n<n_2b; n++) 
         {
             if ( atom_j.element == listOfTwoBodyNeighborElement[n] )
             {
-                values[n] += listOfTwoBodySF[n]->function(rij);
+                values[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
             }
         }
 
@@ -122,13 +114,17 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
         for(auto k: listOfAtomIndex) 
         {
             Atom& atom_k = structure.getAtom(k);
-            if (atom_k.index == atom_i.index) continue;
-            if (atom_k.index <= atom_j.index) continue;
+            if ( atom_k.index == atom_i.index ) continue;
+            if ( atom_k.index <= atom_j.index ) continue;
 
-            double drik[3];
-            const double rik = structure.distance(atom_i, atom_k, drik);
-            const double rjk = structure.distance(atom_j, atom_k);
-            if ( rik > rcGlobal || rjk > rcGlobal ) continue;
+            // double drik[3];
+            // const double rik = structure.distance(atom_i, atom_k, drik);
+            Distance& distance_ik = structure.tableOfDistances[atomIndex][k];
+            if ( distance_ik.dr > rcGlobal ) continue;
+
+            // const double rjk = structure.distance(atom_j, atom_k);
+            Distance& distance_jk = structure.tableOfDistances[j][k];
+            if ( distance_jk.dr > rcGlobal ) continue;
 
             // Loop over all tree-body symmetry functions
             for (int n=0; n<n_3b; n++) 
@@ -137,10 +133,9 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
                     atom_k.element == listOfThreeBodyNeighborElement2[n] )
                 {
                     // cosine of angle between k--<i>--j atoms
-                    const double cost = calculateCosine(rij, rik, drij, drik);
-                
+                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
                     // add value of symmetry function
-                    values[n+n_2b] += listOfThreeBodySF[n]->function(rij, rik, rjk, cost);
+                    values[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
                 } 
             }
         }

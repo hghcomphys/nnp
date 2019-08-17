@@ -36,5 +36,13 @@ private:
     std::vector<std::string> listOfThreeBodyNeighborElement1, listOfThreeBodyNeighborElement2;
 };
 
+inline double calculateCosine(double rij, double rik, double drij[3], double drik[3]) 
+{
+    // cosine of angle between k--<i>--j atoms
+    double cost = 0;
+    for (int d=0; d<3; d++)
+        cost += drij[d] * drik[d];
+    return cost / rij / rik;
+}
 
 #endif //NNP_ACSF_H
