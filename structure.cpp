@@ -12,14 +12,36 @@
 const double ANGSTROM_TO_BOHR = 1.88973;
 
 /* ----------------------------------------------------------------------
+   setup for Distance
+------------------------------------------------------------------------- */
+Distance::Distance(): dr(0), drVec{0, 0 ,0} {};
+
+void Distance::set(double r, double vec[3], double factor) {
+    dr = r;
+    set_drVec(vec, factor);
+}
+
+Distance::Distance(double r, double vec[3]) {
+    set(r, vec); 
+}
+
+/* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
 AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), atomIndex(0) {}
 
-AtomicStructure::~AtomicStructure() { 
+AtomicStructure::~AtomicStructure() 
+{ 
+    // free memory for list of atoms
     for (auto atom: listOfAtoms)
         delete atom;
     listOfAtoms.clear(); 
+
+    // free memory for table of distances
+    const int size = getNumberOfAtoms();
+    for (int i=0; i<size; i++)
+        delete[] tableOfDistances[i];
+    delete[] tableOfDistances;
 }
 
 void AtomicStructure::addAtom(Atom* atom) {
@@ -193,3 +215,41 @@ void AtomicStructure::readFileFormatRuNNer() {
     readFileFormatRuNNer(filename); 
     Log(WARN) << "Read " + filename + " (as default RuNNer structure file)";
 }
+
+void AtomicStructure::calculateTableOfDistances()
+{
+    if ( !isAtom )
+        throw std::runtime_error( (Log(ERROR) << "No atomic structure available for table of distances").toString() );
+
+    if ( !isCell )
+        throw std::runtime_error( (Log(WARN) << "No PBC is applied for table of distances").toString() );
+
+    // get number of atoms in atomic structure
+    const int size = getNumberOfAtoms();
+
+    // allocate matrix
+    tableOfDistances = new Distance*[size];
+    for (int i = 0; i < size; ++i)
+        tableOfDistances[i] = new Distance[size];
+    
+    // TODO: optimize memory usage for matrix
+    // loop over atom i and j
+    for (int i=0; i<size; i++) 
+    {
+        Atom& atom_i = getAtom(i);
+        
+        for (int j=0; j<i; j++) 
+        {
+            Atom& atom_j = getAtom(j);
+
+            // calculate distance between atoms i and j from atomic structure
+            double drij[3];
+            double rij = distance(atom_i, atom_j, drij);
+
+            // fill table of distances
+            tableOfDistances[i][j].set(rij, drij);
+            tableOfDistances[j][i].set(rij, drij, -1.0);
+        }
+    }
+}
+

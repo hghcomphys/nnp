@@ -8,6 +8,17 @@
 #include "atom.h"
 #include <vector>
 
+class Distance {
+public:
+    double dr;
+    double drVec[3];
+    Distance();
+    Distance(double r, double vec[3]); 
+    void set_drVec(double vec[3], double factor=1.0);
+    void set(double r, double vec[3], double factor=1.0);
+};
+
+
 class AtomicStructure {
 public:
     AtomicStructure();
@@ -23,9 +34,12 @@ public:
     double distance(Atom &atom_i, Atom &atom_j);
     // const Atom& operator[] (unsigned int i) const;
     // std::vector<Atom*> getListOfAtoms();
-    std::vector<int> getListOfAtomIndexForElement(const std::string &element);
-    std::vector<int> getListOfAtomIndex();
+    std::vector<int> getListOfAtomIndexForElement(const std::string &element); //TODO: improve design
+    std::vector<int> getListOfAtomIndex(); // TODO: improve design
     inline Atom& getAtom(int index) { return *listOfAtoms[index]; }
+
+    void calculateTableOfDistances();
+    Distance** tableOfDistances;
 
 private:
     bool isAtom;
@@ -36,6 +50,12 @@ private:
     void addAtom(Atom* atom);
     void applyPBC(double &dx, double &dy, double &dz);
 };
+
+inline void Distance::set_drVec(double vec[3], double factor)
+{
+    for (int i=0; i<3; i++)
+        drVec[i] = vec[i] * factor;
+}
 
 
 #endif //NNP_STRUCTURE_H
