@@ -78,10 +78,12 @@ void AtomicStructure::readFileFormatXYZ(const std::string& filename)
     readLineToStringStream(inFile);
     // read atomic names and coordinates
     for( int nLine=0; nLine<nAtoms; nLine++)     {
-        double x, y, z;
+        double position[3];;
         std::string element;
-        readLineToStringStream(inFile) >> element >> x >> y >> z;
-        addAtom( new Atom(x*ANGSTROM_TO_BOHR, y*ANGSTROM_TO_BOHR, z*ANGSTROM_TO_BOHR, element, atomIndex) );
+        readLineToStringStream(inFile) >> element >> position[0] >> position[1] >> position[2];
+        for (int d=0; d<3; d++)
+            position[d]*=ANGSTROM_TO_BOHR;
+        addAtom( new Atom(atomIndex, element, position) );
     }
     inFile.close();
 
@@ -192,11 +194,11 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
                 ss >> cell[cellIndex++];
         }
         else if (keyword == "atom") {
-            double x, y, z;
+            double position[3], force[3], ddummy;
             std::string element;
-            double ddummy, fx, fy, fz;
-            ss >> x >> y >> z >> element >> ddummy >> ddummy >> fx >> fy >> fz;
-            addAtom( new Atom(x, y, z, element, atomIndex, fx, fy, fz) );
+            ss >> position[0] >> position[1] >> position[2] >> element >> ddummy 
+                >> ddummy >> force[0] >> force[1] >> force[2];
+            addAtom( new Atom(atomIndex, element, position, force) );
         }
         else if (keyword == "end")
             break; // read only the first frame
