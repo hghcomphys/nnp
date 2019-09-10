@@ -3,7 +3,7 @@
 //
 
 #include "neural_network.h"
-#include "log.h"
+#include "logger.h"
 #include <fstream>
 #include <sstream>
 

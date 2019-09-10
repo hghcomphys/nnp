@@ -3,7 +3,7 @@
 //
 
 #include "symmetry_function_scaler.h"
-#include "log.h"
+#include "logger.h"
 #include <cmath>
 #include <fstream>
 #include <sstream>

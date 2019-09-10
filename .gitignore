@@ -9,3 +9,6 @@
 CMakeLists.txt
 input.nn
 *.log.*
+.codelite/
+nnp.project
+nnp.workspace

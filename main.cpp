@@ -3,7 +3,7 @@
 #include "descriptor.h"
 #include "structure.h"
 #include "neural_network_potential.h"
-#include "log.h"
+#include "logger.h"
 
 // #include <tensorflow/c/c_api.h>
 // #include "opennn.h"
@@ -13,7 +13,7 @@ using namespace std;
 
 int main()
 {
-    try {
+    try { 
 
         // -----------------------------------------------
         // make atomic structure and read data from a file

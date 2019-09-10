@@ -3,7 +3,7 @@
 //
 
 #include "neural_network_potential.h"
-#include "log.h"
+#include "logger.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>

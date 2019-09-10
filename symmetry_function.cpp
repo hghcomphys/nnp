@@ -6,7 +6,7 @@
 #include <vector>
 #include <stdexcept>
 #include "symmetry_function.h"
-#include "log.h"
+#include "logger.h"
 
 /* ----------------------------------------------------------------------
    setup for base symmetry function base

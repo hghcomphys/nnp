@@ -7,7 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "structure.h"
-#include "log.h"
+#include "logger.h"
 
 const double ANGSTROM_TO_BOHR = 1.88973;
 
