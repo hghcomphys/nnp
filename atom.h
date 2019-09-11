@@ -6,20 +6,24 @@
 #ifndef NNP_ATOM_H
 #define NNP_ATOM_H
 
+#define ELEMENT_BUFSIZE 16
 #include <string>
 
 class Atom {
 public:
-    Atom(int index, const std::string& element, double position[3]);
-    Atom(int index, const std::string& element, double position[3], double force[3]);
-    void setPosition(double position[3]);
-    void setForce(double force[3]);
-    static int getAtomicNumber(const std::string& element);
+    Atom(int index, const char * element, const double position[3]);
+    Atom(int index, const char * element, const double position[3], const double force[3]);
+    void setPosition(const double position[3]);
+    void setForce(const double force[3]);
+    void setElement(const char * element);
+    bool isElement(const char * element);
+    std::string toString();
+    static int getAtomicNumber(const char *element);
 // private:
     int index;
     double x, y, z;
     double fx, fy, fz;
-    std::string element;
+    char element[ELEMENT_BUFSIZE];
 };
 
 #endif //NNP_ATOM_H

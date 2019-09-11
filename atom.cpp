@@ -3,42 +3,65 @@
 //
 
 #include "atom.h"
+#include <cstring>
 
 /* ----------------------------------------------------------------------
    setup for Atom
 ------------------------------------------------------------------------- */
-Atom::Atom(int index, const std::string& element, double position[3]): index(index), element(element)
+Atom::Atom(int index, const char * element, const double position[3]): index(index)
 {
+    setElement(element);
     setPosition(position);
 }
 
-Atom::Atom(int index, const std::string& element, double position[3], double force[3]):
+Atom::Atom(int index, const char * element, const double position[3], const double force[3]):
    Atom(index, element, position) 
 {
     setForce(force);
 }
 
-void Atom::setPosition(double position[3])
+void Atom::setElement(const char * element)
+{
+    strcpy(this->element, element);
+}
+
+void Atom::setPosition(const double position[3])
 {
     x = position[0];
     y = position[1];
     z = position[2];
 }
 
-void Atom::setForce(double force[3])
+void Atom::setForce(const double force[3])
 {
     fx = force[0];
     fy = force[1];
     fz = force[2];
 }
 
-int Atom::getAtomicNumber(const std::string& element) 
+int Atom::getAtomicNumber(const char * element) 
 {
     // TODO: extend to all elements
-    if(element == "H")
+    if (strcmp(element, "H"))
         return 1;
-    else if (element == "C")
+    else if (strcmp(element, "C"))
         return 6; 
-    else if (element == "O")
+    else if (strcmp(element, "O"))
         return 8;
+}
+
+bool Atom::isElement(const char * element)
+{
+    if (std::strcmp(this->element, element))
+        return true;
+    else 
+        return false;
+}
+
+std::string Atom::toString()
+{
+    char buff[500];
+    sprintf(buff, "Atom(index=%d, element=%s, position=(%f, %f, %f), force=(%f, %f, %f))",
+        index, element, x, y, z, fx, fy, fz);
+    return std::string(buff);
 }
