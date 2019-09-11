@@ -12,22 +12,6 @@
 const double ANGSTROM_TO_BOHR = 1.88973;
 
 /* ----------------------------------------------------------------------
-   setup for Distance
-------------------------------------------------------------------------- */
-Distance::Distance(): dr(0), drVec{0, 0 ,0}, inv_dr(0) {};
-
-void Distance::set(double r, double vec[3], double factor) 
-{
-    dr = r;
-    // inv_dr = 1.0 / r;
-    set_drVec(vec, factor);
-}
-
-Distance::Distance(double r, double vec[3]) {
-    set(r, vec); 
-}
-
-/* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
 AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), atomIndex(0) {}
@@ -53,22 +37,29 @@ void AtomicStructure::addAtom(Atom* atom) {
 
 // std::vector<Atom*> AtomicStructure::getListOfAtoms() { return listOfAtoms; }
 
-int AtomicStructure::getNumberOfAtoms() { return listOfAtoms.size(); }
+int AtomicStructure::getNumberOfAtoms() 
+{ 
+    return listOfAtoms.size(); 
+}
 
-int AtomicStructure::getNumberOfAtomsForElement(const std::string& element) { return getListOfAtomIndexForElement(element).size(); }
+int AtomicStructure::getNumberOfAtomsForElement(const char * element) 
+{ 
+    return getListOfAtomIndexForElement(element).size(); 
+}
 
-std::stringstream readLineToStringStream(std::ifstream& inFile) {
+std::stringstream readLineToStringStream(std::ifstream& inFile) 
+{
     std::string line;
     std::getline(inFile, line);
     std::stringstream ss(line);
     return ss;
 }
 
-void AtomicStructure::readFileFormatXYZ(const std::string& filename)
+void AtomicStructure::readFileFormatXYZ(const char * filename)
 {
     std::ifstream inFile(filename);
     if (!inFile)
-        throw std::runtime_error( (Log(ERROR) << "Unable to open file " + filename).toString() );
+        throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
 
     // TODO: need improvement
     // read number of atoms
@@ -83,7 +74,7 @@ void AtomicStructure::readFileFormatXYZ(const std::string& filename)
         readLineToStringStream(inFile) >> element >> position[0] >> position[1] >> position[2];
         for (int d=0; d<3; d++)
             position[d]*=ANGSTROM_TO_BOHR;
-        addAtom( new Atom(atomIndex, element, position) );
+        addAtom( new Atom(atomIndex, element.c_str(), position) );
     }
     inFile.close();
 
@@ -91,7 +82,7 @@ void AtomicStructure::readFileFormatXYZ(const std::string& filename)
     isAtom = true;
 
     // report number of atoms
-    Log(INFO) << "Read " + filename << " (" << getNumberOfAtoms() << " atoms)";
+    Log(INFO) << "Read " << filename << " (" << getNumberOfAtoms() << " atoms)";
 }
 
 void AtomicStructure::setCell(double cell[9])
@@ -145,11 +136,11 @@ double AtomicStructure::distance(Atom &atom_i, Atom &atom_j, double drij[3])
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
-std::vector<int> AtomicStructure::getListOfAtomIndexForElement(const std::string &element)
+std::vector<int> AtomicStructure::getListOfAtomIndexForElement(const char * element)
 {
     std::vector<int> listOfAtomindexForElement;
     for (auto it: listOfAtoms) {
-        if( it->element == element )
+        if( it->isElement(element) )
             listOfAtomindexForElement.push_back( it->index );
     }
 
@@ -170,13 +161,16 @@ std::vector<int> AtomicStructure::getListOfAtomIndex()
 
 // const Atom& Atoms::operator [] (unsigned int i) const { return listOfAtoms[i]; }
 
-bool AtomicStructure::isPBC() const { return isCell; } 
+bool AtomicStructure::isPBC() 
+{ 
+    return isCell; 
+} 
 
-void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
+void AtomicStructure::readFileFormatRuNNer(const char * filename)
 {
     std::ifstream inFile(filename);
     if (!inFile) 
-        throw std::runtime_error( (Log(ERROR) << "Unable to open file " + filename).toString() );
+        throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
 
     std::string line, keyword;
     int cellIndex = 0;
@@ -198,7 +192,7 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
             std::string element;
             ss >> position[0] >> position[1] >> position[2] >> element >> ddummy 
                 >> ddummy >> force[0] >> force[1] >> force[2];
-            addAtom( new Atom(atomIndex, element, position, force) );
+            addAtom( new Atom(atomIndex, element.c_str(), position, force) );
         }
         else if (keyword == "end")
             break; // read only the first frame
@@ -210,14 +204,15 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
     isCell = true;
 
     // report number of atoms
-    Log(INFO) << "Read " + filename << " (" << getNumberOfAtoms() << " atoms)";
+    Log(INFO) << "Read " << filename << " (" << getNumberOfAtoms() << " atoms)";
     Log(INFO) << "Cell (PBC)";
 }
 
-void AtomicStructure::readFileFormatRuNNer() { 
-    const std::string filename = "input.data";
+void AtomicStructure::readFileFormatRuNNer() 
+{ 
+    const char * filename = "input.data";
     readFileFormatRuNNer(filename); 
-    Log(WARN) << "Read " + filename + " (as default RuNNer structure file)";
+    Log(WARN) << "Read " << filename << " (as default RuNNer structure file)";
 }
 
 void AtomicStructure::calculateTableOfDistances()
