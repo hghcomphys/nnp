@@ -17,6 +17,7 @@ public:
     Log(LOG_t level);
     ~Log();
     Log& operator<< (const std::string& message);
+    Log& operator<< (const char * message);
     Log& operator<< (int message);
     Log& operator<< (double message);
     const std::string toString() const;

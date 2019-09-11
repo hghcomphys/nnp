@@ -38,6 +38,15 @@ Log& Log::operator<< (const std::string& message)
     return *this;
 }
 
+Log& Log::operator<< (const char * message) 
+{
+    if( messageLevel >= verbosity ) {
+        buffer << message;
+        isOpened = true;
+    }
+    return *this;
+}
+
 Log& Log::operator<< (int message) { 
     operator<< (std::to_string(message)); 
     return *this;
