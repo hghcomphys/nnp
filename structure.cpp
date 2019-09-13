@@ -217,7 +217,7 @@ double AtomicStructure::distance(Atom & atom_i, Atom & atom_j, double drij[3])
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
-void AtomicStructure::calculateTableOfDistances()
+void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
 {
     if ( !isAtom )
         throw std::runtime_error( (Log(ERROR) << "No atomic structure available for table of distances").toString() );
@@ -251,6 +251,9 @@ void AtomicStructure::calculateTableOfDistances()
             double drij[3];
             double rij = distance(atom_i, atom_j, drij);
 
+            // skip calculation if it is outside the global cutoff radius 
+            if ( rij > globalCutOffRadius ) continue;
+
             // fill table of distances
             tableOfDistances[i][j].set(rij, drij);
             tableOfDistances[j][i].set(rij, drij, -1.0);
@@ -260,3 +263,7 @@ void AtomicStructure::calculateTableOfDistances()
     isTableOfDistances = true;
 }
 
+Distance ** AtomicStructure::getTableOfDistances()
+{
+    return tableOfDistances;
+}

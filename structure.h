@@ -17,18 +17,17 @@ public:
     ~AtomicStructure();
     void readFileFormatRuNNer(const char * filename);
     void readFileFormatRuNNer();
-    Atom ** getListOfAtoms(); 
-    Atom ** getListOfAtomsForElement(const char * element); 
     int getNumberOfAtomsForElement(const char * element);
     inline Atom & getAtom(int atomIndex) { return *listOfAtoms[atomIndex]; }
     inline int getNumberOfAtoms() { return numberOfAtoms; }
-
+    Atom ** getListOfAtoms(); 
+    Atom ** getListOfAtomsForElement(const char * element);
     void setCell(const double cell[9]);
     double distance(Atom & atom_i, Atom & atom_j, double drij[3]);
     double distance(Atom & atom_i, Atom & atom_j);
-    void calculateTableOfDistances();
+    void calculateTableOfDistances(double globalCutOffRadius = 12.0);
+    Distance ** getTableOfDistances();
    
-
 private:
     bool isAtom;
     bool isCell;
