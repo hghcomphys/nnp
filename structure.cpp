@@ -14,61 +14,65 @@ const double ANGSTROM_TO_BOHR = 1.88973;
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
-AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), numberOfAtoms(0), 
-    listOfAtoms(NULL), tableOfDistances(NULL) {}
+AtomicStructure::AtomicStructure() 
+{
+    // initilize variables
+    isAtom = false;
+    isCell = false;
+    isTableOfDistances = false;
+    numberOfAtoms = 0;
+    listOfAtoms = NULL;
+    tableOfDistances = NULL;
+}
 
 AtomicStructure::~AtomicStructure() 
 { 
-    // free memory for list of atoms
-    if (listOfAtoms!=NULL) {
+    // free allocated memory for list of atoms (array of pointers)
+    if (isAtom) {
         for (int i=0; i<numberOfAtoms; i++)
             delete listOfAtoms[i];
         delete[] listOfAtoms; 
     }
-
-    // free memory for table of distances
-    if (tableOfDistances!=NULL) {
+    // free memory for table of distances (matrix of pointets)
+    if (isTableOfDistances) {
         for (int i=0; i<numberOfAtoms; i++)
             delete[] tableOfDistances[i];
-        Log(INFO) << "terminated!";
         delete[] tableOfDistances;
     }    
 }
 
-int AtomicStructure::getNumberOfAtoms() 
-{ 
-    return numberOfAtoms; 
-}
-
-int AtomicStructure::getNumberOfAtomsForElement(const char * element) 
-{ 
-    return getListOfAtomIndexForElement(element).size(); 
-}
-
-std::stringstream readLineToStringStream(std::ifstream& inFile) 
+void AtomicStructure::addAtom(Atom * atom)
 {
-    std::string line;
-    std::getline(inFile, line);
-    std::stringstream ss(line);
-    return ss;
+    listOfAtoms[numberOfAtoms] = atom;
+    numberOfAtoms++;
 }
 
 void AtomicStructure::readFileFormatRuNNer(const char * filename)
 {
+    // open input structure file
     std::ifstream inFile(filename);
     if (!inFile) 
         throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
 
-    std::string line, keyword;
-
     // pre-reading the structure file
+    std::string line, keyword;
     while ( std::getline(inFile, line) ) 
     {
         std::stringstream ss(line);
         ss >> keyword;
 
         if (keyword == "atom")
-           numberOfAtoms++;
+        {
+            // increase number of atom
+            numberOfAtoms++;
+
+            // read element
+            double ddummy;
+            std::string element;
+            ss >> ddummy >> ddummy >> ddummy >> element;
+            // increase number of atom for element
+            numberOfAtomsForElement[element] += 1;
+        }
 
         else if (keyword == "end")
             break; // read only the first frame
@@ -76,13 +80,20 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
     
     // allocate memory for list of atoms
     listOfAtoms = new Atom*[numberOfAtoms];
+    numberOfAtoms = 0; // reset to zero to be used as index
+
+    // allocate memory for each element
+    for (auto & each: numberOfAtomsForElement)
+    {
+        listOfAtomsForElement[each.first] = new Atom*[each.second];
+        each.second = 0; // reset to zero to be used as index
+    }
 
     // go back to begining of the file
     inFile.clear();
     inFile.seekg(0, std::ios::beg);
 
     // read structure file
-    int atomIndex = 0;
     int cellIndex = 0;
     while ( std::getline(inFile, line) ) 
     {
@@ -91,22 +102,31 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
 
         if (keyword == "lattice") 
         {
+            // check cell info is correct
             if (cellIndex == 9)
                     throw std::runtime_error(
                         (Log(ERROR) << "Unexpected number of data for cell").toString()
-                    );
+                    );             
             // read cell parameters
             for (int i=0; i<3; i++)
                 ss >> cell[cellIndex++];
         }
         else if (keyword == "atom") 
         {
+            // read atom data
             double position[3], force[3], ddummy;
             std::string element;
             ss >> position[0] >> position[1] >> position[2] >> element >> ddummy 
                 >> ddummy >> force[0] >> force[1] >> force[2];
-            listOfAtoms[atomIndex] =  new Atom(atomIndex, element.c_str(), position, force);
-            atomIndex++;
+
+            // create atom
+            Atom *atom = new Atom(numberOfAtoms, element.c_str(), position, force);
+
+            // add atom to the list of atoms
+            addAtom(atom);
+
+            // add created atom to list of atoms for element
+            listOfAtomsForElement[element][numberOfAtomsForElement[element]++] = atom;
         }
         else if (keyword == "end")
             break; // read only the first frame
@@ -114,52 +134,44 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
     inFile.close();
 
     // set atomic and cell data are available
-    isAtom = true;
-    isCell = true;
+    isAtom = isCell = true;
 
-    // report number of atoms
-    Log(INFO) << "Read " << filename << " (" << getNumberOfAtoms() << " atoms)";
+    // log additional info regarding number of atoms/elements
+    Log(INFO) << "Read " << filename << " (" << numberOfAtoms << " atoms)";
+    for (auto each: numberOfAtomsForElement)
+        Log(INFO) << "Element " << each.first << ": " << each.second;
     Log(INFO) << "Cell (PBC)";
 }
 
-void AtomicStructure::readFileFormatXYZ(const char * filename)
+void AtomicStructure::readFileFormatRuNNer() 
+{ 
+    const char * filename = "input.data";
+    readFileFormatRuNNer(filename); 
+    Log(WARN) << "Read " << filename << " (as default RuNNer structure file)";
+}
+
+Atom **  AtomicStructure::getListOfAtomForElement(const char * element)
 {
-    std::ifstream inFile(filename);
-    if (!inFile)
-        throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
+    return listOfAtomsForElement[element];
 
-    // read number of atoms
-    readLineToStringStream(inFile) >> numberOfAtoms;
+    //  if ( listOfAtomindexForElement.size() == 0 )
+    //     throw std::runtime_error( (Log(ERROR) << "Cannot find the element in list of atoms").toString());
 
-    // allocate memory for list of atoms
-    listOfAtoms = new Atom*[numberOfAtoms];
+}
 
-    // skip the second line
-    readLineToStringStream(inFile);
+Atom **  AtomicStructure::getListOfAtoms()
+{
+    return listOfAtoms;
+}
 
-    // read atomic names and coordinates
-    int atomIndex = 0;
-    for (int nLine=0; nLine<numberOfAtoms; nLine++) 
-    {
-        double position[3];
-        std::string element;
-        readLineToStringStream(inFile) >> element >> position[0] >> position[1] >> position[2];
-        for (int d=0; d<3; d++)
-            position[d]*=ANGSTROM_TO_BOHR;
-        listOfAtoms[atomIndex] = new Atom(atomIndex, element.c_str(), position);
-        atomIndex++;
-    }
-    inFile.close();
-
-    // set atomic data is available
-    isAtom = true;
-
-    // report number of atoms
-    Log(INFO) << "Read " << filename << " (" << getNumberOfAtoms() << " atoms)";
+int  AtomicStructure::getNumberOfAtomsForElement(const char * element)
+{
+    return numberOfAtomsForElement[element];
 }
 
 void AtomicStructure::setCell(const double cell[9])
 {
+    // set cell info
     for(int d=0; d<9; d++)
         this->cell[d] = cell[d]*ANGSTROM_TO_BOHR;
 
@@ -209,43 +221,6 @@ double AtomicStructure::distance(Atom &atom_i, Atom &atom_j, double drij[3])
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
-std::vector<int> AtomicStructure::getListOfAtomIndexForElement(const char * element)
-{
-    std::vector<int> listOfAtomindexForElement;
-    for (int i=0; i<numberOfAtoms; i++) {
-        if( listOfAtoms[i]->isElement(element) )
-            listOfAtomindexForElement.push_back( listOfAtoms[i]->index );
-    }
-
-    if ( listOfAtomindexForElement.size() == 0 )
-        throw std::runtime_error( (Log(ERROR) << "Cannot find the element in list of atoms").toString());
-
-    return listOfAtomindexForElement;
-}
-
-std::vector<int> AtomicStructure::getListOfAtomIndex()
-{
-    std::vector<int> listOfAtomIndex;
-    for (int i=0; i<numberOfAtoms; i++)
-            listOfAtomIndex.push_back( listOfAtoms[i]->index );
-
-    return listOfAtomIndex;
-}
-
-// const Atom& Atoms::operator [] (unsigned int i) const { return listOfAtoms[i]; }
-
-bool AtomicStructure::isPBC() 
-{ 
-    return isCell; 
-} 
-
-void AtomicStructure::readFileFormatRuNNer() 
-{ 
-    const char * filename = "input.data";
-    readFileFormatRuNNer(filename); 
-    Log(WARN) << "Read " << filename << " (as default RuNNer structure file)";
-}
-
 void AtomicStructure::calculateTableOfDistances()
 {
     if ( !isAtom )
@@ -285,5 +260,8 @@ void AtomicStructure::calculateTableOfDistances()
             tableOfDistances[j][i].set(rij, drij, -1.0);
         }
     }
+
+    // set the flag
+    isTableOfDistances = true;
 }
 
