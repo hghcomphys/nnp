@@ -17,8 +17,7 @@ const double ANGSTROM_TO_BOHR = 1.88973;
 AtomicStructure::AtomicStructure() 
 {
     // initilize variables
-    isAtom = false;
-    isCell = false;
+    isAtom = isCell = false;
     isTableOfDistances = false;
     numberOfAtoms = 0;
     tableOfDistances = NULL;
@@ -27,25 +26,19 @@ AtomicStructure::AtomicStructure()
 AtomicStructure::~AtomicStructure() 
 { 
     // free allocated memory for list of atoms (array of pointers)
-    if (isAtom) {
-        for (auto & atom: listOfAtoms)
+    if ( isAtom ) {
+        for (auto &atom: listOfAtoms)
             delete atom;
     }
     // free memory for table of distances (matrix of pointets)
-    if (isTableOfDistances) {
+    if ( isTableOfDistances ) {
         for (int i=0; i<numberOfAtoms; i++)
             delete[] tableOfDistances[i];
         delete[] tableOfDistances;
     }    
 }
 
-void AtomicStructure::addAtom(Atom * atom)
-{
-    listOfAtoms[numberOfAtoms] = atom;
-    numberOfAtoms++;
-}
-
-void AtomicStructure::readFileFormatRuNNer(const char * filename)
+void AtomicStructure::readFileFormatRuNNer(const char *filename)
 {
     // open input structure file
     std::ifstream inFile(filename);
@@ -81,10 +74,9 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
     
     // reserve allocate memory for list of atoms
     listOfAtoms.reserve(numberOfAtoms);
-    numberOfAtoms = 0; // reset to zero, it will be used as atom index
 
     // reserve allocated memory for each element
-    for (auto & each: numberOfAtomsForElement)
+    for (auto &each: numberOfAtomsForElement)
     {
         listOfAtomsForElement[each.first].reserve(each.second);
         each.second = 0; // reset to zero, will be used as index
@@ -95,6 +87,7 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
     inFile.seekg(0, std::ios::beg);
 
     // read structure file
+    int atomIndex = 0;
     int cellIndex = 0;
     while ( std::getline(inFile, line) ) 
     {
@@ -121,10 +114,10 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
                 >> ddummy >> force[0] >> force[1] >> force[2];
 
             // create atom
-            Atom *atom = new Atom(numberOfAtoms, element.c_str(), position, force);
+            Atom *atom = new Atom(atomIndex, element.c_str(), position, force);
 
             // add atom to the list of atoms
-            addAtom(atom);
+            listOfAtoms[atomIndex++] = atom;
 
             // add created atom to list of atoms for element
             listOfAtomsForElement[element][numberOfAtomsForElement[element]++] = atom;
@@ -151,20 +144,20 @@ void AtomicStructure::readFileFormatRuNNer()
     Log(WARN) << "Read " << filename << " (as default RuNNer structure file)";
 }
 
-Atom **  AtomicStructure::getListOfAtomsForElement(const char * element)
+Atom **AtomicStructure::getListOfAtomsForElement(const char *element)
 {
     // TODO:: throw error when element is not found
     // return vector's pointer
     return &listOfAtomsForElement[element][0];
 }
 
-Atom **  AtomicStructure::getListOfAtoms()
+Atom **AtomicStructure::getListOfAtoms()
 {
     // return vector's pointer
     return &listOfAtoms[0];
 }
 
-int  AtomicStructure::getNumberOfAtomsForElement(const char * element)
+int  AtomicStructure::getNumberOfAtomsForElement(const char *element)
 {
     return numberOfAtomsForElement[element];
 }
@@ -177,41 +170,41 @@ void AtomicStructure::setCell(const double cell[9])
     Log(INFO) << "Set cell sizes";
 }
 
-void AtomicStructure::applyPBC(double & dx, double & dy, double & dz)
+void AtomicStructure::applyPBC(double &dx, double &dy, double &dz)
 {
     // TODO: extend it to non-orthogonal box
     const double lx = cell[0];
     const double ly = cell[4];
     const double lz = cell[8];
 
-    if ( isCell ) 
-    {
-        // x
+    if ( isCell ) {
+        // x-direction
         if ( dx > lx*0.5 ) dx -= lx;
         else if ( dx < -lx*0.5 ) dx += lx;  
-        // y
+        // y-direction
         if ( dy > ly*0.5 ) dy -= ly;
         else if ( dy < -ly*0.5 ) dy += ly;
-        // z
+        // z-direction
         if ( dz > lz*0.5 ) dz -= lz;
         else if ( dz < -lz*0.5 ) dz += lz;   
     }
 }
 
-double AtomicStructure::distance(Atom & atom_i, Atom & atom_j)
+double AtomicStructure::distance(Atom *atom_i, Atom *atom_j)
 {
-    double xij = atom_i.x - atom_j.x;
-    double yij = atom_i.y - atom_j.y;
-    double zij = atom_i.z - atom_j.z;
+    double xij = atom_i->x - atom_j->x;
+    double yij = atom_i->y - atom_j->y;
+    double zij = atom_i->z - atom_j->z;
     applyPBC(xij, yij, zij);
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
-double AtomicStructure::distance(Atom & atom_i, Atom & atom_j, double drij[3])
+double AtomicStructure::distance(Atom *atom_i, Atom *atom_j, double drij[3])
 {
-    double xij = atom_i.x - atom_j.x;
-    double yij = atom_i.y - atom_j.y;
-    double zij = atom_i.z - atom_j.z;;
+    // TODO: do not repeat yourself
+    double xij = atom_i->x - atom_j->x;
+    double yij = atom_i->y - atom_j->y;
+    double zij = atom_i->z - atom_j->z;
     applyPBC(xij, yij, zij);
     drij[0] = xij; drij[1] = yij; drij[2] = zij; 
     return  sqrt( xij*xij + yij*yij + zij*zij );
@@ -219,37 +212,28 @@ double AtomicStructure::distance(Atom & atom_i, Atom & atom_j, double drij[3])
 
 void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
 {
+    // check atomic data is available
     if ( !isAtom )
         throw std::runtime_error( (Log(ERROR) << "No atomic structure available for table of distances").toString() );
 
+    // check PBC is applied
     if ( !isCell )
         throw std::runtime_error( (Log(WARN) << "No PBC is applied for table of distances").toString() );
 
-    // get number of atoms in atomic structure
-    const int size = numberOfAtoms;
-    if ( size==0 )
-        throw std::runtime_error( 
-            (Log(ERROR) << "Unexpected size for table of distances (" << size << ")").toString() 
-            );
-
-    // allocate matrix
-    tableOfDistances = new Distance*[size];
+    // TODO: optimize memory usage for matrix (e.g. neighbor profiling)
+    // allocate memory for table of distances
+    tableOfDistances = new Distance*[numberOfAtoms];
     for (int i = 0; i < numberOfAtoms; ++i)
-        tableOfDistances[i] = new Distance[size];
+        tableOfDistances[i] = new Distance[numberOfAtoms];
     
-    // TODO: optimize memory usage for matrix
     // loop over atom i and j
-    for (int i=0; i<size; i++) 
-    {
-        Atom& atom_i = getAtom(i);
-        
+    for (int i=0; i<numberOfAtoms; i++) 
+    {   
         for (int j=0; j<i; j++) 
         {
-            Atom& atom_j = getAtom(j);
-
             // calculate distance between atoms i and j from atomic structure
             double drij[3];
-            double rij = distance(atom_i, atom_j, drij);
+            double rij = distance(listOfAtoms[i], listOfAtoms[j], drij);
 
             // skip calculation if it is outside the global cutoff radius 
             if ( rij > globalCutOffRadius ) continue;
@@ -260,10 +244,11 @@ void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
         }
     }
 
+    // set table of distance is claculated
     isTableOfDistances = true;
 }
 
-Distance ** AtomicStructure::getTableOfDistances()
+Distance **AtomicStructure::getTableOfDistances()
 {
     return tableOfDistances;
 }

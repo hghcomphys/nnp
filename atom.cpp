@@ -8,19 +8,19 @@
 /* ----------------------------------------------------------------------
    setup for Atom
 ------------------------------------------------------------------------- */
-Atom::Atom(int index, const char * element, const double position[3]): index(index)
+Atom::Atom(int index, const char *element, const double position[3]): index(index)
 {
     setElement(element);
     setPosition(position);
 }
 
-Atom::Atom(int index, const char * element, const double position[3], const double force[3]):
+Atom::Atom(int index, const char *element, const double position[3], const double force[3]):
    Atom(index, element, position) 
 {
     setForce(force);
 }
 
-void Atom::setElement(const char * element)
+void Atom::setElement(const char *element)
 {
     strcpy(this->element, element);
 }
@@ -39,18 +39,7 @@ void Atom::setForce(const double force[3])
     fz = force[2];
 }
 
-int Atom::getAtomicNumber(const char * element) 
-{
-    // TODO: extend to all elements
-    if (strcmp(element, "H"))
-        return 1;
-    else if (strcmp(element, "C"))
-        return 6; 
-    else if (strcmp(element, "O"))
-        return 8;
-}
-
-bool Atom::isElement(const char * element)
+bool Atom::isElement(const char *element)
 {
     if (std::strcmp(this->element, element))
         return true;
@@ -60,8 +49,19 @@ bool Atom::isElement(const char * element)
 
 std::string Atom::toString()
 {
-    char buff[500];
+    char buff[200];
     sprintf(buff, "Atom(index=%d, element=%s, position=(%f, %f, %f), force=(%f, %f, %f))",
         index, element, x, y, z, fx, fy, fz);
     return std::string(buff);
+}
+
+int Atom::getAtomicNumber(const char *element) 
+{
+    // TODO: extend to all elements
+    if (strcmp(element, "H"))
+        return 1;
+    else if (strcmp(element, "C"))
+        return 6; 
+    else if (strcmp(element, "O"))
+        return 8;
 }
