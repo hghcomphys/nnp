@@ -17,15 +17,17 @@ public:
     ~AtomicStructure();
     void readFileFormatRuNNer(const char * filename);
     void readFileFormatRuNNer();
-    void setCell(const double cell[9]);
-    double distance(Atom &atom_i, Atom &atom_j, double drij[3]);
-    double distance(Atom &atom_i, Atom &atom_j);
-    void calculateTableOfDistances();
-    void applyPBC(double & dx, double & dy, double & dz);
-    inline Atom& getAtom(int index) { return *listOfAtoms[index]; }
     Atom ** getListOfAtoms(); 
-    Atom ** getListOfAtomForElement(const char * element); 
+    Atom ** getListOfAtomsForElement(const char * element); 
     int getNumberOfAtomsForElement(const char * element);
+    inline Atom & getAtom(int atomIndex) { return *listOfAtoms[atomIndex]; }
+    inline int getNumberOfAtoms() { return numberOfAtoms; }
+
+    void setCell(const double cell[9]);
+    double distance(Atom & atom_i, Atom & atom_j, double drij[3]);
+    double distance(Atom & atom_i, Atom & atom_j);
+    void calculateTableOfDistances();
+   
 
 private:
     bool isAtom;
@@ -33,11 +35,12 @@ private:
     bool isTableOfDistances;
     int numberOfAtoms;
     double cell[9];
-    Atom ** listOfAtoms;
+    std::vector<Atom*> listOfAtoms;
     std::map<std::string, int> numberOfAtomsForElement;
-    std::map<std::string, Atom**> listOfAtomsForElement; 
+    std::map<std::string, std::vector<Atom*>> listOfAtomsForElement; 
     Distance ** tableOfDistances;
     void addAtom(Atom * atom);
+    void applyPBC(double & dx, double & dy, double & dz);
 };
 
 #endif //NNP_STRUCTURE_H

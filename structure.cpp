@@ -21,7 +21,6 @@ AtomicStructure::AtomicStructure()
     isCell = false;
     isTableOfDistances = false;
     numberOfAtoms = 0;
-    listOfAtoms = NULL;
     tableOfDistances = NULL;
 }
 
@@ -29,9 +28,8 @@ AtomicStructure::~AtomicStructure()
 { 
     // free allocated memory for list of atoms (array of pointers)
     if (isAtom) {
-        for (int i=0; i<numberOfAtoms; i++)
-            delete listOfAtoms[i];
-        delete[] listOfAtoms; 
+        for (auto & atom: listOfAtoms)
+            delete atom;
     }
     // free memory for table of distances (matrix of pointets)
     if (isTableOfDistances) {
@@ -54,8 +52,10 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
     if (!inFile) 
         throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
 
-    // pre-reading the structure file
+    // variables parsing input file
     std::string line, keyword;
+
+    // pre-reading the structure file
     while ( std::getline(inFile, line) ) 
     {
         std::stringstream ss(line);
@@ -70,6 +70,7 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
             double ddummy;
             std::string element;
             ss >> ddummy >> ddummy >> ddummy >> element;
+            
             // increase number of atom for element
             numberOfAtomsForElement[element] += 1;
         }
@@ -78,15 +79,15 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
             break; // read only the first frame
     }
     
-    // allocate memory for list of atoms
-    listOfAtoms = new Atom*[numberOfAtoms];
-    numberOfAtoms = 0; // reset to zero to be used as index
+    // reserve allocate memory for list of atoms
+    listOfAtoms.reserve(numberOfAtoms);
+    numberOfAtoms = 0; // reset to zero, it will be used as atom index
 
-    // allocate memory for each element
+    // reserve allocated memory for each element
     for (auto & each: numberOfAtomsForElement)
     {
-        listOfAtomsForElement[each.first] = new Atom*[each.second];
-        each.second = 0; // reset to zero to be used as index
+        listOfAtomsForElement[each.first].reserve(each.second);
+        each.second = 0; // reset to zero, will be used as index
     }
 
     // go back to begining of the file
@@ -136,9 +137,9 @@ void AtomicStructure::readFileFormatRuNNer(const char * filename)
     // set atomic and cell data are available
     isAtom = isCell = true;
 
-    // log additional info regarding number of atoms/elements
+    // log out info regarding number of atoms/elements/cell
     Log(INFO) << "Read " << filename << " (" << numberOfAtoms << " atoms)";
-    for (auto each: numberOfAtomsForElement)
+    for (auto & each: numberOfAtomsForElement)
         Log(INFO) << "Element " << each.first << ": " << each.second;
     Log(INFO) << "Cell (PBC)";
 }
@@ -150,18 +151,17 @@ void AtomicStructure::readFileFormatRuNNer()
     Log(WARN) << "Read " << filename << " (as default RuNNer structure file)";
 }
 
-Atom **  AtomicStructure::getListOfAtomForElement(const char * element)
+Atom **  AtomicStructure::getListOfAtomsForElement(const char * element)
 {
-    return listOfAtomsForElement[element];
-
-    //  if ( listOfAtomindexForElement.size() == 0 )
-    //     throw std::runtime_error( (Log(ERROR) << "Cannot find the element in list of atoms").toString());
-
+    // TODO:: throw error when element is not found
+    // return vector's pointer
+    return &listOfAtomsForElement[element][0];
 }
 
 Atom **  AtomicStructure::getListOfAtoms()
 {
-    return listOfAtoms;
+    // return vector's pointer
+    return &listOfAtoms[0];
 }
 
 int  AtomicStructure::getNumberOfAtomsForElement(const char * element)
@@ -171,38 +171,34 @@ int  AtomicStructure::getNumberOfAtomsForElement(const char * element)
 
 void AtomicStructure::setCell(const double cell[9])
 {
-    // set cell info
     for(int d=0; d<9; d++)
         this->cell[d] = cell[d]*ANGSTROM_TO_BOHR;
-
-    // set cell data is available
     isCell = true;
-
-    // report number of atoms
     Log(INFO) << "Set cell sizes";
 }
 
-void AtomicStructure::applyPBC(double &dx, double &dy, double &dz)
+void AtomicStructure::applyPBC(double & dx, double & dy, double & dz)
 {
     // TODO: extend it to non-orthogonal box
     const double lx = cell[0];
     const double ly = cell[4];
     const double lz = cell[8];
 
-    if ( isCell )
+    if ( isCell ) 
     {
+        // x
         if ( dx > lx*0.5 ) dx -= lx;
         else if ( dx < -lx*0.5 ) dx += lx;  
-
+        // y
         if ( dy > ly*0.5 ) dy -= ly;
         else if ( dy < -ly*0.5 ) dy += ly;
-
+        // z
         if ( dz > lz*0.5 ) dz -= lz;
         else if ( dz < -lz*0.5 ) dz += lz;   
     }
 }
 
-double AtomicStructure::distance(Atom &atom_i, Atom &atom_j)
+double AtomicStructure::distance(Atom & atom_i, Atom & atom_j)
 {
     double xij = atom_i.x - atom_j.x;
     double yij = atom_i.y - atom_j.y;
@@ -211,7 +207,7 @@ double AtomicStructure::distance(Atom &atom_i, Atom &atom_j)
     return  sqrt( xij*xij + yij*yij + zij*zij );
 }
 
-double AtomicStructure::distance(Atom &atom_i, Atom &atom_j, double drij[3])
+double AtomicStructure::distance(Atom & atom_i, Atom & atom_j, double drij[3])
 {
     double xij = atom_i.x - atom_j.x;
     double yij = atom_i.y - atom_j.y;
@@ -261,7 +257,6 @@ void AtomicStructure::calculateTableOfDistances()
         }
     }
 
-    // set the flag
     isTableOfDistances = true;
 }
 
