@@ -27,8 +27,9 @@ AtomicStructure::~AtomicStructure()
 { 
     // free allocated memory for list of atoms (array of pointers)
     if ( isAtom ) {
-        for (auto &atom: listOfAtoms)
-            delete atom;
+        for (int i=0; i<numberOfAtoms; i++)
+            delete listOfAtoms[i];
+        delete[] listOfAtoms;
     }
     // free memory for table of distances (matrix of pointets)
     if ( isTableOfDistances ) {
@@ -48,7 +49,7 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
     // variables parsing input file
     std::string line, keyword;
 
-    // pre-reading the structure file
+    // pre-reading the structure file (e.g. number of atoms)
     while ( std::getline(inFile, line) ) 
     {
         std::stringstream ss(line);
@@ -72,13 +73,13 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
             break; // read only the first frame
     }
     
-    // reserve allocate memory for list of atoms
-    listOfAtoms.reserve(numberOfAtoms);
+    // allocate memory for list of atoms
+    listOfAtoms = new Atom*[numberOfAtoms];
 
-    // reserve allocated memory for each element
+    // allocated memory for each element
     for (auto &each: numberOfAtomsForElement)
     {
-        listOfAtomsForElement[each.first].reserve(each.second);
+        listOfAtomsForElement[each.first] = new Atom*[each.second];
         each.second = 0; // reset to zero, will be used as index
     }
 
@@ -119,7 +120,7 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
             // add atom to the list of atoms
             listOfAtoms[atomIndex++] = atom;
 
-            // add created atom to list of atoms for element
+            // add atom to list of atoms for element
             listOfAtomsForElement[element][numberOfAtomsForElement[element]++] = atom;
         }
         else if (keyword == "end")
@@ -148,13 +149,13 @@ Atom **AtomicStructure::getListOfAtomsForElement(const char *element)
 {
     // TODO:: throw error when element is not found
     // return vector's pointer
-    return &listOfAtomsForElement[element][0];
+    return listOfAtomsForElement[element];
 }
 
 Atom **AtomicStructure::getListOfAtoms()
 {
     // return vector's pointer
-    return &listOfAtoms[0];
+    return listOfAtoms;
 }
 
 int  AtomicStructure::getNumberOfAtomsForElement(const char *element)

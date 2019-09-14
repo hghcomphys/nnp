@@ -34,9 +34,9 @@ private:
     int numberOfAtoms;
     double cell[9];
     // TODO: merge together listOfAtoms and ListOfAtomsForElement
-    std::vector<Atom*> listOfAtoms;
+    Atom **listOfAtoms;
     std::map<std::string, int> numberOfAtomsForElement;
-    std::map<std::string, std::vector<Atom*>> listOfAtomsForElement; 
+    std::map<std::string, Atom**> listOfAtomsForElement; 
     Distance **tableOfDistances;
     void applyPBC(double &dx, double &dy, double &dz);
 };
