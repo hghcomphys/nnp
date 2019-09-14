@@ -12,12 +12,16 @@ Atom::Atom(int index, const char *element, const double position[3]): index(inde
 {
     setElement(element);
     setPosition(position);
+    fx = fy = fz = 0.0;
+    charge = energy = 0.0;
 }
 
-Atom::Atom(int index, const char *element, const double position[3], const double force[3]):
-   Atom(index, element, position) 
+Atom::Atom(int index, const char *element, const double position[3], const double force[3], double charge, double energy):
+    Atom(index, element, position) 
 {
     setForce(force);
+    this->charge = charge;
+    this->energy = energy;
 }
 
 void Atom::setElement(const char *element)
