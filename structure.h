@@ -6,19 +6,8 @@
 #define NNP_STRUCTURE_H
 
 #include "atom.h"
+#include "distance.h"
 #include <vector>
-
-class Distance {
-public:
-    double dr;
-    double drVec[3];
-    double inv_dr;
-    Distance();
-    Distance(double r, double vec[3]); 
-    void set_drVec(double vec[3], double factor=1.0);
-    void set(double r, double vec[3], double factor=1.0);
-};
-
 
 class AtomicStructure {
 public:
@@ -50,12 +39,5 @@ private:
     void addAtom(Atom* atom);
     void applyPBC(double &dx, double &dy, double &dz);
 };
-
-inline void Distance::set_drVec(double vec[3], double factor)
-{
-    for (int i=0; i<3; i++)
-        drVec[i] = vec[i] * factor;
-}
-
 
 #endif //NNP_STRUCTURE_H

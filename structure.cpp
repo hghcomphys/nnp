@@ -12,22 +12,6 @@
 const double ANGSTROM_TO_BOHR = 1.88973;
 
 /* ----------------------------------------------------------------------
-   setup for Distance
-------------------------------------------------------------------------- */
-Distance::Distance(): dr(0), drVec{0, 0 ,0}, inv_dr(0) {};
-
-void Distance::set(double r, double vec[3], double factor) 
-{
-    dr = r;
-    // inv_dr = 1.0 / r;
-    set_drVec(vec, factor);
-}
-
-Distance::Distance(double r, double vec[3]) {
-    set(r, vec); 
-}
-
-/* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
 AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), atomIndex(0) {}
