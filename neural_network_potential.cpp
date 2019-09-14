@@ -312,9 +312,8 @@ double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, int a
 double NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure) 
 {
     double totalEnergy = 0.0;
-    const auto listOfAtomIndex = structure.getListOfAtomIndex();
-    for(auto Atomindex: listOfAtomIndex)
-         totalEnergy += calculateEnergy(structure, Atomindex);
+    for(int i=0; i<structure.numberOfAtoms; i++)
+         totalEnergy += calculateEnergy(structure, structure.listOfAtoms[i]->index);
    
     return totalEnergy;
 }
@@ -324,35 +323,35 @@ std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& stru
     Atom& atom_i = structure.getAtom(atomIndex);
     std::vector<double> force({0, 0, 0});
 
-    // list of index of atoms
-    const auto& listofAtomIndex = structure.getListOfAtomIndex();
+    // // list of index of atoms
+    // const auto& listofAtomIndex = structure.getListOfAtomIndex();
 
-    // sum over all atoms
-    for (auto j: listofAtomIndex) 
-    {       
-        // refer to atom
-        Atom& atom_j = structure.getAtom(j);
+    // // sum over all atoms
+    // for (auto j: listofAtomIndex) 
+    // {       
+    //     // refer to atom
+    //     Atom& atom_j = structure.getAtom(j);
 
-        // TODO: improve 
-        const double rij = structure.distance(atom_i, atom_j);
-        if ( rij > getDescriptorForElement(atom_j.element).getGlobalCutOffRadius() ) continue; // TODO: fix it!
+    //     // TODO: improve 
+    //     const double rij = structure.distance(atom_i, atom_j);
+    //     if ( rij > getDescriptorForElement(atom_j.element).getGlobalCutOffRadius() ) continue; // TODO: fix it!
 
-        // gradient of neural network respect to symmetry functions
-        const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.element).calculate(structure, atom_j.index);
-        const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j.element).scale(descriptorValues);
-        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j.element).calculateJacobian(scaledDescriptorValues);
-        const std::vector<double>& scalingFactors = getScalerForElement(atom_j.element).getScalingFactors();          
+    //     // gradient of neural network respect to symmetry functions
+    //     const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j.element).calculate(structure, atom_j.index);
+    //     const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j.element).scale(descriptorValues);
+    //     const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j.element).calculateJacobian(scaledDescriptorValues);
+    //     const std::vector<double>& scalingFactors = getScalerForElement(atom_j.element).getScalingFactors();          
 
-        // gradient of symmetry functions respect to atomic positions
-        const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j.element).gradient(structure, atom_j.index, atom_i.index);
+    //     // gradient of symmetry functions respect to atomic positions
+    //     const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j.element).gradient(structure, atom_j.index, atom_i.index);
        
-        // sum over symmetry functions
-        for (int n=0; n<descriptorValues.size(); n++ ) 
-        {
-            for (int d=0; d<3; d++)
-                force[d] -=  scalingFactors[n] * networkGradient[n] * descriptorGradient[n][d];          
-        }
-    }
+    //     // sum over symmetry functions
+    //     for (int n=0; n<descriptorValues.size(); n++ ) 
+    //     {
+    //         for (int d=0; d<3; d++)
+    //             force[d] -=  scalingFactors[n] * networkGradient[n] * descriptorGradient[n][d];          
+    //     }
+    // }
 
     // return force vector applied on atomIndex
     return force;

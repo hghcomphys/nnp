@@ -15,8 +15,8 @@ public:
     ACSF(std::string element);
     ~ACSF();
     void addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1); /*add two-body symmetry function*/
-    void addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction,
-                            const std::string& neighborElement1, const std::string& neibghorElement2); /*add three-body symmetry function*/
+    void addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1, 
+        const std::string& neibghorElement2); /*add three-body symmetry function*/
     TwoBodySymmetryFunction& getTwoBodySF(int index) const;
     ThreeBodySymmetryFunction& getThreeBodySF(int index) const;
     int getNumberOfTwoBodySF() const;
