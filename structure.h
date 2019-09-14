@@ -15,7 +15,6 @@ public:
     ~AtomicStructure();
     int getNumberOfAtoms();
     int getNumberOfAtomsForElement(const std::string& element);
-    void readFileFormatXYZ(const std::string& filename);
     void readFileFormatRuNNer(const std::string& filename);
     void readFileFormatRuNNer();
     void setCell(double cell[9]);
