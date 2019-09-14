@@ -99,11 +99,11 @@ int main()
         //     // cout << "NN (main): " << nnp.getNeuralNetworkForElement(element)->getPerceptron() << "\n";
         // }
 
-        for (int index=140; index<145; index++) 
+        for (int index=0; index<5; index++) 
         {
             Atom& atom = structure.getAtom(index);
             double energy = nnp.calculateEnergy(structure, atom.index);
-            std::vector<double> force = nnp.calculateForce(structure, atom.index);
+            // std::vector<double> force = nnp.calculateForce(structure, atom.index);
             
             // symmetry functions
             // cout << "SF--> ";
@@ -111,10 +111,7 @@ int main()
             //     cout << sf << " ";
             // cout << "\n";
 
-            cout << "Atom[" << atom.element << "," << index+1 << "]:(" << atom.x << ", " << atom.y << ", " << atom.z << ") " 
-                // << "energy: " << energy
-                << " Force: " << force[0] << " (" << atom.fx << "), " << force[1] << " (" << atom.fy << "), " << force[2] << " (" << atom.fz << ")"
-                << endl;
+            cout << atom.toString() << endl;
         }    
         cout << "Total energy: " << nnp.caculateTotalEnergy(structure) << endl;
         
