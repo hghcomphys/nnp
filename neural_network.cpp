@@ -83,10 +83,7 @@ void NeuralNetwork::readParameters(const std::string& filename)
 
     char cSpace = ' ';
     std::string line, dummy;
-    double ddummy;
-    int idummy;
-    int count=0;
-
+    
     while ( std::getline(inFile, line) ) 
     {
         std::stringstream ss(line);

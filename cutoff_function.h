@@ -43,9 +43,9 @@ inline double CutoffFunction::dfc(double r)
     // return -M_PI_2 * inv_rc * sin(M_PI * r * inv_rc);
     
     // TANH TYPE
-    double tmp = tanh(1.0 - r * inv_rc);
-    tmp *= tmp;
-    return 3.0 * tmp * (tmp - 1.0) * inv_rc;
+    double temp = tanh(1.0 - r * inv_rc);
+    temp *= temp;
+    return 3.0 * temp * (temp - 1.0) * inv_rc;
 }
 
 #endif //NNP_CUTOFFFUNCTION_H

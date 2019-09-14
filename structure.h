@@ -6,74 +6,56 @@
 #define NNP_STRUCTURE_H
 
 #include "atom.h"
-#include "distance.h"
 #include <vector>
-#include <map>
-#include <string>
+
+class Distance {
+public:
+    double dr;
+    double drVec[3];
+    double inv_dr;
+    Distance();
+    Distance(double r, double vec[3]); 
+    void set_drVec(double vec[3], double factor=1.0);
+    void set(double r, double vec[3], double factor=1.0);
+};
+
 
 class AtomicStructure {
 public:
     AtomicStructure();
     ~AtomicStructure();
-    void writeFileFormatRunner(const char *filename);
-    void readFileFormatRuNNer(const char *filename);
-    void readFileFormatRuNNer();
-    int getNumberOfAtomsForElement(const char *element);
-    Atom & getAtom(int atomIndex);
     int getNumberOfAtoms();
-    Atom **getListOfAtoms(); 
-    Atom **getListOfAtomsForElement(const char *element);
-    void setCell(const double cell[9]);
-    double distance(Atom *atom_i, Atom *atom_j, double drij[3]);
-    double distance(Atom *atom_i, Atom *atom_j);
-    void calculateTableOfDistances(double globalCutOffRadius = 12.0);
-    Distance **getTableOfDistances();
-   
+    int getNumberOfAtomsForElement(const std::string& element);
+    void readFileFormatXYZ(const std::string& filename);
+    void readFileFormatRuNNer(const std::string& filename);
+    void readFileFormatRuNNer();
+    void setCell(double cell[9]);
+    bool isPBC() const;
+    double distance(Atom &atom_i, Atom &atom_j, double drij[3]);
+    double distance(Atom &atom_i, Atom &atom_j);
+    // const Atom& operator[] (unsigned int i) const;
+    // std::vector<Atom*> getListOfAtoms();
+    std::vector<int> getListOfAtomIndexForElement(const std::string &element); //TODO: improve design
+    std::vector<int> getListOfAtomIndex(); // TODO: improve design
+    inline Atom& getAtom(int index) { return *listOfAtoms[index]; }
+    void calculateTableOfDistances();
+    Distance** tableOfDistances;
+
 private:
-    bool isAtom, isCell;
-    bool isTableOfDistances;
-    int numberOfAtoms;
+    bool isAtom;
+    bool isCell;
     double cell[9];
-    double totalCharge, totalEnergy;
-    // TODO: merge together listOfAtoms and ListOfAtomsForElement
-    Atom **listOfAtoms;
-    std::map<std::string, int> numberOfAtomsForElement;
-    std::map<std::string, Atom**> listOfAtomsForElement; 
-    Distance **tableOfDistances;
+    int atomIndex; //TODO: improve the method for indexing atoms
+    std::vector<Atom*> listOfAtoms;
+    void addAtom(Atom* atom);
     void applyPBC(double &dx, double &dy, double &dz);
 };
 
-inline Atom &AtomicStructure::getAtom(int atomIndex) 
-{ 
-    return *listOfAtoms[atomIndex]; 
-}
-
-inline int AtomicStructure::getNumberOfAtoms() 
-{ 
-    return numberOfAtoms; 
-}
-
-inline Distance **AtomicStructure::getTableOfDistances()
+inline void Distance::set_drVec(double vec[3], double factor)
 {
-    return tableOfDistances;
+    for (int i=0; i<3; i++)
+        drVec[i] = vec[i] * factor;
 }
 
-inline Atom **AtomicStructure::getListOfAtomsForElement(const char *element)
-{
-    // TODO:: throw error when element is not found
-    // return vector's pointer
-    return listOfAtomsForElement[element];
-}
-
-inline Atom **AtomicStructure::getListOfAtoms()
-{
-    // return vector's pointer
-    return listOfAtoms;
-}
-
-inline int  AtomicStructure::getNumberOfAtomsForElement(const char *element)
-{
-    return numberOfAtomsForElement[element];
-}
 
 #endif //NNP_STRUCTURE_H
