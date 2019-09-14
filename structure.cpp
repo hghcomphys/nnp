@@ -2,14 +2,12 @@
 // Atomic Configuration
 //
 
+#include "structure.h"
+#include "logger.h"
 #include <cmath>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include "structure.h"
-#include "logger.h"
-
-const double ANGSTROM_TO_BOHR = 1.88973;
 
 /* ----------------------------------------------------------------------
    setup for Atoms
@@ -21,6 +19,7 @@ AtomicStructure::AtomicStructure()
     isTableOfDistances = false;
     numberOfAtoms = 0;
     tableOfDistances = NULL;
+    totalCharge = totalEnergy = 0.0;
 }
 
 AtomicStructure::~AtomicStructure() 
@@ -37,6 +36,46 @@ AtomicStructure::~AtomicStructure()
             delete[] tableOfDistances[i];
         delete[] tableOfDistances;
     }    
+}
+
+void AtomicStructure::writeFileFormatRunner(const char *filename)
+{
+    // open input structure file
+    std::ofstream outFile(filename);
+    if (!outFile) 
+        throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
+
+    outFile << "begin\n";
+    // cell
+    if ( isCell )
+        for (int d=0; d<9; d+=3)
+            outFile << "lattice " << cell[d] << " " << cell[d+1] << " " << cell[d+2] << "\n";
+    else
+        Log(WARN) << "No cell data available to wrote into " << filename;
+    
+    // atoms
+    if ( isAtom )
+    {
+        for (int i=0; i<numberOfAtoms; i+=1) 
+        {
+            Atom *atom = listOfAtoms[i];
+            outFile << "atom " 
+                << atom->x 
+                << " " << atom->y << " " << atom->z << " " << atom->element
+                << " " << atom->charge << " " << atom->energy 
+                << " " << atom->fx << " " << atom->fy << " " << atom->fz 
+                << "\n";
+        }
+    }    
+    else
+        Log(ERROR) << "No atom data available to wrote into " << filename;
+    
+    // total energy and charge
+    outFile << "energy " << totalEnergy << "\n";
+    outFile << "charge " << totalCharge << "\n";
+    outFile << "end\n";
+    
+    outFile.close();
 }
 
 void AtomicStructure::readFileFormatRuNNer(const char *filename)
@@ -77,10 +116,10 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
     listOfAtoms = new Atom*[numberOfAtoms];
 
     // allocated memory for each element
-    for (auto &each: numberOfAtomsForElement)
+    for (auto &it: numberOfAtomsForElement)
     {
-        listOfAtomsForElement[each.first] = new Atom*[each.second];
-        each.second = 0; // reset to zero, will be used as index
+        listOfAtomsForElement[it.first] = new Atom*[it.second];
+        it.second = 0; // reset to zero, will be used as index
     }
 
     // go back to begining of the file
@@ -109,13 +148,14 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
         else if (keyword == "atom") 
         {
             // read atom data
-            double position[3], force[3], ddummy;
+            double position[3], force[3];
+            double charge, energy;
             std::string element;
-            ss >> position[0] >> position[1] >> position[2] >> element >> ddummy 
-                >> ddummy >> force[0] >> force[1] >> force[2];
+            ss >> position[0] >> position[1] >> position[2] >> element >> charge 
+                >> energy >> force[0] >> force[1] >> force[2];
 
             // create atom
-            Atom *atom = new Atom(atomIndex, element.c_str(), position, force);
+            Atom *atom = new Atom(atomIndex, element.c_str(), position, force, charge, energy);
 
             // add atom to the list of atoms
             listOfAtoms[atomIndex++] = atom;
@@ -123,8 +163,18 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
             // add atom to list of atoms for element
             listOfAtomsForElement[element][numberOfAtomsForElement[element]++] = atom;
         }
+        else if (keyword == "energy") 
+        {
+            ss >> totalEnergy;
+        }
+        else if (keyword == "charge") 
+        {
+            ss >> totalCharge;
+        }
         else if (keyword == "end")
+        {
             break; // read only the first frame
+        }
     }
     inFile.close();
 
@@ -145,28 +195,10 @@ void AtomicStructure::readFileFormatRuNNer()
     Log(WARN) << "Read " << filename << " (as default RuNNer structure file)";
 }
 
-Atom **AtomicStructure::getListOfAtomsForElement(const char *element)
-{
-    // TODO:: throw error when element is not found
-    // return vector's pointer
-    return listOfAtomsForElement[element];
-}
-
-Atom **AtomicStructure::getListOfAtoms()
-{
-    // return vector's pointer
-    return listOfAtoms;
-}
-
-int  AtomicStructure::getNumberOfAtomsForElement(const char *element)
-{
-    return numberOfAtomsForElement[element];
-}
-
 void AtomicStructure::setCell(const double cell[9])
 {
     for(int d=0; d<9; d++)
-        this->cell[d] = cell[d]*ANGSTROM_TO_BOHR;
+        this->cell[d] = cell[d];
     isCell = true;
     Log(INFO) << "Set cell sizes";
 }
@@ -237,7 +269,7 @@ void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
             double rij = distance(listOfAtoms[i], listOfAtoms[j], drij);
 
             // skip calculation if it is outside the global cutoff radius 
-            if ( rij > globalCutOffRadius ) continue;
+            // if ( rij > globalCutOffRadius ) continue;
 
             // fill table of distances
             tableOfDistances[i][j].set(rij, drij);
@@ -247,9 +279,4 @@ void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
 
     // set table of distance is claculated
     isTableOfDistances = true;
-}
-
-Distance **AtomicStructure::getTableOfDistances()
-{
-    return tableOfDistances;
 }
