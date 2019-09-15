@@ -15,7 +15,8 @@
 ------------------------------------------------------------------------- */
 NeuralNetworkPotential::NeuralNetworkPotential() {}
 
-NeuralNetworkPotential::~NeuralNetworkPotential() {
+NeuralNetworkPotential::~NeuralNetworkPotential() 
+{
     for (auto each: neuralNetworks)
         delete each;    
     neuralNetworks.clear();
@@ -91,67 +92,6 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
                     Log(INFO) << sIndvStr + ": " << activationFunctionTypes[i];
                 }
             }
-#ifndef REORDER_SYMMETRY_FUNCTIONS
-            // add symmetryc functions from input.nn
-            else if (sIndvStr == "symfunction_short")
-            {
-                int sfType;
-                std::string centralElement;
-                std::string neighborElement1, neighborElement2;
-                std::vector<double> params;
-                Log log(DEBUG);
-
-                ss >> centralElement >> sfType;
-                switch (sfType)
-                {
-                case 2:
-                    // two-body symmetry functions
-                    ss >> neighborElement1;
-                    for (int i=0; i<3; i++) {
-                        ss >> ddummy; //eta >> rshift >> rcutoff;
-                        params.push_back(ddummy);
-                    }
-                    getDescriptorForElement(centralElement).addTwoBodySF(new G2(params), neighborElement1);
-                    // log
-                    log << "G2(<" << centralElement << ">, " << neighborElement1 << "): ";
-                    for (auto& p: params) 
-                        log << p << " ";
-                    break;
-
-                case 3:
-                    // three-body symmetry functions (narrow)
-                    ss >> neighborElement1 >> neighborElement2;
-                    for (int i=0; i<4; i++) {
-                        ss >> ddummy; //eta >> lambda >> zeta >> rcutoff;
-                        params.push_back(ddummy);
-                    }
-                    getDescriptorForElement(centralElement).addThreeBodySF(new G4(params), neighborElement1, neighborElement2);
-                    // log
-                    log << "G4(<" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
-                    for (auto& p: params) 
-                        log << p << " ";
-                    break;
-
-                case 9:
-                    // three-body symmetry functions (wide)
-                    ss >> neighborElement1 >> neighborElement2;
-                    for (int i=0; i<4; i++) {
-                        ss >> ddummy; //eta >> lambda >> zeta >> rcutoff;
-                        params.push_back(ddummy);
-                    }
-                    getDescriptorForElement(centralElement).addThreeBodySF(new G5(params), neighborElement1, neighborElement2);
-                    // log
-                    log << "G5(" << centralElement << ">, " << neighborElement1 << ", " << neighborElement2 << "): ";
-                    for (auto& p: params) 
-                        log << p << " ";
-                    break;
-                
-                default:
-                    throw std::runtime_error(  (Log(ERROR) << "Unexpected symmetry function in " + filename).toString() );
-                    break;
-                }
-            }
-#endif
         }           
     }
 
@@ -273,13 +213,17 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 
 }
 
-void NeuralNetworkPotential::readSetupFiles() { readSetupFiles(""); }
+void NeuralNetworkPotential::readSetupFiles() 
+{ 
+    readSetupFiles(""); 
+}
 
-int NeuralNetworkPotential::getNumberOfElements() const { return elements.size(); }
+int NeuralNetworkPotential::getNumberOfElements()  
+{ 
+    return elements.size(); 
+}
 
-const std::vector<std::string>& NeuralNetworkPotential::getElements() const { return elements; }
-
-int NeuralNetworkPotential::getIndexForElement(const std::string& element) const 
+int NeuralNetworkPotential::getIndexForElement(const std::string& element) 
 {
     // TODO: optimize the finding algorithm
     int index;
@@ -289,15 +233,18 @@ int NeuralNetworkPotential::getIndexForElement(const std::string& element) const
     return index;
 }
 
-ACSF& NeuralNetworkPotential::getDescriptorForElement(const std::string& element) { 
+ACSF& NeuralNetworkPotential::getDescriptorForElement(const std::string& element) 
+{ 
     return descriptors[getIndexForElement(element)];
 }
 
-SymmeryFunctionsScaler& NeuralNetworkPotential::getScalerForElement(const std::string& element) {
+SymmeryFunctionsScaler& NeuralNetworkPotential::getScalerForElement(const std::string& element) 
+{
     return scalers[getIndexForElement(element)];
 }
 
-NeuralNetwork&  NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element) {
+NeuralNetwork&  NeuralNetworkPotential::getNeuralNetworkForElement(const std::string& element) 
+{
     return *neuralNetworks[getIndexForElement(element)];
 }
 
