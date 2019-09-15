@@ -313,7 +313,7 @@ double NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure)
 {
     double totalEnergy = 0.0;
     for(int i=0; i<structure.numberOfAtoms; i++)
-         totalEnergy += calculateEnergy(structure, structure.listOfAtoms[i]->index);
+         totalEnergy += calculateEnergy(structure, structure.atoms[i]->index);
    
     return totalEnergy;
 }
@@ -330,7 +330,7 @@ std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& stru
     for (int j=0; j<structure.numberOfAtoms; j++) 
     {       
         // refer to atom
-        Atom *atom_j = structure.listOfAtoms[j];
+        Atom *atom_j = structure.atoms[j];
 
         // TODO: improve 
         const double rij = structure.distance(atom_i, atom_j);

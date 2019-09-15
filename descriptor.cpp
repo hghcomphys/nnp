@@ -73,7 +73,7 @@ ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index) const
 std::vector<std::vector<double>> ACSF::calculate(AtomicStructure &structure)
 {
     std::vector<std::vector<double>> values;
-    Atom **listOfAtomsForCentralElement = structure.listOfAtomsForElement[centralElement.c_str()];
+    Atom **listOfAtomsForCentralElement = structure.atomsForElement[centralElement.c_str()];
     const int numberOfAtomsForCentralElement = structure.numberOfAtomsForElement[centralElement.c_str()];
     
     // loop over all atoms
@@ -161,7 +161,7 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     // Loop over all two-body symmetry functions
     for (int n=0; n<n_2b; n++) 
     {
-        Atom **listOfAtomsForNeighborElement = structure.listOfAtomsForElement[listOfTwoBodyNeighborElement[n].c_str()];
+        Atom **listOfAtomsForNeighborElement = structure.atomsForElement[listOfTwoBodyNeighborElement[n].c_str()];
         const int numberOfAtomsForNeighborElement = structure.numberOfAtomsForElement[listOfTwoBodyNeighborElement[n].c_str()];
        
         for(int j=0; j<numberOfAtomsForNeighborElement; j++) 
@@ -180,10 +180,10 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     // loop over all tree-body symmetry functions
     for (int n=0; n<n_3b; n++) 
     {
-        Atom **listOfAtomsForNeighborElement1 = structure.listOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
+        Atom **listOfAtomsForNeighborElement1 = structure.atomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
         const int numberOfAtomsForNeighborElement1 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
      
-        Atom **listOfAtomsForNeighborElement2 = structure.listOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
+        Atom **listOfAtomsForNeighborElement2 = structure.atomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
         const int numberOfAtomsForNeighborElement2 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
      
         // first neighbors
@@ -263,7 +263,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     for (int n=0; n<n_2b; n++) 
     { 
         // list of atom index for neighbor element
-        Atom **listOfAtomForNeighborElement = structure.listOfAtomsForElement[listOfTwoBodyNeighborElement[n]];
+        Atom **listOfAtomForNeighborElement = structure.atomsForElement[listOfTwoBodyNeighborElement[n]];
         const int numberOfAtomsForNeighborElement = structure.numberOfAtomsForElement[listOfTwoBodyNeighborElement[n]];
 
         // check whether gradient is respect to atom itself or neighbor atom
@@ -303,10 +303,10 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     // Loop over all tree-body symmetry functions
     for (int n=0; n<n_3b; n++) 
     {
-         Atom **listOfAtomsForNeighborElement1 = structure.listOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
+         Atom **listOfAtomsForNeighborElement1 = structure.atomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
         const int numberOfAtomsForNeighborElement1 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
      
-        Atom **listOfAtomsForNeighborElement2 = structure.listOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
+        Atom **listOfAtomsForNeighborElement2 = structure.atomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
         const int numberOfAtomsForNeighborElement2 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
      
         // check whether the gradient is respect to atom itself or other atoms
@@ -428,16 +428,14 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
 double ACSF::getGlobalCutOffRadius() const 
 {
     double maxValue = 0.0;
-
     // loop over two-body symmetry functions
     for (auto iter: listOfTwoBodySF)
-        if( iter->getCutoffRadius() > maxValue )
-            maxValue = iter->getCutoffRadius();
-
+        if( iter->cutoffRadius > maxValue )
+            maxValue = iter->cutoffRadius;
     // loop over three-body symmetry functions
     for (auto iter: listOfTwoBodySF)
-        if( iter->getCutoffRadius() > maxValue )
-            maxValue = iter->getCutoffRadius();
+        if( iter->cutoffRadius > maxValue )
+            maxValue = iter->cutoffRadius;
 
     return maxValue;
 }

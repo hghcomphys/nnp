@@ -12,23 +12,16 @@
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
-AtomicStructure::AtomicStructure() 
-{
-    // initilize variables
-    isAtom = isCell = false;
-    isTableOfDistances = false;
-    numberOfAtoms = 0;
-    tableOfDistances = NULL;
-    totalCharge = totalEnergy = 0.0;
-}
+AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), isTableOfDistances(false),
+    numberOfAtoms(0), tableOfDistances(NULL), totalCharge(0), totalEnergy(0) {}
 
 AtomicStructure::~AtomicStructure() 
 { 
     // free allocated memory for list of atoms (array of pointers)
     if ( isAtom ) {
         for (int i=0; i<numberOfAtoms; i++)
-            delete listOfAtoms[i];
-        delete[] listOfAtoms;
+            delete atoms[i];
+        delete[] atoms;
     }
     // free memory for table of distances (matrix of pointets)
     if ( isTableOfDistances ) {
@@ -58,7 +51,7 @@ void AtomicStructure::writeFileFormatRunner(const char *filename)
     {
         for (int i=0; i<numberOfAtoms; i+=1) 
         {
-            Atom *atom = listOfAtoms[i];
+            Atom *atom = atoms[i];
             outFile << "atom " 
                 << atom->x 
                 << " " << atom->y << " " << atom->z << " " << atom->element
@@ -113,12 +106,12 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
     }
     
     // allocate memory for list of atoms
-    listOfAtoms = new Atom*[numberOfAtoms];
+    atoms = new Atom*[numberOfAtoms];
 
     // allocated memory for each element
     for (auto &it: numberOfAtomsForElement)
     {
-        listOfAtomsForElement[it.first] = new Atom*[it.second];
+        atomsForElement[it.first] = new Atom*[it.second];
         it.second = 0; // reset to zero, will be used as index
     }
 
@@ -158,10 +151,10 @@ void AtomicStructure::readFileFormatRuNNer(const char *filename)
             Atom *atom = new Atom(atomIndex, element.c_str(), position, force, charge, energy);
 
             // add atom to the list of atoms
-            listOfAtoms[atomIndex++] = atom;
+            atoms[atomIndex++] = atom;
 
             // add atom to list of atoms for element
-            listOfAtomsForElement[element][numberOfAtomsForElement[element]++] = atom;
+            atomsForElement[element][numberOfAtomsForElement[element]++] = atom;
         }
         else if (keyword == "energy") 
         {
@@ -266,7 +259,7 @@ void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
         {
             // calculate distance between atoms i and j from atomic structure
             double drij[3];
-            double rij = distance(listOfAtoms[i], listOfAtoms[j], drij);
+            double rij = distance(atoms[i], atoms[j], drij);
 
             // skip calculation if it is outside the global cutoff radius 
             // if ( rij > globalCutOffRadius ) continue;
