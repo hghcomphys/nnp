@@ -13,24 +13,18 @@
    setup for scaler 
 ------------------------------------------------------------------------- */
 Scaler::Scaler(double min, double max, double mean, double sigma):
-            min(min), max(max), mean(mean), sigma(sigma),
-            smin(0.0), smax(1.0) { setScalingFactor(); }
+    min(min), max(max), mean(mean), sigma(sigma), smin(0.0), smax(1.0) 
+{ 
+    setScalingFactor(); 
+}
 
-double Scaler::getMin() const { return min; }
-double Scaler::getMax() const { return max; }
-double Scaler::getMean() const { return mean; }
-double Scaler::getSigma() const { return sigma; }
-double Scaler::getScalingMinValue() const { return smin; }
-double Scaler::getScalingMaxValue() const { return smax; }
-void Scaler::setScalingMinValue(double value) { smin = value; }
-void Scaler::setScalingMaxValue(double value) { smax = value; }
-double Scaler::getScalingFactor() const { return scalingFactor; }
-
-void Scaler::setScalingFactor() { 
+void Scaler::setScalingFactor() 
+{ 
     scalingFactor = (smax - smin) / (max - min); 
 }
 
-double Scaler::scale(double value) const {
+double Scaler::scale(double value) 
+{
     return smin +  scalingFactor * (value - mean) ; 
 }
 
@@ -39,16 +33,14 @@ double Scaler::scale(double value) const {
 ------------------------------------------------------------------------- */
 SymmeryFunctionsScaler::SymmeryFunctionsScaler(): numberOfWarnings(0), maxNumberOfWarnings(100) {}
 
-void SymmeryFunctionsScaler::addScaler(const Scaler& newScaler) { 
+void SymmeryFunctionsScaler::addScaler(const Scaler& newScaler) 
+{ 
     listOfScalers.push_back(newScaler); 
 }
 
-int SymmeryFunctionsScaler::getNumberOfScalers() const { 
+int SymmeryFunctionsScaler::getNumberOfScalers() 
+{ 
     return listOfScalers.size(); 
-}
-
-const std::vector<Scaler>& SymmeryFunctionsScaler::getListOfScalers() const { 
-    return listOfScalers; 
 }
 
 void SymmeryFunctionsScaler::readScaling(const std::string& filename, int elementIndex) 
@@ -88,10 +80,10 @@ std::vector<double> SymmeryFunctionsScaler::scale(const std::vector<double>& val
     std::vector<double> scaledValues( numberOfScalers );
     for(int i=0; i<numberOfScalers; i++) {
 
-        const Scaler& sc = listOfScalers[i];
+        Scaler& sc = listOfScalers[i];
         const double value = values[i];
 
-        if ( value > sc.getMax() || value < sc.getMin() ) 
+        if ( value > sc.max || value < sc.min ) 
         {
             // increase number of warrning
             numberOfWarnings++;
@@ -109,17 +101,20 @@ std::vector<double> SymmeryFunctionsScaler::scale(const std::vector<double>& val
     return scaledValues;
 }
 
-std::vector<double> SymmeryFunctionsScaler::getScalingFactors() const {
+std::vector<double> SymmeryFunctionsScaler::getScalingFactors() 
+{
     std::vector<double> scalingFactors;
     for (const Scaler& each: listOfScalers)
-        scalingFactors.push_back( each.getScalingFactor() );
+        scalingFactors.push_back( each.scalingFactor );
     return scalingFactors;
 }
 
-void SymmeryFunctionsScaler::setMaxNumberOfWarnings(double number) { 
+void SymmeryFunctionsScaler::setMaxNumberOfWarnings(double number) 
+{ 
     maxNumberOfWarnings=number; 
 }
 
-int SymmeryFunctionsScaler::getMaxNumberOfWarnings() const { 
+int SymmeryFunctionsScaler::getMaxNumberOfWarnings() 
+{ 
     return maxNumberOfWarnings; 
 }
