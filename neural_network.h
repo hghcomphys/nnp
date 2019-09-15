@@ -20,8 +20,8 @@ public:
     int getNumberOfOutputs();
     int getNumberOfLayers();
     int getNumberOfHiddenLayers();
-    double calculateEnergy(const std::vector<double>& descriptorValues);
-    OpenNN::Vector<double> calculateJacobian(const std::vector<double>& descriptorValues);
+    double calculateEnergy(double *descriptorValues, int descriptorSize);
+    OpenNN::Vector<double> calculateJacobian(double *descriptorValues, int descriptorSize);
 
 private:
     OpenNN::MultilayerPerceptron* multilayerPerceptron;

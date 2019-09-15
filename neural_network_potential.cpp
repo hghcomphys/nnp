@@ -250,9 +250,27 @@ NeuralNetwork&  NeuralNetworkPotential::getNeuralNetworkForElement(const std::st
 
 double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, Atom *atom) 
 {
-    std::vector<double> descriptorValues = getDescriptorForElement(atom->element).calculate(structure, atom);
-    std::vector<double> scaledDescriptorValues = getScalerForElement(atom->element).scale(descriptorValues);
-    return getNeuralNetworkForElement(atom->element).calculateEnergy(scaledDescriptorValues);
+    // get descriptor for element
+    ACSF& descriptor = getDescriptorForElement(atom->element);
+    
+    // allocate memory for descriptor values
+    int descriptorSize = descriptor.getTotalNumberOfSF();
+    double *descriptorValues = new double[descriptorSize];
+    
+    // calulate descriptor
+    descriptor.calculate(structure, atom, descriptorValues);
+    
+    // scale descriptor
+    getScalerForElement(atom->element).scale(descriptorValues, descriptorSize);
+    
+    // calculate NNP enrgy
+    double energy  = getNeuralNetworkForElement(atom->element).calculateEnergy(descriptorValues, descriptorSize);
+    
+    // free allocated memory
+    delete descriptorValues;
+    
+    // return NNP energy
+    return energy;
 }
 
 double NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure) 
@@ -281,21 +299,44 @@ std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& stru
         const double rij = structure.distance(atom_i, atom_j);
         if ( rij > getDescriptorForElement(atom_j->element).getGlobalCutOffRadius() ) continue; // TODO: fix it!
 
+        // get descriptor for element
+        ACSF& descriptor = getDescriptorForElement(atom_j->element);
+        
+        // allocate memory for descriptor values
+        int descriptorSize = descriptor.getTotalNumberOfSF();
+        double *descriptorValues = new double[descriptorSize];
+        
+        // calulate descriptor
+        descriptor.calculate(structure, atom_j, descriptorValues);
+        
+        // scale descriptor
+        getScalerForElement(atom_j->element).scale(descriptorValues, descriptorSize);
+
         // gradient of neural network respect to symmetry functions
-        const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j->element).calculate(structure, atom_j);
-        const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j->element).scale(descriptorValues);
-        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j->element).calculateJacobian(scaledDescriptorValues);
+        const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j->element).calculateJacobian(descriptorValues, descriptorSize);
         const std::vector<double>& scalingFactors = getScalerForElement(atom_j->element).getScalingFactors();          
 
+        // alocate memory
+        double **gradientValues = new double*[descriptorSize];
+        for (int i = 0; i < descriptorSize; ++i)
+            gradientValues[i] = new double[3];
+
         // gradient of symmetry functions respect to atomic positions
-        const std::vector<std::vector<double>>& descriptorGradient = getDescriptorForElement(atom_j->element).gradient(structure, atom_j->index, atom_i->index);
+        getDescriptorForElement(atom_j->element).gradient(structure, atom_j, atom_i, gradientValues, descriptorSize);
        
         // sum over symmetry functions
-        for (int n=0; n<descriptorValues.size(); n++ ) 
+        for (int n=0; n<descriptorSize; n++ ) 
         {
             for (int d=0; d<3; d++)
-                force[d] -=  scalingFactors[n] * networkGradient[n] * descriptorGradient[n][d];          
+                force[d] -=  scalingFactors[n] * networkGradient[n] * gradientValues[n][d];          
         }
+
+        // free allocated memory for descriptor
+        delete[] descriptorValues;
+        // free allocated memory for gradient
+        for (int i=0; i<descriptorSize; i++)
+            delete[] gradientValues[i];
+        delete[] gradientValues;
     }
 
     // return force vector applied on atomIndex

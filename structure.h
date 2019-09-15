@@ -7,7 +7,6 @@
 
 #include "atom.h"
 #include "distance.h"
-#include <vector>
 #include <map>
 #include <string>
 

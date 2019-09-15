@@ -21,10 +21,9 @@ public:
     int getNumberOfTwoBodySF();
     int getNumberOfThreeBodySF();
     int getTotalNumberOfSF();
-    std::vector<std::vector<double>> calculate(AtomicStructure& structure);
-    std::vector<double> calculate(AtomicStructure& structure, Atom *atom);
-    std::vector<std::vector<double>> gradient(AtomicStructure& structure, int atomIndex_i, int atomIndex_j);
     double getGlobalCutOffRadius();
+    void calculate(AtomicStructure& structure, Atom *atom, double *descriptorValues);
+    void gradient(AtomicStructure &structure, Atom *atom_i, Atom *atom_ip, double **gradientValues, int gradientSize);
 
 // private:
     std::string centralElement;

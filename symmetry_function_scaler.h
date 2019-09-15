@@ -28,7 +28,7 @@ public:
     void addScaler(const Scaler& newScaler);
     int getNumberOfScalers();
     void readScaling(const std::string& filename, int elementIndex);
-    std::vector<double> scale(const std::vector<double>& values);
+    void scale(double *descriptorValues, int descriptorSize);
     void setMaxNumberOfWarnings(double number);
     int getMaxNumberOfWarnings();
     std::vector<double> getScalingFactors();

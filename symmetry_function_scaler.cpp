@@ -67,21 +67,19 @@ void SymmeryFunctionsScaler::readScaling(const std::string& filename, int elemen
     inFile.close(); 
 }
 
-std::vector<double> SymmeryFunctionsScaler::scale(const std::vector<double>& values) 
+void SymmeryFunctionsScaler::scale(double *descriptorValues, int descriptorSize) 
 {
     const int numberOfScalers = getNumberOfScalers();
-    const int valuesSize = values.size();
-    if (valuesSize != numberOfScalers) 
+    if (descriptorSize != numberOfScalers) 
         throw std::runtime_error(
-            (Log(ERROR) << "Inconsistent number of symmetry functions (" << valuesSize
+            (Log(ERROR) << "Inconsistent number of symmetry functions (" << descriptorSize
             << ") and scalers (" << numberOfScalers << ")").toString()
             );
 
-    std::vector<double> scaledValues( numberOfScalers );
     for(int i=0; i<numberOfScalers; i++) {
 
         Scaler& sc = listOfScalers[i];
-        const double value = values[i];
+        const double value = descriptorValues[i];
 
         if ( value > sc.max || value < sc.min ) 
         {
@@ -96,9 +94,8 @@ std::vector<double> SymmeryFunctionsScaler::scale(const std::vector<double>& val
                     << maxNumberOfWarnings << ")").toString()
                     );
         }
-        scaledValues[i] = sc.scale(value);
+        descriptorValues[i] = sc.scale(value);
     }  
-    return scaledValues;
 }
 
 std::vector<double> SymmeryFunctionsScaler::getScalingFactors() 

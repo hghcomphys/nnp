@@ -139,10 +139,9 @@ void NeuralNetwork::readParameters(const std::string& filename)
     multilayerPerceptron->set_layers_biases( layers_biases );
 }
 
-double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValues) 
+double NeuralNetwork::calculateEnergy(double *descriptorValues, int descriptorSize) 
 {
     const int numberOfInputs = getNumberOfInputs();
-    const int descriptorSize = descriptorValues.size();
     if (descriptorSize != numberOfInputs)
         throw std::runtime_error(
             (Log(ERROR) << "Unexpected size of inputs (" << numberOfInputs << "), expected " 
@@ -150,17 +149,16 @@ double NeuralNetwork::calculateEnergy(const std::vector<double>& descriptorValue
             );
 
     // TODO: optimize the conversion
-    OpenNN::Vector<double> inputs(numberOfInputs);
+    OpenNN:: Vector<double> inputs(numberOfInputs);
     for(int i=0; i<numberOfInputs; i++ )
         inputs[i] = descriptorValues[i];
 
     return multilayerPerceptron->calculate_outputs( inputs )[0]; // last layer has one output perceptron
 }
 
-OpenNN::Vector<double> NeuralNetwork::calculateJacobian(const std::vector<double>& descriptorValues) 
+OpenNN::Vector<double> NeuralNetwork::calculateJacobian(double *descriptorValues, int descriptorSize) 
 {
     const int numberOfInputs = getNumberOfInputs();
-    const int descriptorSize = descriptorValues.size();
     if (descriptorSize != numberOfInputs)
         throw std::runtime_error(
             (Log(ERROR) << "Unexpected size of inputs (" << numberOfInputs << "), expected " 

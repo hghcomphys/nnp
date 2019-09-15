@@ -65,90 +65,17 @@ ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index)
     return *(listOfThreeBodySF[index]);
 }
 
-std::vector<std::vector<double>> ACSF::calculate(AtomicStructure &structure)
-{
-    std::vector<std::vector<double>> values;
-    Atom **listOfAtomsForCentralElement = structure.atomsForElement[centralElement];
-    const int numberOfAtomsForCentralElement = structure.numberOfAtomsForElement[centralElement];
-    
-    // loop over all atoms
-    for(int i=0; i<numberOfAtomsForCentralElement; i++)
-        values.push_back( calculate(structure, listOfAtomsForCentralElement[i]) );
-
-    return values;
-}
-
-std::vector<double> ACSF::calculate(AtomicStructure &structure, Atom *atom_i)
+void ACSF::calculate(AtomicStructure &structure, Atom *atom_i, double *descriptorValues)
 {
     // TODO: optimization
     const int n_2b = getNumberOfTwoBodySF();
     const int n_3b = getNumberOfThreeBodySF();
 
     // initialize values for array of symmetry functions
-    std::vector<double> values(n_2b + n_3b);
-    std::fill(values.begin(), values.end(), 0.0); // initialize to zero
+    std::fill(descriptorValues, descriptorValues + (n_2b + n_3b), 0.0); // initialize to zero
 
     // global cutoff radius
     const double rcGlobal = getGlobalCutOffRadius();
-
-    // ===================================================================
-
-    // // list of index for all atoms
-    // // const auto& listOfAtomIndex = structure.getListOfAtomIndex();
-    // const int nAtoms = structure.getNumberOfAtoms(); 
-
-    // // loop over fist neighbors
-    // for(int j=0; j<nAtoms; j++) 
-    // {
-    //     // get neighbor atom j
-    //     const Atom& atom_j = structure.getAtom(j);
-    //     if ( atom_j.index == atom_i.index ) continue;
-
-    //     // get distance between atom i & j from table of distances
-    //     const Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
-    //     if ( distance_ij.dr > rcGlobal ) continue;
-
-    //     // Loop over all two-body symmetry functions
-    //     for (int n=0; n<n_2b; n++) 
-    //     {
-    //         if ( atom_j.element == listOfTwoBodyNeighborElement[n] )
-    //         {
-    //             values[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
-    //         }
-    //     }
-
-    //     // loop over second neighbors
-    //     for(int k=0; k<nAtoms; k++) 
-    //     {
-    //         const Atom& atom_k = structure.getAtom(k);
-    //         if ( atom_k.index == atom_i.index ) continue;
-    //         if ( atom_k.index <= atom_j.index ) continue;
-
-    //         // get distance between atom i & k from table of distances
-    //         const Distance& distance_ik = structure.tableOfDistances[atom_i.index][atom_k.index];
-    //         if ( distance_ik.dr > rcGlobal ) continue;
-
-    //         // get distance between atom j & k from table of distances
-    //         const Distance& distance_jk = structure.tableOfDistances[atom_j.index][atom_k.index];
-    //         if ( distance_jk.dr > rcGlobal ) continue;
-
-    //         // Loop over all tree-body symmetry functions
-    //         for (int n=0; n<n_3b; n++) 
-    //         {
-    //             if ( atom_j.element == listOfThreeBodyNeighborElement1[n] && 
-    //                 atom_k.element == listOfThreeBodyNeighborElement2[n] )
-    //             {
-    //                 // cosine of angle between k--<i>--j atoms
-    //                 const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
-                    
-    //                 // add value of symmetry function
-    //                 values[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
-    //             } 
-    //         }
-    //     }
-    // } 
-
-    // ===================================================================
 
     // Loop over all two-body symmetry functions
     for (int n=0; n<n_2b; n++) 
@@ -165,7 +92,7 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, Atom *atom_i)
             Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
             if ( distance_ij.dr > rcGlobal ) continue;
 
-            values[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
+            descriptorValues[n] += listOfTwoBodySF[n]->function(distance_ij.dr);
         } 
     }
     
@@ -209,15 +136,10 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, Atom *atom_i)
                 const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
                 
                 // add value of symmetry function
-                values[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
+                descriptorValues[n+n_2b] += listOfThreeBodySF[n]->function(distance_ij.dr, distance_ik.dr, distance_jk.dr, cost);
             }
         }
     }
-
-    // ===================================================================
- 
-    // return array of symmetry function values
-    return values;
 }
 
 inline bool isInList(Atom **atoms, int numberOfAtoms, int atomIndex) 
@@ -231,15 +153,16 @@ inline bool isInList(Atom **atoms, int numberOfAtoms, int atomIndex)
     return find;
 }
 
-std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int atomIndex_i, int atomIndex_ip) 
+void ACSF::gradient(AtomicStructure &structure, Atom *atom_i, Atom *atom_ip, double **gradientValues, int gradientSize) 
 {
     // TODO: optimization
     const int n_2b = getNumberOfTwoBodySF();
     const int n_3b = getNumberOfThreeBodySF();
 
-    std::vector<std::vector<double>> values(n_2b + n_3b, std::vector<double>(3));
-    for (auto& value: values)
-        std::fill(value.begin(), value.end(), 0.0); // initialize to zero
+    // initilize to zero
+    for (int i=0; i<gradientSize; i++)
+        for (int d=0; d<3; d++)
+            gradientValues[i][d] = 0.0;
 
     // global cutoff radius
     const double rcGlobal = getGlobalCutOffRadius();
@@ -247,9 +170,6 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
 
     // list of index of atom
     // const auto& listOfAtomIndex = structure.getListOfAtomIndex();
-
-    // get central atom i
-    Atom *atom_i = &structure.getAtom(atomIndex_i);
 
     // Loop over all two-body symmetry functions
     for (int n=0; n<n_2b; n++) 
@@ -259,12 +179,12 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
         const int numberOfAtomsForNeighborElement = structure.numberOfAtomsForElement[listOfTwoBodyNeighborElement[n]];
 
         // check whether gradient is respect to atom itself or neighbor atom
-        if ( atomIndex_ip == atomIndex_i )
+        if ( atom_ip->index == atom_i->index )
         {
             for (int j=0; j<numberOfAtomsForNeighborElement; j++) 
             { 
                 Atom *atom_j = listOfAtomForNeighborElement[j];
-                if ( atom_j->index == atomIndex_i ) continue; 
+                if ( atom_j->index == atom_i->index ) continue; 
 
                 // get distance between atom i & j from table of distances
                 Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
@@ -272,14 +192,14 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
 
                 listOfTwoBodySF[n]->gradient_ii(distance_ij.dr, distance_ij.drVec);
                 for (int d=0; d<3; d++)
-                    values[n][d] += listOfTwoBodySF[n]->gradientValue[d]; 
+                    gradientValues[n][d] += listOfTwoBodySF[n]->gradientValue[d]; 
             }
         } 
         else
         {
-            if ( isInList(listOfAtomForNeighborElement, numberOfAtomsForNeighborElement, atomIndex_ip) ) {
+            if ( isInList(listOfAtomForNeighborElement, numberOfAtomsForNeighborElement, atom_ip->index) ) {
                 
-                Atom *atom_j = &structure.getAtom(atomIndex_ip);
+                Atom *atom_j = atom_ip;
                 
                 // get distance between atom i & j from table of distances
                 Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
@@ -287,7 +207,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
 
                 listOfTwoBodySF[n]->gradient_ij(distance_ij.dr, distance_ij.drVec);
                 for (int d=0; d<3; d++)
-                    values[n][d] = listOfTwoBodySF[n]->gradientValue[d]; 
+                    gradientValues[n][d] = listOfTwoBodySF[n]->gradientValue[d]; 
             }
         }
     }
@@ -302,7 +222,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
         const int numberOfAtomsForNeighborElement2 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement2[n]];
      
         // check whether the gradient is respect to atom itself or other atoms
-        if ( atomIndex_ip == atomIndex_i )
+        if ( atom_ip->index == atom_i->index )
         {
             // first neighbors
             for(int j=0; j<numberOfAtomsForNeighborElement1; j++) 
@@ -336,15 +256,15 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                     listOfThreeBodySF[n]->gradient_ii(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
                             cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
                     for (int d=0; d<3; d++)
-                        values[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
+                        gradientValues[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
                 }
             }
         } 
         else
         {
-            if ( isInList(listOfAtomsForNeighborElement1, numberOfAtomsForNeighborElement1, atomIndex_ip) ) {
+            if ( isInList(listOfAtomsForNeighborElement1, numberOfAtomsForNeighborElement1, atom_ip->index) ) {
 
-                Atom *atom_j = &structure.getAtom(atomIndex_ip);
+                Atom *atom_j = atom_ip;
                 if (atom_j->index == atom_i->index) continue;  
 
                 // get distance between atom i & j from table of distances
@@ -373,11 +293,11 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                     listOfThreeBodySF[n]->gradient_ij(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
                             cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
                     for (int d=0; d<3; d++)
-                        values[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
+                        gradientValues[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
                 }
             }
 
-            if ( isInList(listOfAtomsForNeighborElement2, numberOfAtomsForNeighborElement2, atomIndex_ip) ) {
+            if ( isInList(listOfAtomsForNeighborElement2, numberOfAtomsForNeighborElement2, atom_ip->index) ) {
 
                 for(int j=0; j<numberOfAtomsForNeighborElement1; j++) {
                 
@@ -388,7 +308,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                     Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
                     if ( distance_ij.dr > rcGlobal ) continue;
   
-                    Atom *atom_k = &structure.getAtom(atomIndex_ip);
+                    Atom *atom_k = atom_ip;
                     if (atom_k->index == atom_i->index) continue;
                     if (atom_k->index <= atom_j->index) continue;
 
@@ -407,14 +327,11 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
                     listOfThreeBodySF[n]->gradient_ik(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
                             cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
                     for (int d=0; d<3; d++)
-                        values[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
+                        gradientValues[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
                 }
             }
         }   
     }
- 
-    // return array of gradient (vector) of symmetry functions
-    return values;
 }
 
 double ACSF::getGlobalCutOffRadius() 
