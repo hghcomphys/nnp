@@ -28,17 +28,31 @@ NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayer
 NeuralNetwork::NeuralNetwork(int inputsSize, const std::vector<int>& hiddenLayersSize): 
     NeuralNetwork(inputsSize, hiddenLayersSize, 1) {}
 
-NeuralNetwork::~NeuralNetwork() { delete multilayerPerceptron; }
+NeuralNetwork::~NeuralNetwork() 
+{ 
+    delete multilayerPerceptron; 
+}
 
 
-int NeuralNetwork::getNumberOfInputs() const { return multilayerPerceptron->get_inputs_number(); }
+int NeuralNetwork::getNumberOfInputs() 
+{
+    return multilayerPerceptron->get_inputs_number(); 
+}
 
-int NeuralNetwork::getNumberOfOutputs() const { return multilayerPerceptron->get_outputs_number(); }
+int NeuralNetwork::getNumberOfOutputs() 
+{ 
+    return multilayerPerceptron->get_outputs_number(); 
+}
 
-int NeuralNetwork::getNumberOfLayers() const { return multilayerPerceptron->get_layers_number(); }
+int NeuralNetwork::getNumberOfLayers() 
+{ 
+    return multilayerPerceptron->get_layers_number(); 
+}
 
-int NeuralNetwork::getNumberOfHiddenLayers() const { return getNumberOfLayers()-1; /*exclude the output layer*/} 
-
+int NeuralNetwork::getNumberOfHiddenLayers() 
+{ 
+    return getNumberOfLayers()-1; /*exclude the output layer*/
+} 
 
 void NeuralNetwork::setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType) 
 {

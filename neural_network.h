@@ -16,10 +16,10 @@ public:
     ~NeuralNetwork();
     void setLayersActivationFunction(const std::vector<std::string>& activationFucntionsType);
     void readParameters(const std::string& fullPathFileName);
-    int getNumberOfInputs() const;
-    int getNumberOfOutputs() const;
-    int getNumberOfLayers() const;
-    int getNumberOfHiddenLayers() const;
+    int getNumberOfInputs();
+    int getNumberOfOutputs();
+    int getNumberOfLayers();
+    int getNumberOfHiddenLayers();
     double calculateEnergy(const std::vector<double>& descriptorValues);
     OpenNN::Vector<double> calculateJacobian(const std::vector<double>& descriptorValues);
 
