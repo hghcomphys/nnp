@@ -15,8 +15,8 @@ Atom::Atom(int index, const char *element, const double position[3]):
     setPosition(position);
 }
 
-Atom::Atom(int index, const char *element, const double position[3], const double force[3], 
-    double charge, double energy): index(index), charge(charge), energy(energy)
+Atom::Atom(int index, const char *element, const double position[3], const double force[3], double charge, double energy): 
+    index(index), charge(charge), energy(energy)
 {
     setElement(element);
     setPosition(position);

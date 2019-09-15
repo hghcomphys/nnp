@@ -14,8 +14,7 @@
 class Atom {
 public:
     Atom(int index, const char *element, const double position[3]);
-    Atom(int index, const char *element, const double position[3], const double force[3],
-         double charge=0.0, double energy=0.0);
+    Atom(int index, const char *element, const double position[3], const double force[3], double charge=0.0, double energy=0.0);
     void setPosition(const double position[3]);
     void setForce(const double force[3]);
     void setElement(const char *element);
