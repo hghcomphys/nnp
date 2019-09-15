@@ -228,11 +228,11 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     return values;
 }
 
-inline bool isInList(const std::vector<int>& list, int item) 
+inline bool isInList(Atom **atoms, int numberOfAtoms, int atomIndex) 
 {
     bool find = false;
-    for(auto each: list)
-        if ( item == each ) {
+    for(int i=0; i<numberOfAtoms; i++)
+        if ( atoms[i]->index == atomIndex ) {
             find = true;
             break;
         }
@@ -249,174 +249,177 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     for (auto& value: values)
         std::fill(value.begin(), value.end(), 0.0); // initialize to zero
 
-    // // global cutoff radius
-    // const double rcGlobal = getGlobalCutOffRadius();
-    // // Log(INFO) << "Global cutoff radius: " << rcGlobal;
+    // global cutoff radius
+    const double rcGlobal = getGlobalCutOffRadius();
+    // Log(INFO) << "Global cutoff radius: " << rcGlobal;
 
-    // // list of index of atom
+    // list of index of atom
     // const auto& listOfAtomIndex = structure.getListOfAtomIndex();
 
-    // // get central atom i
-    // Atom& atom_i = structure.getAtom(atomIndex_i);
+    // get central atom i
+    Atom *atom_i = &structure.getAtom(atomIndex_i);
 
-    // // Loop over all two-body symmetry functions
-    // for (int n=0; n<n_2b; n++) 
-    // { 
-    //     // list of atom index for a specific element
-    //     const auto& listOfAtomIndexForElement = structure.getListOfAtomIndexForElement(listOfTwoBodyNeighborElement[n]);
-        
-    //     // check whether gradient is respect to atom itself or neighbor atom
-    //     if ( atomIndex_ip == atomIndex_i )
-    //     {
-    //         for (int j: listOfAtomIndexForElement) {
+    // Loop over all two-body symmetry functions
+    for (int n=0; n<n_2b; n++) 
+    { 
+        // list of atom index for neighbor element
+        Atom **listOfAtomForNeighborElement = structure.listOfAtomsForElement[listOfTwoBodyNeighborElement[n]];
+        const int numberOfAtomsForNeighborElement = structure.numberOfAtomsForElement[listOfTwoBodyNeighborElement[n]];
 
-    //             if ( j == atomIndex_i ) continue;  
-    //             Atom& atom_j = structure.getAtom(j);
+        // check whether gradient is respect to atom itself or neighbor atom
+        if ( atomIndex_ip == atomIndex_i )
+        {
+            for (int j=0; j<numberOfAtomsForNeighborElement; j++) 
+            { 
+                Atom *atom_j = listOfAtomForNeighborElement[j];
+                if ( atom_j->index == atomIndex_i ) continue; 
 
-    //             // get distance between atom i & j from table of distances
-    //             Distance& distance_ij = structure.tableOfDistances[atom_i.index][j];
-    //             // if ( distance_ij.dr > rcGlobal ) continue;
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
+                // if ( distance_ij.dr > rcGlobal ) continue;
 
-    //             const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ii(distance_ij.dr, distance_ij.drVec);
-    //             for (int d=0; d<3; d++)
-    //                 values[n][d] += gradient[d]; 
-    //         }
-    //     } 
-    //     else
-    //     {
-    //         if ( isInList(listOfAtomIndexForElement, atomIndex_ip) ) {
+                listOfTwoBodySF[n]->gradient_ii(distance_ij.dr, distance_ij.drVec);
+                for (int d=0; d<3; d++)
+                    values[n][d] += listOfTwoBodySF[n]->gradientValue[d]; 
+            }
+        } 
+        else
+        {
+            if ( isInList(listOfAtomForNeighborElement, numberOfAtomsForNeighborElement, atomIndex_ip) ) {
                 
-    //             Atom& atom_j = structure.getAtom(atomIndex_ip);
+                Atom *atom_j = &structure.getAtom(atomIndex_ip);
                 
-    //             // get distance between atom i & j from table of distances
-    //             Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
-    //             if ( distance_ij.dr > rcGlobal ) continue;
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
+                if ( distance_ij.dr > rcGlobal ) continue;
 
-    //             const std::vector<double>& gradient = listOfTwoBodySF[n]->gradient_ij(distance_ij.dr, distance_ij.drVec);
-    //             for (int d=0; d<3; d++)
-    //                 values[n][d] = gradient[d]; 
-    //         }
-    //     }
-    // }
+                listOfTwoBodySF[n]->gradient_ij(distance_ij.dr, distance_ij.drVec);
+                for (int d=0; d<3; d++)
+                    values[n][d] = listOfTwoBodySF[n]->gradientValue[d]; 
+            }
+        }
+    }
 
-    // // Loop over all tree-body symmetry functions
-    // for (int n=0; n<n_3b; n++) 
-    // {
-    //     // list of atom index for specific elements
-    //     const auto& listOfAtomIndexForElement1 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement1[n]);
-    //     const auto& listOfAtomIndexForElement2 = structure.getListOfAtomIndexForElement(listOfThreeBodyNeighborElement2[n]);
+    // Loop over all tree-body symmetry functions
+    for (int n=0; n<n_3b; n++) 
+    {
+         Atom **listOfAtomsForNeighborElement1 = structure.listOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
+        const int numberOfAtomsForNeighborElement1 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
+     
+        Atom **listOfAtomsForNeighborElement2 = structure.listOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
+        const int numberOfAtomsForNeighborElement2 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
+     
+        // check whether the gradient is respect to atom itself or other atoms
+        if ( atomIndex_ip == atomIndex_i )
+        {
+            // first neighbors
+            for(int j=0; j<numberOfAtomsForNeighborElement1; j++) 
+            {
+                Atom *atom_j = listOfAtomsForNeighborElement1[j];
+                if (atom_j->index == atom_i->index) continue;  
 
-    //     // check whether the gradient is respect to atom itself or other atoms
-    //     if ( atomIndex_ip == atomIndex_i )
-    //     {
-    //         // first neighbors
-    //         for(int j: listOfAtomIndexForElement1) {
-                    
-    //             Atom& atom_j = structure.getAtom(j);
-    //             if (atom_j.index == atom_i.index) continue;  
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
+                if ( distance_ij.dr > rcGlobal ) continue;
 
-    //             // get distance between atom i & j from table of distances
-    //             Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
-    //             if ( distance_ij.dr > rcGlobal ) continue;
+                // second neighbors
+                for(int k=0; k<numberOfAtomsForNeighborElement2; k++) 
+                {    
+                    Atom *atom_k = listOfAtomsForNeighborElement2[k];
+                    if (atom_k->index == atom_i->index) continue;
+                    if (atom_k->index <= atom_j->index) continue;
 
-    //             // second neighbors
-    //             for(int k: listOfAtomIndexForElement2) {
-                    
-    //                 Atom& atom_k = structure.getAtom(k);
-    //                 if (atom_k.index == atom_i.index) continue;
-    //                 if (atom_k.index <= atom_j.index) continue;
+                    // get distance between atom i & k from table of distances
+                    Distance& distance_ik = structure.tableOfDistances[atom_i->index][atom_k->index];
+                    if ( distance_ik.dr > rcGlobal ) continue;
 
-    //                 // get distance between atom i & k from table of distances
-    //                 Distance& distance_ik = structure.tableOfDistances[atom_i.index][k];
-    //                 if ( distance_ik.dr > rcGlobal ) continue;
+                    // get distance between atom j & k from table of distances
+                    Distance& distance_jk = structure.tableOfDistances[atom_j->index][atom_k->index];
+                    if ( distance_jk.dr > rcGlobal ) continue;
 
-    //                 // get distance between atom j & k from table of distances
-    //                 Distance& distance_jk = structure.tableOfDistances[j][k];
-    //                 if ( distance_jk.dr > rcGlobal ) continue;
-
-    //                 // cosine of angle between k--<i>--j atoms
-    //                 const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+                    // cosine of angle between k--<i>--j atoms
+                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
             
-    //                 // add gradient vector 
-    //                 const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ii(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
-    //                         cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
-    //                 for (int d=0; d<3; d++)
-    //                     values[n+n_2b][d] += gradient[d];
-    //             }
-    //         }
-    //     } 
-    //     else
-    //     {
-    //         if ( isInList(listOfAtomIndexForElement1, atomIndex_ip) ) {
+                    // add gradient vector 
+                    listOfThreeBodySF[n]->gradient_ii(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
+                            cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
+                    for (int d=0; d<3; d++)
+                        values[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
+                }
+            }
+        } 
+        else
+        {
+            if ( isInList(listOfAtomsForNeighborElement1, numberOfAtomsForNeighborElement1, atomIndex_ip) ) {
 
-    //             Atom& atom_j = structure.getAtom(atomIndex_ip);
-    //             if (atom_j.index == atom_i.index) continue;  
+                Atom *atom_j = &structure.getAtom(atomIndex_ip);
+                if (atom_j->index == atom_i->index) continue;  
 
-    //             // get distance between atom i & j from table of distances
-    //             Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
-    //             if ( distance_ij.dr > rcGlobal ) continue;
+                // get distance between atom i & j from table of distances
+                Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
+                if ( distance_ij.dr > rcGlobal ) continue;
 
-    //             // second neighbors
-    //             for(int k: listOfAtomIndexForElement2) {
+                // second neighbors
+                for(int k=0; k<numberOfAtomsForNeighborElement2; k++) {
                     
-    //                 Atom& atom_k = structure.getAtom(k);
-    //                 if (atom_k.index == atom_i.index) continue;
-    //                 if (atom_k.index <= atom_j.index) continue;
+                    Atom *atom_k = listOfAtomsForNeighborElement2[k];
+                    if (atom_k->index == atom_i->index) continue;
+                    if (atom_k->index <= atom_j->index) continue;
                     
-    //                 // get distance between atom i & k from table of distances
-    //                 Distance& distance_ik = structure.tableOfDistances[atom_i.index][k];
-    //                 if ( distance_ik.dr > rcGlobal ) continue;
+                    // get distance between atom i & k from table of distances
+                    Distance& distance_ik = structure.tableOfDistances[atom_i->index][atom_k->index];
+                    if ( distance_ik.dr > rcGlobal ) continue;
 
-    //                 // get distance between atom j & k from table of distances
-    //                 Distance& distance_jk = structure.tableOfDistances[atom_j.index][k];
-    //                 if ( distance_jk.dr > rcGlobal ) continue;
+                    // get distance between atom j & k from table of distances
+                    Distance& distance_jk = structure.tableOfDistances[atom_j->index][atom_k->index];
+                    if ( distance_jk.dr > rcGlobal ) continue;
 
-    //                 // cosine of angle between k--<i>--j atoms
-    //                 const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+                    // cosine of angle between k--<i>--j atoms
+                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
             
-    //                 // add gradient vector 
-    //                 const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ij(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
-    //                         cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
-    //                 for (int d=0; d<3; d++)
-    //                     values[n+n_2b][d] += gradient[d];
-    //             }
-    //         }
+                    // add gradient vector 
+                    listOfThreeBodySF[n]->gradient_ij(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
+                            cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
+                    for (int d=0; d<3; d++)
+                        values[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
+                }
+            }
 
-    //         if ( isInList(listOfAtomIndexForElement2, atomIndex_ip) ) {
+            if ( isInList(listOfAtomsForNeighborElement2, numberOfAtomsForNeighborElement2, atomIndex_ip) ) {
 
-    //             for(int j: listOfAtomIndexForElement1) {
+                for(int j=0; j<numberOfAtomsForNeighborElement1; j++) {
                 
-    //                 Atom& atom_j = structure.getAtom(j);
-    //                 if (atom_j.index == atom_i.index) continue;  
+                    Atom *atom_j = listOfAtomsForNeighborElement1[j];
+                    if (atom_j->index == atom_i->index) continue;  
 
-    //                 // get distance between atom i & j from table of distances
-    //                 Distance& distance_ij = structure.tableOfDistances[atom_i.index][atom_j.index];
-    //                 if ( distance_ij.dr > rcGlobal ) continue;
+                    // get distance between atom i & j from table of distances
+                    Distance& distance_ij = structure.tableOfDistances[atom_i->index][atom_j->index];
+                    if ( distance_ij.dr > rcGlobal ) continue;
   
-    //                 Atom& atom_k = structure.getAtom(atomIndex_ip);
-    //                 if (atom_k.index == atom_i.index) continue;
-    //                 if (atom_k.index <= atom_j.index) continue;
+                    Atom *atom_k = &structure.getAtom(atomIndex_ip);
+                    if (atom_k->index == atom_i->index) continue;
+                    if (atom_k->index <= atom_j->index) continue;
 
-    //                 // get distance between atom i & k from table of distances
-    //                 Distance& distance_ik = structure.tableOfDistances[atom_i.index][atom_k.index];
-    //                 if ( distance_ik.dr > rcGlobal ) continue;
+                    // get distance between atom i & k from table of distances
+                    Distance& distance_ik = structure.tableOfDistances[atom_i->index][atom_k->index];
+                    if ( distance_ik.dr > rcGlobal ) continue;
 
-    //                 // get distance between atom j & k from table of distances
-    //                 Distance& distance_jk = structure.tableOfDistances[j][atom_k.index];
-    //                 if ( distance_jk.dr > rcGlobal ) continue;
+                    // get distance between atom j & k from table of distances
+                    Distance& distance_jk = structure.tableOfDistances[atom_j->index][atom_k->index];
+                    if ( distance_jk.dr > rcGlobal ) continue;
 
-    //                 // cosine of angle between k--<i>--j atoms
-    //                 const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
+                    // cosine of angle between k--<i>--j atoms
+                    const double cost = calculateCosine(distance_ij.dr, distance_ik.dr, distance_ij.drVec, distance_ik.drVec);
             
-    //                 // add gradient vector 
-    //                 const std::vector<double>& gradient = listOfThreeBodySF[n]->gradient_ik(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
-    //                         cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
-    //                 for (int d=0; d<3; d++)
-    //                     values[n+n_2b][d] += gradient[d];
-    //             }
-    //         }
-    //     }   
-    // }
+                    // add gradient vector 
+                    listOfThreeBodySF[n]->gradient_ik(distance_ij.dr, distance_ik.dr, distance_jk.dr, 
+                            cost, distance_ij.drVec, distance_ik.drVec, distance_jk.drVec);
+                    for (int d=0; d<3; d++)
+                        values[n+n_2b][d] += listOfThreeBodySF[n]->gradientValue[d];
+                }
+            }
+        }   
+    }
  
     // return array of gradient (vector) of symmetry functions
     return values;

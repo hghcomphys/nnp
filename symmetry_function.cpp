@@ -11,97 +11,111 @@
 /* ----------------------------------------------------------------------
    setup for base symmetry function base
 ------------------------------------------------------------------------- */
-SymmetryFunction::SymmetryFunction(double cutoffRadius): cutoffRadius(cutoffRadius) {
+SymmetryFunction::SymmetryFunction(double cutoffRadius): cutoffRadius(cutoffRadius) 
+{
     cutoffFunction.setCutoffRadius(cutoffRadius);
 }
 
-double SymmetryFunction::getCutoffRadius() { return cutoffRadius; }
+double SymmetryFunction::getCutoffRadius() 
+{ 
+    return cutoffRadius; 
+}
 
 
 /* ----------------------------------------------------------------------
    setup for G0 symmetry function
 ------------------------------------------------------------------------- */
-G0::G0(std::vector<double> p): TwoBodySymmetryFunction(p[0]) {
+G0::G0(std::vector<double> p): TwoBodySymmetryFunction(p[0]) 
+{
     if ( p.size()!=1 ) 
         throw std::runtime_error( (Log(ERROR) << "Expected rcutoff argument").toString() );
 }
 
-double G0::function(double rij) {
+double G0::function(double rij) 
+{
     if ( rij > cutoffRadius ) return 0;
     return cutoffFunction.fc(rij);
 }
 
-std::vector<double>  G0::gradient_ii(double rij, double drij[3]) 
+void  G0::gradient_ii(double rij, double drij[3]) 
 {
     if ( rij > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
-
+    {
+        for (int d=0; d<3; d++)
+            gradientValue[d] = 0.0;
+        return;
+    }
     // gradient of symmytry function of atom i respect to itself
     std::vector<double> result(3);
     const double temp = cutoffFunction.dfc(rij) / rij;
     for (int d=0; d<3; d++)
-        result[d] = drij[d] * temp;
-    return result;
+        gradientValue[d] = drij[d] * temp;
 }
 
-std::vector<double>  G0::gradient_ij(double rij, double drij[3]) 
+void  G0::gradient_ij(double rij, double drij[3]) 
 {
     if ( rij > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
-
+    {
+        for (int d=0; d<3; d++)
+            gradientValue[d] = 0.0;
+        return;
+    }
     // gradient of symmytry function of atom i respect to other atom j 
-    std::vector<double> result(3);
-    const std::vector<double>& gradient = gradient_ii(rij, drij);
+    gradient_ii(rij, drij);
     for (int d=0; d<3; d++)
-        result[d] = -gradient[d];
-    return result;
+        gradientValue[d] *= -1.0;
 }
 
 /* ----------------------------------------------------------------------
    setup for G2 symmetry function
 ------------------------------------------------------------------------- */
-G2::G2(std::vector<double> p): eta(p[0]), rshift(p[1]), TwoBodySymmetryFunction(p[2]) {
+G2::G2(std::vector<double> p): eta(p[0]), rshift(p[1]), TwoBodySymmetryFunction(p[2]) 
+{
     if ( p.size()<3 ) 
         throw std::runtime_error( (Log(ERROR) << "Expected eta, rshift, and rcutoff arguments").toString() );
 }
 
-double G2::function(double rij) {
+double G2::function(double rij) 
+{
     if ( rij > cutoffRadius ) return 0;
         return exp( -eta * (rij-rshift) * (rij-rshift) ) * cutoffFunction.fc(rij);
 }
 
-std::vector<double> G2::gradient_ii(double rij, double drij[3]) 
+void G2::gradient_ii(double rij, double drij[3]) 
 {
     if ( rij > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
-
+    {
+        for (int d=0; d<3; d++)
+            gradientValue[d] = 0.0;
+        return;
+    }
     // gradient of symmytry function of atom i respect to itself
-    std::vector<double> result(3);
     const double rp = rij - rshift;
     const double temp = ( cutoffFunction.dfc(rij) - 2.0 * eta * rp * cutoffFunction.fc(rij) ) * exp( -eta * rp * rp ) / rij ;
     for (int d=0; d<3; d++)
-        result[d] = drij[d] * temp;
-    return result;
+        gradientValue[d] = drij[d] * temp;
 }
 
-std::vector<double> G2::gradient_ij(double rij, double drij[3]) 
+void G2::gradient_ij(double rij, double drij[3]) 
 {
     if ( rij > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
-
+    {
+        for (int d=0; d<3; d++)
+            gradientValue[d] = 0.0;
+        return;
+    }
     // gradient of symmytry function of atom i respect to other atom j
-    std::vector<double> result(3);
-    const std::vector<double>& gradient = gradient_ii(rij, drij);
+    gradient_ii(rij, drij);
     for (int d=0; d<3; d++)
-        result[d] = -gradient[d];
-    return result;
+        gradientValue[d] *= -1.0;
 }
 
 
 /* ----------------------------------------------------------------------
    setup for G4 symmetry function
 ------------------------------------------------------------------------ */
-G4::G4(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySymmetryFunction(p[3]), rshift(0) {
+G4::G4(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySymmetryFunction(p[3]), rshift(0) 
+{
     if ( p.size()<4 ) 
         throw std::runtime_error( (Log(ERROR) << "Expected eta, lambda, zeta, and rcutoff arguments").toString() );
 }
@@ -113,11 +127,15 @@ double G4::function(double rij, double rik, double rjk, double cost)
     return res * cutoffFunction.fc(rij) * cutoffFunction.fc(rik) * cutoffFunction.fc(rjk);
 }
 
-std::vector<double> G4::gradient_ii(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+void G4::gradient_ii(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
 {
     // TODO: optimize performance
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
+    {
+        for (int d=0; d<3; d++)
+            gradientValue[d] = 0.0;
+        return;
+    }
 
     // gradient of atom i respect to j 
     const double inv_rij = 1.0 / rij;
@@ -143,19 +161,20 @@ std::vector<double> G4::gradient_ii(double rij, double rik, double rjk, double c
         dterm3[d] = coef3 * ( cutoffFunction.dfc(rij) * cutoffFunction.fc(rik) * drij[d] * inv_rij + cutoffFunction.fc(rij) * cutoffFunction.dfc(rik) * drik[d] * inv_rik );
 
     const double coef = pow(2.0, 1.0-zeta);
-    std::vector<double> result(3);
     for (int d=0; d<3; d++) 
-        result[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d] );
-        
-    return result;
+        gradientValue[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d] );
 }
 
 
-std::vector<double> G4::gradient_ij(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+void G4::gradient_ij(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
 {
     // TODO: optimize performance
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
+    {
+        for (int d=0; d<3; d++)
+            gradientValue[d] = 0.0;
+        return;
+    }
 
     // gradient of atom i respect to j
     const double inv_rij = 1.0 / rij;
@@ -181,19 +200,20 @@ std::vector<double> G4::gradient_ij(double rij, double rik, double rjk, double c
         dterm3[d] = coef3 * ( -cutoffFunction.dfc(rij) * cutoffFunction.fc(rjk) * drij[d] * inv_rij + cutoffFunction.fc(rij) * cutoffFunction.dfc(rjk) * drjk[d] * inv_rjk );
 
     const double coef = pow(2.0, 1.0-zeta);
-    std::vector<double> result(3);
     for (int d=0; d<3; d++) 
-        result[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d] );
-
-    return result;
+        gradientValue[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d] );
 }
 
 
-std::vector<double> G4::gradient_ik(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
+void G4::gradient_ik(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) 
 {
     // TODO: optimize performance
     if ( rij > cutoffRadius || rik > cutoffRadius || rjk > cutoffRadius ) 
-        return std::vector<double>({0.0, 0.0, 0.0});
+    {
+        for (int d=0; d<3; d++)
+            gradientValue[d] = 0.0;
+        return;
+    }
 
     // gradient of atom i respect to j
     const double inv_rij = 1.0 / rij;
@@ -219,18 +239,16 @@ std::vector<double> G4::gradient_ik(double rij, double rik, double rjk, double c
         dterm3[d] = coef3 * ( -cutoffFunction.dfc(rik) * cutoffFunction.fc(rjk) * drik[d] * inv_rik - cutoffFunction.fc(rik) * cutoffFunction.dfc(rjk) * drjk[d] * inv_rjk );
 
     const double coef = pow(2.0, 1.0-zeta);
-    std::vector<double> result(3);
     for (int d=0; d<3; d++) 
-        result[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d] );
-
-    return result;
+        gradientValue[d] = coef * ( dterm1[d] * term2 * term3 + term1 * dterm2[d] * term3 + term1 * term2 * dterm3[d] );
 }
 
 
 /* ----------------------------------------------------------------------
    setup for G5 symmetry function
 ------------------------------------------------------------------------- */
-G5::G5(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySymmetryFunction(p[3]), rshift(0) {
+G5::G5(std::vector<double> p): eta(p[0]), lambda(p[1]), zeta(p[2]), ThreeBodySymmetryFunction(p[3]), rshift(0) 
+{
      if ( p.size()<4 ) 
         throw std::runtime_error( (Log(ERROR) << "Expected eta, lambda, zeta, and rcutoff arguments").toString() );
 }
