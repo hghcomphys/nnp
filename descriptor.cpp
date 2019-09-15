@@ -68,17 +68,17 @@ ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index)
 std::vector<std::vector<double>> ACSF::calculate(AtomicStructure &structure)
 {
     std::vector<std::vector<double>> values;
-    Atom **listOfAtomsForCentralElement = structure.atomsForElement[centralElement.c_str()];
-    const int numberOfAtomsForCentralElement = structure.numberOfAtomsForElement[centralElement.c_str()];
+    Atom **listOfAtomsForCentralElement = structure.atomsForElement[centralElement];
+    const int numberOfAtomsForCentralElement = structure.numberOfAtomsForElement[centralElement];
     
     // loop over all atoms
     for(int i=0; i<numberOfAtomsForCentralElement; i++)
-        values.push_back( calculate(structure, listOfAtomsForCentralElement[i]->index) );
+        values.push_back( calculate(structure, listOfAtomsForCentralElement[i]) );
 
     return values;
 }
 
-std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
+std::vector<double> ACSF::calculate(AtomicStructure &structure, Atom *atom_i)
 {
     // TODO: optimization
     const int n_2b = getNumberOfTwoBodySF();
@@ -87,9 +87,6 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     // initialize values for array of symmetry functions
     std::vector<double> values(n_2b + n_3b);
     std::fill(values.begin(), values.end(), 0.0); // initialize to zero
-
-    // get central atom i
-    Atom *atom_i = &(structure.getAtom(atomIndex));
 
     // global cutoff radius
     const double rcGlobal = getGlobalCutOffRadius();
@@ -156,8 +153,8 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     // Loop over all two-body symmetry functions
     for (int n=0; n<n_2b; n++) 
     {
-        Atom **listOfAtomsForNeighborElement = structure.atomsForElement[listOfTwoBodyNeighborElement[n].c_str()];
-        const int numberOfAtomsForNeighborElement = structure.numberOfAtomsForElement[listOfTwoBodyNeighborElement[n].c_str()];
+        Atom **listOfAtomsForNeighborElement = structure.atomsForElement[listOfTwoBodyNeighborElement[n]];
+        const int numberOfAtomsForNeighborElement = structure.numberOfAtomsForElement[listOfTwoBodyNeighborElement[n]];
        
         for(int j=0; j<numberOfAtomsForNeighborElement; j++) 
         {
@@ -175,10 +172,10 @@ std::vector<double> ACSF::calculate(AtomicStructure &structure, int atomIndex)
     // loop over all tree-body symmetry functions
     for (int n=0; n<n_3b; n++) 
     {
-        Atom **listOfAtomsForNeighborElement1 = structure.atomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
+        Atom **listOfAtomsForNeighborElement1 = structure.atomsForElement[listOfThreeBodyNeighborElement1[n]];
         const int numberOfAtomsForNeighborElement1 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
      
-        Atom **listOfAtomsForNeighborElement2 = structure.atomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
+        Atom **listOfAtomsForNeighborElement2 = structure.atomsForElement[listOfThreeBodyNeighborElement2[n]];
         const int numberOfAtomsForNeighborElement2 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
      
         // first neighbors
@@ -298,11 +295,11 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     // Loop over all tree-body symmetry functions
     for (int n=0; n<n_3b; n++) 
     {
-         Atom **listOfAtomsForNeighborElement1 = structure.atomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
-        const int numberOfAtomsForNeighborElement1 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement1[n].c_str()];
+         Atom **listOfAtomsForNeighborElement1 = structure.atomsForElement[listOfThreeBodyNeighborElement1[n]];
+        const int numberOfAtomsForNeighborElement1 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement1[n]];
      
-        Atom **listOfAtomsForNeighborElement2 = structure.atomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
-        const int numberOfAtomsForNeighborElement2 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement2[n].c_str()];
+        Atom **listOfAtomsForNeighborElement2 = structure.atomsForElement[listOfThreeBodyNeighborElement2[n]];
+        const int numberOfAtomsForNeighborElement2 = structure.numberOfAtomsForElement[listOfThreeBodyNeighborElement2[n]];
      
         // check whether the gradient is respect to atom itself or other atoms
         if ( atomIndex_ip == atomIndex_i )

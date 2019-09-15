@@ -301,26 +301,24 @@ NeuralNetwork&  NeuralNetworkPotential::getNeuralNetworkForElement(const std::st
     return *neuralNetworks[getIndexForElement(element)];
 }
 
-double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, int atomIndex) 
+double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, Atom *atom) 
 {
-    Atom& atom = structure.getAtom(atomIndex);
-    std::vector<double> descriptorValues = getDescriptorForElement(atom.element).calculate(structure, atomIndex);
-    std::vector<double> scaledDescriptorValues = getScalerForElement(atom.element).scale(descriptorValues);
-    return getNeuralNetworkForElement(atom.element).calculateEnergy(scaledDescriptorValues);
+    std::vector<double> descriptorValues = getDescriptorForElement(atom->element).calculate(structure, atom);
+    std::vector<double> scaledDescriptorValues = getScalerForElement(atom->element).scale(descriptorValues);
+    return getNeuralNetworkForElement(atom->element).calculateEnergy(scaledDescriptorValues);
 }
 
 double NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure) 
 {
     double totalEnergy = 0.0;
     for(int i=0; i<structure.numberOfAtoms; i++)
-         totalEnergy += calculateEnergy(structure, structure.atoms[i]->index);
+         totalEnergy += calculateEnergy(structure, structure.atoms[i]);
    
     return totalEnergy;
 }
 
-std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& structure, int atomIndex) 
+std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& structure, Atom *atom_i) 
 {
-    Atom *atom_i = &structure.getAtom(atomIndex);
     std::vector<double> force({0, 0, 0});
 
     // list of index of atoms
@@ -337,7 +335,7 @@ std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& stru
         if ( rij > getDescriptorForElement(atom_j->element).getGlobalCutOffRadius() ) continue; // TODO: fix it!
 
         // gradient of neural network respect to symmetry functions
-        const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j->element).calculate(structure, atom_j->index);
+        const std::vector<double>& descriptorValues = getDescriptorForElement(atom_j->element).calculate(structure, atom_j);
         const std::vector<double>& scaledDescriptorValues = getScalerForElement(atom_j->element).scale(descriptorValues);
         const OpenNN::Vector<double>&  networkGradient = getNeuralNetworkForElement(atom_j->element).calculateJacobian(scaledDescriptorValues);
         const std::vector<double>& scalingFactors = getScalerForElement(atom_j->element).getScalingFactors();          

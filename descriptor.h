@@ -16,14 +16,14 @@ public:
     ~ACSF();
     void addTwoBodySF(TwoBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1); /*add two-body symmetry function*/
     void addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction, const std::string& neighborElement1, const std::string& neibghorElement2); /*add three-body symmetry function*/
-    TwoBodySymmetryFunction &getTwoBodySF(int index);
-    ThreeBodySymmetryFunction &getThreeBodySF(int index);
+    TwoBodySymmetryFunction& getTwoBodySF(int index);
+    ThreeBodySymmetryFunction& getThreeBodySF(int index);
     int getNumberOfTwoBodySF();
     int getNumberOfThreeBodySF();
     int getTotalNumberOfSF();
-    std::vector<std::vector<double>> calculate(AtomicStructure &structure);
-    std::vector<double> calculate(AtomicStructure &structure, int atomIndex);
-    std::vector<std::vector<double>> gradient(AtomicStructure &structure, int atomIndex_i, int atomIndex_j);
+    std::vector<std::vector<double>> calculate(AtomicStructure& structure);
+    std::vector<double> calculate(AtomicStructure& structure, Atom *atom);
+    std::vector<std::vector<double>> gradient(AtomicStructure& structure, int atomIndex_i, int atomIndex_j);
     double getGlobalCutOffRadius();
 
 // private:

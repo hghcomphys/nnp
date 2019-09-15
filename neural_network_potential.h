@@ -22,9 +22,9 @@ public:
     int getNumberOfElements() const;
     const std::vector<std::string>& getElements() const;
     const std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
-    double calculateEnergy(AtomicStructure& structure, int AtomIndex);
+    double calculateEnergy(AtomicStructure& structure, Atom *atom);
     double caculateTotalEnergy(AtomicStructure& structure);
-    std::vector<double> calculateForce(AtomicStructure& structure, int atomIndex);
+    std::vector<double> calculateForce(AtomicStructure& structure, Atom *atom);
 
 private:
     std::vector<std::string> elements;
