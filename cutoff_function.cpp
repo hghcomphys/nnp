@@ -9,7 +9,8 @@
 ------------------------------------------------------------------------- */
 CutoffFunction::CutoffFunction() {}
 
-void CutoffFunction::setCutoffRadius(double cutoffRadius) {
+void CutoffFunction::setCutoffRadius(double cutoffRadius) 
+{
     rc = cutoffRadius;
     inv_rc = 1.0 / cutoffRadius;
 }
