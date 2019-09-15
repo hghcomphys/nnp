@@ -38,33 +38,28 @@ void ACSF::addThreeBodySF(ThreeBodySymmetryFunction *symmetryFunction,
     listOfThreeBodyNeighborElement2.push_back(neighborElement2);
 }
 
-int ACSF::getNumberOfTwoBodySF() const 
+int ACSF::getNumberOfTwoBodySF() 
 { 
     return listOfTwoBodySF.size(); 
 }
 
-int ACSF::getNumberOfThreeBodySF() const 
+int ACSF::getNumberOfThreeBodySF() 
 { 
     return listOfThreeBodySF.size();
 }
 
-int ACSF::getTotalNumberOfSF() const 
+int ACSF::getTotalNumberOfSF() 
 { 
     return getNumberOfTwoBodySF() + getNumberOfThreeBodySF(); 
 }
 
-const std::string& ACSF::getCentralElement() const 
-{ 
-    return centralElement; 
-}
-
-TwoBodySymmetryFunction& ACSF::getTwoBodySF(int index) const 
+TwoBodySymmetryFunction& ACSF::getTwoBodySF(int index) 
 {
     // TODO: index error
     return *(listOfTwoBodySF[index]);
 }
 
-ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index) const 
+ThreeBodySymmetryFunction& ACSF::getThreeBodySF(int index) 
 {
     // TODO: index error
     return *(listOfThreeBodySF[index]);
@@ -425,7 +420,7 @@ std::vector<std::vector<double>> ACSF::gradient(AtomicStructure &structure, int 
     return values;
 }
 
-double ACSF::getGlobalCutOffRadius() const 
+double ACSF::getGlobalCutOffRadius() 
 {
     double maxValue = 0.0;
     // loop over two-body symmetry functions
