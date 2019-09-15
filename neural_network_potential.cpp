@@ -257,7 +257,7 @@ void NeuralNetworkPotential::readSetupFiles(const std::string& directory)
 
             // read weights
             char filename[32];
-            sprintf(filename, "weights.%3.3d.data", Atom::getAtomicNumber(element.c_str()));
+            sprintf(filename, "weights.%3.3d.data", getAtomicNumber(element));
             const std::string fullPathFileName = directory + std::string(filename);
             Log(INFO) << "Read " << fullPathFileName;
 

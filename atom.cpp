@@ -15,8 +15,8 @@ Atom::Atom(int index, const char *element, const double position[3]):
     setPosition(position);
 }
 
-Atom::Atom(int index, const char *element, const double position[3], const double force[3], double charge, double energy):
-    index(index), charge(charge), energy(energy)
+Atom::Atom(int index, const char *element, const double position[3], const double force[3], 
+    double charge, double energy): index(index), charge(charge), energy(energy)
 {
     setElement(element);
     setPosition(position);
@@ -58,13 +58,13 @@ std::string Atom::toString()
     return std::string(buff);
 }
    
-int Atom::getAtomicNumber(const std::string& elem) 
+int getAtomicNumber(const std::string& element) 
 {
     // TODO: extend to all elements
-    if ( elem == "H" )
+    if ( element == "H" )
         return 1;
-    else if ( elem == "C" )
+    else if ( element == "C" )
         return 6; 
-    else if ( elem == "O" )
+    else if ( element == "O" )
         return 8;
 }
