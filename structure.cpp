@@ -31,7 +31,7 @@ AtomicStructure::~AtomicStructure()
     }    
 }
 
-void AtomicStructure::writeFileFormatRunner(const char *filename)
+void AtomicStructure::writeFileFormatRunner(const std::string& filename)
 {
     // open input structure file
     std::ofstream outFile(filename);
@@ -71,7 +71,7 @@ void AtomicStructure::writeFileFormatRunner(const char *filename)
     outFile.close();
 }
 
-void AtomicStructure::readFileFormatRuNNer(const char *filename)
+void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
 {
     // open input structure file
     std::ifstream inFile(filename);

@@ -15,10 +15,10 @@ class AtomicStructure {
 public:
     AtomicStructure();
     ~AtomicStructure();
-    void writeFileFormatRunner(const char *filename);
-    void readFileFormatRuNNer(const char *filename);
+    void writeFileFormatRunner(const std::string& filename);
+    void readFileFormatRuNNer(const std::string& filename);
     void readFileFormatRuNNer();
-    Atom &getAtom(int atomIndex);
+    Atom& getAtom(int atomIndex);
     void setCell(const double cell[9]);
     double distance(Atom *atom_i, Atom *atom_j, double drij[3]);
     double distance(Atom *atom_i, Atom *atom_j);
@@ -35,10 +35,10 @@ public:
     std::map<std::string, int> numberOfAtomsForElement;
     std::map<std::string, Atom**> atomsForElement; 
     Distance **tableOfDistances;
-    void applyPBC(double &dx, double &dy, double &dz);
+    void applyPBC(double& dx, double& dy, double& dz);
 };
 
-inline Atom &AtomicStructure::getAtom(int atomIndex) 
+inline Atom& AtomicStructure::getAtom(int atomIndex) 
 { 
     return *atoms[atomIndex]; 
 }

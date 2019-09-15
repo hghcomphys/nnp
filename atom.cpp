@@ -3,29 +3,22 @@
 //
 
 #include "atom.h"
-#include <cstring>
+#define ATOM_BUFSIZE 200
 
 /* ----------------------------------------------------------------------
    setup for Atom
 ------------------------------------------------------------------------- */
-Atom::Atom(int index, const char *element, const double position[3]): 
-    index(index), fx(0), fy(0), fz(0), charge(0), energy(0)
+Atom::Atom(int index, const std::string& element, const double position[3]): 
+    index(index), element(element), fx(0), fy(0), fz(0), charge(0), energy(0)
 {
-    setElement(element);
     setPosition(position);
 }
 
-Atom::Atom(int index, const char *element, const double position[3], const double force[3], double charge, double energy): 
-    index(index), charge(charge), energy(energy)
+Atom::Atom(int index, const std::string& element, const double position[3], const double force[3], double charge, double energy): 
+    index(index), element(element), charge(charge), energy(energy)
 {
-    setElement(element);
     setPosition(position);
     setForce(force);
-}
-
-void Atom::setElement(const char *element)
-{
-    strcpy(this->element, element);
 }
 
 void Atom::setPosition(const double position[3])
@@ -42,9 +35,9 @@ void Atom::setForce(const double force[3])
     fz = force[2];
 }
 
-bool Atom::isElement(const char *element)
+bool Atom::isElement(const std::string& element)
 {
-    if ( std::strcmp(this->element, element) )
+    if ( this->element == element )
         return true;
     else 
         return false;
