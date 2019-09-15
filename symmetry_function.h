@@ -12,16 +12,15 @@
 class SymmetryFunction {
 public:
     SymmetryFunction(double cutoffRadius);
-    double getCutoffRadius();
+// protected:
     CutoffFunction cutoffFunction;
-protected:
     double cutoffRadius;
+    double gradientValue[3];
 };
 
 // Two-body symmetry function base class
 class TwoBodySymmetryFunction: public SymmetryFunction { 
 public:
-    double gradientValue[3];
     TwoBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
     virtual double function(double rij) {}; 
     virtual void gradient_ii(double rij, double drij[3]) {}; 
@@ -31,7 +30,6 @@ public:
 // Three-body symmetry function base class
 class ThreeBodySymmetryFunction: public SymmetryFunction {
 public:
-    double gradientValue[3];
     ThreeBodySymmetryFunction(double cutoffRadius): SymmetryFunction(cutoffRadius) {};
     virtual double function(double rij, double rik, double rjk, double cost) {}; 
     virtual void gradient_ii(double rij, double rik, double rjk, double cost, double drij[3], double drik[3], double drjk[3]) {}; 

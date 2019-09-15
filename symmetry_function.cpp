@@ -16,11 +16,6 @@ SymmetryFunction::SymmetryFunction(double cutoffRadius): cutoffRadius(cutoffRadi
     cutoffFunction.setCutoffRadius(cutoffRadius);
 }
 
-double SymmetryFunction::getCutoffRadius() 
-{ 
-    return cutoffRadius; 
-}
-
 
 /* ----------------------------------------------------------------------
    setup for G0 symmetry function
@@ -46,7 +41,6 @@ void  G0::gradient_ii(double rij, double drij[3])
         return;
     }
     // gradient of symmytry function of atom i respect to itself
-    std::vector<double> result(3);
     const double temp = cutoffFunction.dfc(rij) / rij;
     for (int d=0; d<3; d++)
         gradientValue[d] = drij[d] * temp;
