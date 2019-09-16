@@ -1,15 +1,16 @@
 
 CXX = g++
-CXXFLAGS = -Wall #-pg  #-O3 #-D__PURE_INTEL_C99_HEADERS__  # -std=c++11
+CXXFLAGS = -Wall -O2 #-D__PURE_INTEL_C99_HEADERS__  # -std=c++11
 LFLAGS = -lopennn -ltinyxml2 #-pg #-fopenmp #-ltensorflow
 
-OBJS = main.o atom.o distance.o descriptor.o structure.o symmetry_function.o cutoff_function.o neural_network_potential.o neural_network.o symmetry_function_scaler.o logger.o
+EXE = nnp-pred.x
+OBJS = nnp-pred.o atom.o distance.o descriptor.o structure.o symmetry_function.o cutoff_function.o neural_network_potential.o neural_network.o symmetry_function_scaler.o logger.o
 
 all: $(OBJS)
-	$(CXX) $(OBJS) -o nnp.x $(LFLAGS)
+	$(CXX) $(OBJS) -o $(EXE) $(LFLAGS)
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
+nnp-pred.o: nnp-pred.cpp
+	$(CXX) $(CXXFLAGS) -c nnp-pred.cpp
 
 atom.o: atom.cpp atom.h
 	$(CXX) $(CXXFLAGS) -c atom.cpp
@@ -42,4 +43,4 @@ distance.o: distance.cpp distance.h
 	$(CXX) $(CXXFLAGS) -c distance.cpp
 
 clean:
-	rm -f *.o nnp.x
+	rm -f *.o $(EXE)
