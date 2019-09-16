@@ -4,11 +4,7 @@
 #include "neural_network_potential.h"
 #include "logger.h"
 
-// #include <tensorflow/c/c_api.h>
-// #include "opennn.h"
-
 using namespace std;
-// using namespace OpenNN;
 
 int main(int argc,char* argv[])
 {
@@ -32,7 +28,7 @@ int main(int argc,char* argv[])
         // make atomic structure and read data from a file
         // -----------------------------------------------
         AtomicStructure structure;
-        structure.readFileFormatRuNNer("log/input.data");
+        structure.readFileFormatRuNNer("example/input.data");
         structure.calculateTableOfDistances();
 
         // -------------------------------------------------
@@ -60,7 +56,7 @@ int main(int argc,char* argv[])
         nnp.calculateForce(structure);
 
         // write (calculated NNP energy and forces) into RuNNer data format
-        structure.writeFileFormatRunner("log/input.data.pred");
+        structure.writeFileFormatRunner("example/input.data.pred");
     }
 
     catch (runtime_error e)
