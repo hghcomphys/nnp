@@ -283,7 +283,9 @@ void NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure)
         totalEnergy += atom_i->energy;
     }
     // overwrite total energy to the structure
-    structure.totalCharge = totalEnergy;
+    structure.totalEnergy = totalEnergy;
+
+    Log(INFO) << "Calculate NNP energy";
 }
 
 void NeuralNetworkPotential::calculateForce(AtomicStructure& structure, Atom *atom_i) 
@@ -349,6 +351,10 @@ void NeuralNetworkPotential::calculateForce(AtomicStructure& structure, Atom *at
 
  void NeuralNetworkPotential::calculateForce(AtomicStructure& structure)
  {
-     for (int i=0; i<structure.numberOfAtoms; i++) 
+    Log(INFO) << "Calculating NNP forces for entire structure ... (it may take a while)";
+    
+    for (int i=0; i<structure.numberOfAtoms; i++) 
         calculateForce(structure, structure.atoms[i]);
+    
+    Log(INFO) << "NNP force calculation was successfully done";
  }

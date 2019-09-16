@@ -69,6 +69,9 @@ void AtomicStructure::writeFileFormatRunner(const std::string& filename)
     outFile << "end\n";
     
     outFile.close();
+
+    // log out info regarding number of atoms/elements/cell
+    Log(INFO) << "Write structure into " << filename; 
 }
 
 void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
