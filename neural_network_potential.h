@@ -21,9 +21,10 @@ public:
     NeuralNetwork& getNeuralNetworkForElement(const std::string& element);
     int getNumberOfElements();
     const std::vector<std::vector<double>>& getDescriptorValuesForElement(const std::string& element);
-    double calculateEnergy(AtomicStructure& structure, Atom *atom);
-    double caculateTotalEnergy(AtomicStructure& structure);
-    std::vector<double> calculateForce(AtomicStructure& structure, Atom *atom);
+    void calculateEnergy(AtomicStructure& structure, Atom *atom_i);
+    void caculateTotalEnergy(AtomicStructure& structure);
+    void calculateForce(AtomicStructure& structure, Atom *atom);
+    void calculateForce(AtomicStructure& structure);
 
 // private:
     std::vector<std::string> elements;

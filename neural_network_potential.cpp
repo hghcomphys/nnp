@@ -248,46 +248,48 @@ NeuralNetwork&  NeuralNetworkPotential::getNeuralNetworkForElement(const std::st
     return *neuralNetworks[getIndexForElement(element)];
 }
 
-double NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, Atom *atom) 
+void NeuralNetworkPotential::calculateEnergy(AtomicStructure& structure, Atom *atom_i) 
 {
     // get descriptor for element
-    ACSF& descriptor = getDescriptorForElement(atom->element);
+    ACSF& descriptor = getDescriptorForElement(atom_i->element);
     
     // allocate memory for descriptor values
     int descriptorSize = descriptor.getTotalNumberOfSF();
     double *descriptorValues = new double[descriptorSize];
     
     // calulate descriptor
-    descriptor.calculate(structure, atom, descriptorValues);
+    descriptor.calculate(structure, atom_i, descriptorValues);
     
     // scale descriptor
-    getScalerForElement(atom->element).scale(descriptorValues, descriptorSize);
+    getScalerForElement(atom_i->element).scale(descriptorValues, descriptorSize);
     
     // calculate NNP enrgy
-    double energy  = getNeuralNetworkForElement(atom->element).calculateEnergy(descriptorValues, descriptorSize);
+    double energy  = getNeuralNetworkForElement(atom_i->element).calculateEnergy(descriptorValues, descriptorSize);
     
     // free allocated memory
     delete descriptorValues;
     
-    // return NNP energy
-    return energy;
+    // overwite energy to the atom;
+    atom_i->energy = energy;
 }
 
-double NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure) 
+void NeuralNetworkPotential::caculateTotalEnergy(AtomicStructure& structure) 
 {
     double totalEnergy = 0.0;
-    for(int i=0; i<structure.numberOfAtoms; i++)
-         totalEnergy += calculateEnergy(structure, structure.atoms[i]);
-   
-    return totalEnergy;
+    for(int i=0; i<structure.numberOfAtoms; i++) 
+    {
+        Atom *atom_i = structure.atoms[i];
+        calculateEnergy(structure, atom_i);
+        totalEnergy += atom_i->energy;
+    }
+    // overwrite total energy to the structure
+    structure.totalCharge = totalEnergy;
 }
 
-std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& structure, Atom *atom_i) 
+void NeuralNetworkPotential::calculateForce(AtomicStructure& structure, Atom *atom_i) 
 {
-    std::vector<double> force({0, 0, 0});
-
-    // list of index of atoms
-    // const auto& listofAtomIndex = structure.getListOfAtomIndex();
+    // initilize force array to zero
+    double force[3] = {0, 0, 0};
 
     // sum over all atoms
     for (int j=0; j<structure.numberOfAtoms; j++) 
@@ -339,6 +341,14 @@ std::vector<double> NeuralNetworkPotential::calculateForce(AtomicStructure& stru
         delete[] gradientValues;
     }
 
-    // return force vector applied on atomIndex
-    return force;
+    // overwrite calculated force into the atom
+    atom_i->fx = force[0];
+    atom_i->fy = force[1];
+    atom_i->fz = force[2];
 }
+
+ void NeuralNetworkPotential::calculateForce(AtomicStructure& structure)
+ {
+     for (int i=0; i<structure.numberOfAtoms; i++) 
+        calculateForce(structure, structure.atoms[i]);
+ }
