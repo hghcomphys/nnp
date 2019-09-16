@@ -46,8 +46,8 @@ bool Atom::isElement(const std::string& element)
 std::string Atom::toString()
 {
     char buff[ATOM_BUFSIZE];
-    sprintf(buff, "Atom(index=%d, element=%s, position=(%f, %f, %f), force=(%f, %f, %f))",
-        index, element, x, y, z, fx, fy, fz);
+    sprintf(buff, "Atom(index=%d, element=%s, position=(%f, %f, %f), force=(%f, %f, %f), energy=%f)",
+        index, element.c_str(), x, y, z, fx, fy, fz, energy);
     return std::string(buff);
 }
    
