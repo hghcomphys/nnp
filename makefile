@@ -4,13 +4,13 @@ CXXFLAGS = -Wall -O2 #-D__PURE_INTEL_C99_HEADERS__  # -std=c++11
 LFLAGS = -lopennn -ltinyxml2 #-pg #-fopenmp #-ltensorflow
 
 EXE = nnp-pred.x
-OBJS = nnp-pred.o atom.o distance.o descriptor.o structure.o symmetry_function.o cutoff_function.o neural_network_potential.o neural_network.o symmetry_function_scaler.o logger.o
+OBJS = main.o atom.o distance.o descriptor.o structure.o symmetry_function.o cutoff_function.o neural_network_potential.o neural_network.o symmetry_function_scaler.o logger.o
 
 all: $(OBJS)
 	$(CXX) $(OBJS) -o $(EXE) $(LFLAGS)
 
-nnp-pred.o: nnp-pred.cpp
-	$(CXX) $(CXXFLAGS) -c nnp-pred.cpp
+main.o: main.cpp
+	$(CXX) $(CXXFLAGS) -c main.cpp
 
 atom.o: atom.cpp atom.h
 	$(CXX) $(CXXFLAGS) -c atom.cpp
