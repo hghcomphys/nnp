@@ -1,5 +1,5 @@
 /*
-  base.c: This file is part of Free Molecular Dynamics
+  symmetry_function_scaler.cpp: This file is part of Free Molecular Dynamics
 
   Copyright (C) 2019 Hossein Ghorbanfekr
 
