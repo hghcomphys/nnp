@@ -9,11 +9,11 @@ Dependencies:
 
 How to compile:
 ```
-$ make all
+$make all
 ```
 
 How to run:
 ```
-$ ./nnp-pred.x path_to_nnp_potential_directory
+$./nnp-pred.x path_to_nnp_potential input.data
 ```
-*Example: ./nnp-pred.x potentials/water*
+*Example: ./nnp-pred.x potentials/water input.data*
