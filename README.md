@@ -1,4 +1,4 @@
-## C++ Implementation of Neural Network Potential
+## NNP - C++ Implementation of Neural Network Potential
 
 This repository is a c++ implementation of high-dimensional neural network interatomic potential (NNP) used for force field molecular dynamics simulation. At this moment, only the predict mode is implemented. 
 This means that if one has a trained potential data files including symmetry functions and weights 
@@ -9,11 +9,11 @@ Dependencies:
 
 How to compile:
 ```
-$make all
+make all
 ```
 
 How to run:
 ```
-$./nnp-pred.x path_to_nnp_potential input.data
+./nnp-pred.x [path_to_nnp_potential] [input_file]
 ```
-*Example: ./nnp-pred.x potentials/water input.data*
+*Example: ./nnp-pred.x ../potentials/water ../example/input.data*

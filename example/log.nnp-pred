@@ -1,11 +1,11 @@
-[WARN ] Expected (1) path to NNP potential and (2) input filename!
-[WARN ] './nnp-pred potentials/water example/input.data' will be used instead
-[INFO ] Output: example/input.data.pred
-[INFO ] Read example/input.data (222 atoms)
+[INFO ] NNP directory: ../potentials/water//
+[INFO ] Input: ../example/input.data
+[INFO ] Output: ../example/input.data.pred
+[INFO ] Read ../example/input.data (222 atoms)
 [INFO ] Element H: 148
 [INFO ] Element O: 74
 [INFO ] Cell (PBC)
-[INFO ] Read potentials/water/input.nn
+[INFO ] Read ../potentials/water//input.nn
 [INFO ] number_of_elements: 2
 [INFO ] Element: H
 [INFO ] Element: O
@@ -17,13 +17,13 @@
 [INFO ] global_activation_short: t
 [INFO ] global_activation_short: t
 [INFO ] global_activation_short: l
-[INFO ] Read potentials/water/nnp-scaling.log.0000 (H)
-[INFO ] Read potentials/water/nnp-scaling.log.0000 (O)
+[INFO ] Read ../potentials/water//nnp-scaling.log.0000 (H)
+[INFO ] Read ../potentials/water//nnp-scaling.log.0000 (O)
 [INFO ] Read scaling.data (H)
 [INFO ] Read scaling.data (O)
 [INFO ] Neural Network (H)
 [INFO ] Neural Network (O)
-[INFO ] Read potentials/water/weights.001.data
+[INFO ] Read ../potentials/water//weights.001.data
 [INFO ] Weight matrix in layer(1): (25, 27)
 [INFO ] Biases vector in layer(1): (25)
 [INFO ] Weight matrix in layer(2): (25, 25)
@@ -31,7 +31,7 @@
 [INFO ] Weight matrix in layer(3): (1, 25)
 [INFO ] Biases vector in layer(3): (1)
 [INFO ] Initialize weights for Neural network (H)
-[INFO ] Read potentials/water/weights.008.data
+[INFO ] Read ../potentials/water//weights.008.data
 [INFO ] Weight matrix in layer(1): (25, 30)
 [INFO ] Biases vector in layer(1): (25)
 [INFO ] Weight matrix in layer(2): (25, 25)
@@ -39,17 +39,7 @@
 [INFO ] Weight matrix in layer(3): (1, 25)
 [INFO ] Biases vector in layer(3): (1)
 [INFO ] Initialize weights for Neural network (O)
-Atom(index=0, element=H, position=(10.923614, 9.327703, 24.401523), force=(-0.009181, -0.024016, -0.002030), energy=-0.115862)
-Atom(index=1, element=H, position=(11.404871, 11.935260, 23.294154), force=(-0.002904, 0.028370, -0.033900), energy=-0.116002)
-Atom(index=2, element=H, position=(2.577132, 24.086662, 23.802902), force=(-0.015988, 0.008179, -0.001734), energy=-0.114553)
-Atom(index=3, element=H, position=(4.831423, 24.240971, 22.059863), force=(0.009002, 0.005678, -0.019489), energy=-0.118163)
-Atom(index=4, element=H, position=(18.034824, 21.644615, 16.140450), force=(0.003854, 0.010076, -0.010666), energy=-0.102639)
-Atom(index=5, element=H, position=(18.081481, 22.891835, 13.398798), force=(-0.005784, -0.001863, -0.005082), energy=-0.106861)
-Atom(index=6, element=H, position=(4.606376, 4.035679, 13.531362), force=(-0.009789, 0.000941, 0.005455), energy=-0.103889)
-Atom(index=7, element=H, position=(5.444393, 1.441258, 14.620147), force=(-0.000112, 0.004171, -0.003836), energy=-0.109351)
-Atom(index=8, element=H, position=(9.556341, 17.813839, 15.562855), force=(-0.013388, 0.004629, 0.025585), energy=-0.100576)
-Atom(index=9, element=H, position=(11.711063, 16.326115, 14.192351), force=(0.023640, -0.016138, 0.006558), energy=-0.115890)
 [INFO ] Calculate NNP energy
 [INFO ] Calculating NNP forces for entire structure ... (it may take a while)
 [INFO ] NNP force calculation was successfully done
-[INFO ] Write structure into example/input.data.pred
+[INFO ] Write structure into ../example/input.data.pred
