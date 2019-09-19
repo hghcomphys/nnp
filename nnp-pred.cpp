@@ -10,25 +10,32 @@ int main(int argc,char* argv[])
 {
     try {
 
-        // set path to NNP potential files
+        // set defaults
         string potentialPath = "potentials/water/";
-
+        string inStructureFile = "example/input.data";
+        
         // read input argument
-        if(argc==1) {
-            Log(WARN) << "Path to NNP potential directory has to be given!";
-            Log(WARN) << " [./nnp-pred potentials/water] will be used instead"; 
-        }    
-        else
-        {
-            potentialPath = string(argv[1]) + "/";
-            Log(INFO) << "NNP directory: " << potentialPath;
+        switch (argc) {
+            case 1:
+                Log(WARN) << "Expected (1) path to NNP potential and (2) input filename!";
+                Log(WARN) << "'./nnp-pred potentials/water example/input.data' will be used instead"; 
+                break;
+            default:
+                potentialPath = string(argv[1]) + "/";
+                Log(INFO) << "NNP directory: " << potentialPath;
+
+                 string inStructureFile = "example/input.data";
+                Log(INFO) << "Input: " << inStructureFile;
         }
+
+        string outStructureFile = inStructureFile + ".pred";
+        Log(INFO) << "Output: " << outStructureFile;
 
         // -----------------------------------------------
         // make atomic structure and read data from a file
         // -----------------------------------------------
         AtomicStructure structure;
-        structure.readFileFormatRuNNer("example/input.data");
+        structure.readFileFormatRuNNer(inStructureFile);
         structure.calculateTableOfDistances();
 
         // -------------------------------------------------
@@ -37,7 +44,7 @@ int main(int argc,char* argv[])
         NeuralNetworkPotential nnp;
         nnp.readSetupFiles(potentialPath);
 
-        // calculate NNP energy and forces specific atoms 
+        // calculate NNP energy and forces for specific atoms 
         for (int i=0; i<10; i++) 
         {
             // get specific atom in structure file
@@ -51,12 +58,12 @@ int main(int argc,char* argv[])
             cout << atom.toString() << endl;
         }       
 
-        // calculate NNP energy and forces for all atoms in given structure 
+        // Or, calculate NNP energy and forces for all atoms in given structure 
         nnp.caculateTotalEnergy(structure); 
         nnp.calculateForce(structure);
 
         // write (calculated NNP energy and forces) into RuNNer data format
-        structure.writeFileFormatRunner("example/input.data.pred");
+        structure.writeFileFormatRunner(outStructureFile);
     }
 
     catch (runtime_error e)
