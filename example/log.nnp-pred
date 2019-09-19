@@ -1,6 +1,7 @@
-[WARN ] Path to NNP potential directory has to be given!
-[WARN ]  [./nnp-pred potentials/water] will be used instead
-[INFO ] Read log/input.data (222 atoms)
+[WARN ] Expected (1) path to NNP potential and (2) input filename!
+[WARN ] './nnp-pred potentials/water example/input.data' will be used instead
+[INFO ] Output: example/input.data.pred
+[INFO ] Read example/input.data (222 atoms)
 [INFO ] Element H: 148
 [INFO ] Element O: 74
 [INFO ] Cell (PBC)
@@ -51,4 +52,4 @@ Atom(index=9, element=H, position=(11.711063, 16.326115, 14.192351), force=(0.02
 [INFO ] Calculate NNP energy
 [INFO ] Calculating NNP forces for entire structure ... (it may take a while)
 [INFO ] NNP force calculation was successfully done
-[INFO ] Write structure into log/input.data.pred
+[INFO ] Write structure into example/input.data.pred
