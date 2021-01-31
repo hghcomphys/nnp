@@ -21,11 +21,11 @@
 #include <sstream>
 #include "structure.h"
 #include "neural_network_potential.h"
-#include "logger.h"
 
 using namespace std;
 
-int main(int argc,char* argv[])
+
+int main(int argc, char* argv[])
 {
     try {
 
@@ -35,20 +35,20 @@ int main(int argc,char* argv[])
         // read input argument
         if (argc==1) 
         {
-            Log(ERROR) << "Expected (1) path to NNP potential and (2) input structure filename\n"
+            cerr << "Expected (1) path to NNP potential and (2) input structure filename\n"
                         << "        Example run: ./nnp-pred.x potentials/water example/input.data";
             exit(1); 
         }
         else 
         {
             potentialPath = string(argv[1]) + "/";
-            Log(INFO) << "NNP directory: " << potentialPath;
+            cout << "NNP directory: " << potentialPath << endl;
 
             inStructureFile = string(argv[2]);
-            Log(INFO) << "Input: " << inStructureFile;
+            cout << "Input: " << inStructureFile << endl;
 
             outStructureFile = inStructureFile + ".pred";
-            Log(INFO) << "Output: " << outStructureFile;
+            cout << "Output: " << outStructureFile << endl;
         }
 
         // -----------------------------------------------
@@ -61,8 +61,8 @@ int main(int argc,char* argv[])
         // -------------------------------------------------
         // make neural network potential
         // ------------------------------------------------
-        NeuralNetworkPotential nnp;
-        nnp.readSetupFiles(potentialPath);
+        // NeuralNetworkPotential nnp;
+        // nnp.readSetupFiles(potentialPath);
 
         // // calculate NNP energy and forces for specific atoms 
         // for (int i=0; i<10; i++) 
@@ -79,16 +79,16 @@ int main(int argc,char* argv[])
         // }       
 
         // Or, calculate NNP energy and forces for all atoms in given structure 
-        nnp.caculateTotalEnergy(structure); 
-        nnp.calculateForce(structure);
+        // nnp.caculateTotalEnergy(structure); 
+        // nnp.calculateForce(structure);
 
         // write (calculated NNP energy and forces) into RuNNer data format
-        structure.writeFileFormatRunner(outStructureFile);
+        // structure.writeFileFormatRunner(outStructureFile);
     }
 
     catch (runtime_error e)
     {
-        cout << "Runtime Error: " << e.what() << "!" << endl;
+        cerr << "Runtime Error: " << e.what() << "!" << endl;
     }
 
 }
