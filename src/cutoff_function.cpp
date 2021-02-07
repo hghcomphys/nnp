@@ -28,10 +28,10 @@
 ------------------------------------------------------------------------- */
 CutoffFunction::CutoffFunction() {}
 
-void CutoffFunction::setCutoffRadius(double rc) 
+void CutoffFunction::setCutoffRadius(double cutoffRadius) 
 {
-    rc = rc;
-    inv_rc = 1.0 / rc;
+    rc = cutoffRadius;
+    inv_rc = 1.0 / cutoffRadius;
 }
 
 // TODO: other types of cutoff function
@@ -62,3 +62,4 @@ double CutoffFunction::dfc(double r)
     tmp *= tmp;
     return 3.0 * tmp * (tmp - 1.0) * inv_rc;
 }
+
