@@ -1,8 +1,9 @@
 ## NNP - C++ Implementation of Neural Network Potential
 
-This repository is an experimental c++ implementation of high-dimensional neural network interatomic potential (HDNNP) used for force field molecular dynamics simulation. At this moment, only the _predict_ mode is implemented. 
-This means that if one has a trained potential data files including symmetry functions and weights 
-for the neural network, the excutable file `nnp-pred.x` will predict energy and force components of atom(s) for a given input structure file.
+This repository presents an experimental implementation in C++ of a high-dimensional neural network interatomic potential (HDNNP) used in force field molecular dynamics simulations. 
+Currently, only the _predict_ mode has been implemented. This means that if we possess trained potential data files containing symmetry functions and weights for the neural network, the executable file `nnp-pred.x` will be able to predict the energy and force components of atom(s) for a provided input structure file.
+
+This repository is intended solely for educational purposes. 
 
 Dependencies:
 - Open-source neural network library [OpenNN](http://www.opennn.net/documentation/)
