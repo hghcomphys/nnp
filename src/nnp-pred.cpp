@@ -61,8 +61,8 @@ int main(int argc, char* argv[])
         // -------------------------------------------------
         // make neural network potential
         // ------------------------------------------------
-        // NeuralNetworkPotential nnp;
-        // nnp.readSetupFiles(potentialPath);
+        NeuralNetworkPotential nnp;
+        nnp.readSetupFiles(potentialPath);
 
         // // calculate NNP energy and forces for specific atoms 
         // for (int i=0; i<10; i++) 
@@ -79,8 +79,10 @@ int main(int argc, char* argv[])
         // }       
 
         // Or, calculate NNP energy and forces for all atoms in given structure 
-        // nnp.caculateTotalEnergy(structure); 
+        nnp.caculateTotalEnergy(structure); 
         // nnp.calculateForce(structure);
+
+        cout << "Total energy: " << structure.totalEnergy << endl;
 
         // write (calculated NNP energy and forces) into RuNNer data format
         // structure.writeFileFormatRunner(outStructureFile);
