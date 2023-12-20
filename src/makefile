@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -Wall -O2 #-D__PURE_INTEL_C99_HEADERS__  # -std=c++11
-LFLAGS = -lopennn -ltinyxml2 #-pg #-fopenmp #-ltensorflow
+CXXFLAGS = -Wall -O2 -I ~/opennn/opennn #-D__PURE_INTEL_C99_HEADERS__ # -std=c++11
+LFLAGS = -lopennn -L ~/opennn/opennn #-ltinyxml2 #-pg #-fopenmp #-ltensorflow
 
 EXE = nnp-pred.x
 
