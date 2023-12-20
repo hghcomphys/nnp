@@ -1,7 +1,7 @@
 [INFO ] NNP directory: ../potentials/water//
-[INFO ] Input: ../example/input.data
-[INFO ] Output: ../example/input.data.pred
-[INFO ] Read ../example/input.data (222 atoms)
+[INFO ] Input: ../examples/input.data
+[INFO ] Output: ../examples/input.data.pred
+[INFO ] Read ../examples/input.data (222 atoms)
 [INFO ] Element H: 148
 [INFO ] Element O: 74
 [INFO ] Cell (PBC)
@@ -42,4 +42,4 @@
 [INFO ] Calculate NNP energy
 [INFO ] Calculating NNP forces for entire structure ... (it may take a while)
 [INFO ] NNP force calculation was successfully done
-[INFO ] Write structure into ../example/input.data.pred
+[INFO ] Write structure into ../examples/input.data.pred
