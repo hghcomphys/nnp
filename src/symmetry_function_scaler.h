@@ -27,26 +27,26 @@
 #include <vector>
 #include <string>
 
-
-class Scaler {
+class Scaler
+{
 public:
     Scaler(double min, double max, double mean, double sigma);
     double scale(double value);
     void setScalingFactor();
 
-// private:
+    // private:
     double min, max, mean, sigma;
     double smin, smax;
     double scalingFactor;
 };
 
-
-class SymmeryFunctionsScaler {
+class SymmetryFunctionsScaler
+{
 public:
-    SymmeryFunctionsScaler();
-    void addScaler(const Scaler& newScaler);
+    SymmetryFunctionsScaler();
+    void addScaler(const Scaler &newScaler);
     int getNumberOfScalers();
-    void readScaling(const std::string& filename, int elementIndex);
+    void readScaling(const std::string &filename, int elementIndex);
     void scale(double *descriptorValues, int descriptorSize);
     void setMaxNumberOfWarnings(double number);
     int getMaxNumberOfWarnings();
@@ -57,5 +57,4 @@ private:
     int numberOfWarnings, maxNumberOfWarnings;
 };
 
-
-#endif //NNP_SYMMETRYFUNCTIONSCALER_H
+#endif // NNP_SYMMETRYFUNCTIONSCALER_H

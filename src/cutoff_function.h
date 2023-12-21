@@ -26,17 +26,17 @@
 
 #include <cmath>
 
-class CutoffFunction {
+class CutoffFunction
+{
 public:
-    CutoffFunction();
-    void setCutoffRadius(double cutoffRadius);
-    double fc(double r);
-    double dfc(double r);
+  CutoffFunction();
+  void setCutoffRadius(double cutoffRadius);
+  double fc(double r);
+  double dfc(double r);
 
 private:
-    double rc;
-    double inv_rc;
+  double rc;
+  double inv_rc;
 };
 
-
-#endif //NNP_CUTOFFFUNCTION_H
+#endif // NNP_CUTOFFFUNCTION_H

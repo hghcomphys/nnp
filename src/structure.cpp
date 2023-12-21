@@ -31,80 +31,82 @@
 /* ----------------------------------------------------------------------
    setup for Atoms
 ------------------------------------------------------------------------- */
-AtomicStructure::AtomicStructure(): isAtom(false), isCell(false), isTableOfDistances(false),
-    numberOfAtoms(0), tableOfDistances(NULL), totalCharge(0), totalEnergy(0) {}
+AtomicStructure::AtomicStructure() : isAtom(false), isCell(false), isTableOfDistances(false),
+                                     numberOfAtoms(0), tableOfDistances(NULL), totalCharge(0), totalEnergy(0) {}
 
-AtomicStructure::~AtomicStructure() 
-{ 
+AtomicStructure::~AtomicStructure()
+{
     // free allocated memory for list of atoms (array of pointers)
-    if ( isAtom ) {
-        for (int i=0; i<numberOfAtoms; i++)
+    if (isAtom)
+    {
+        for (int i = 0; i < numberOfAtoms; i++)
             delete atoms[i];
         delete[] atoms;
     }
     // free memory for table of distances (matrix of pointets)
-    if ( isTableOfDistances ) {
-        for (int i=0; i<numberOfAtoms; i++)
+    if (isTableOfDistances)
+    {
+        for (int i = 0; i < numberOfAtoms; i++)
             delete[] tableOfDistances[i];
         delete[] tableOfDistances;
-    }    
+    }
 }
 
-void AtomicStructure::writeFileFormatRunner(const std::string& filename)
+void AtomicStructure::writeFileFormatRunner(const std::string &filename)
 {
     // open input structure file
     std::ofstream outFile(filename);
-    if (!outFile) 
-        throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
+    if (!outFile)
+        throw std::runtime_error((Log(ERROR) << "Unable to open file " << filename).toString());
 
     outFile << "begin\n";
     // cell
-    if ( isCell )
-        for (int d=0; d<9; d+=3)
-            outFile << "lattice " << cell[d] << " " << cell[d+1] << " " << cell[d+2] << "\n";
+    if (isCell)
+        for (int d = 0; d < 9; d += 3)
+            outFile << "lattice " << cell[d] << " " << cell[d + 1] << " " << cell[d + 2] << "\n";
     else
         Log(WARN) << "No cell data available to wrote into " << filename;
-    
+
     // atoms
-    if ( isAtom )
+    if (isAtom)
     {
-        for (int i=0; i<numberOfAtoms; i+=1) 
+        for (int i = 0; i < numberOfAtoms; i += 1)
         {
             Atom *atom = atoms[i];
-            outFile << "atom " 
-                << atom->x 
-                << " " << atom->y << " " << atom->z << " " << atom->element
-                << " " << atom->charge << " " << atom->energy 
-                << " " << atom->fx << " " << atom->fy << " " << atom->fz 
-                << "\n";
+            outFile << "atom "
+                    << atom->x
+                    << " " << atom->y << " " << atom->z << " " << atom->element
+                    << " " << atom->charge << " " << atom->energy
+                    << " " << atom->fx << " " << atom->fy << " " << atom->fz
+                    << "\n";
         }
-    }    
+    }
     else
         Log(ERROR) << "No atom data available to wrote into " << filename;
-    
+
     // total energy and charge
     outFile << "energy " << totalEnergy << "\n";
     outFile << "charge " << totalCharge << "\n";
     outFile << "end\n";
-    
+
     outFile.close();
 
     // log out info regarding number of atoms/elements/cell
-    Log(INFO) << "Write structure into " << filename; 
+    Log(INFO) << "Write structure into " << filename;
 }
 
-void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
+void AtomicStructure::readFileFormatRuNNer(const std::string &filename)
 {
     // open input structure file
     std::ifstream inFile(filename);
-    if (!inFile) 
-        throw std::runtime_error( (Log(ERROR) << "Unable to open file " << filename).toString() );
+    if (!inFile)
+        throw std::runtime_error((Log(ERROR) << "Unable to open file " << filename).toString());
 
     // variables parsing input file
     std::string line, keyword;
 
     // pre-reading the structure file (e.g. number of atoms)
-    while ( std::getline(inFile, line) ) 
+    while (std::getline(inFile, line))
     {
         std::stringstream ss(line);
         ss >> keyword;
@@ -118,7 +120,7 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
             double ddummy;
             std::string element;
             ss >> ddummy >> ddummy >> ddummy >> element;
-            
+
             // increase number of atom for element
             numberOfAtomsForElement[element] += 1;
         }
@@ -126,48 +128,46 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
         else if (keyword == "end")
             break; // read only the first frame
     }
-    
+
     // allocate memory for list of atoms
-    atoms = new Atom*[numberOfAtoms];
+    atoms = new Atom *[numberOfAtoms];
 
     // allocated memory for each element
-    for (auto &it: numberOfAtomsForElement)
+    for (auto &it : numberOfAtomsForElement)
     {
-        atomsForElement[it.first] = new Atom*[it.second];
+        atomsForElement[it.first] = new Atom *[it.second];
         it.second = 0; // reset to zero, will be used as index
     }
 
-    // go back to begining of the file
+    // go back to beginning of the file
     inFile.clear();
     inFile.seekg(0, std::ios::beg);
 
     // read structure file
     int atomIndex = 0;
     int cellIndex = 0;
-    while ( std::getline(inFile, line) ) 
+    while (std::getline(inFile, line))
     {
         std::stringstream ss(line);
         ss >> keyword;
 
-        if (keyword == "lattice") 
+        if (keyword == "lattice")
         {
             // check cell info is correct
             if (cellIndex == 9)
-                    throw std::runtime_error(
-                        (Log(ERROR) << "Unexpected number of data for cell").toString()
-                    );             
+                throw std::runtime_error(
+                    (Log(ERROR) << "Unexpected number of data for cell").toString());
             // read cell parameters
-            for (int i=0; i<3; i++)
+            for (int i = 0; i < 3; i++)
                 ss >> cell[cellIndex++];
         }
-        else if (keyword == "atom") 
+        else if (keyword == "atom")
         {
             // read atom data
             double position[3], force[3];
             double charge, energy;
             std::string element;
-            ss >> position[0] >> position[1] >> position[2] >> element >> charge 
-                >> energy >> force[0] >> force[1] >> force[2];
+            ss >> position[0] >> position[1] >> position[2] >> element >> charge >> energy >> force[0] >> force[1] >> force[2];
 
             // create atom
             Atom *atom = new Atom(atomIndex, element.c_str(), position, force, charge, energy);
@@ -178,11 +178,11 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
             // add atom to list of atoms for element
             atomsForElement[element][numberOfAtomsForElement[element]++] = atom;
         }
-        else if (keyword == "energy") 
+        else if (keyword == "energy")
         {
             ss >> totalEnergy;
         }
-        else if (keyword == "charge") 
+        else if (keyword == "charge")
         {
             ss >> totalCharge;
         }
@@ -198,21 +198,21 @@ void AtomicStructure::readFileFormatRuNNer(const std::string& filename)
 
     // log out info regarding number of atoms/elements/cell
     Log(INFO) << "Read " << filename << " (" << numberOfAtoms << " atoms)";
-    for (auto & each: numberOfAtomsForElement)
+    for (auto &each : numberOfAtomsForElement)
         Log(INFO) << "Element " << each.first << ": " << each.second;
     Log(INFO) << "Cell (PBC)";
 }
 
-void AtomicStructure::readFileFormatRuNNer() 
-{ 
-    const char * filename = "input.data";
-    readFileFormatRuNNer(filename); 
+void AtomicStructure::readFileFormatRuNNer()
+{
+    const char *filename = "input.data";
+    readFileFormatRuNNer(filename);
     Log(WARN) << "Read " << filename << " (as default RuNNer structure file)";
 }
 
 void AtomicStructure::setCell(const double cell[9])
 {
-    for(int d=0; d<9; d++)
+    for (int d = 0; d < 9; d++)
         this->cell[d] = cell[d];
     isCell = true;
     Log(INFO) << "Set cell sizes";
@@ -225,16 +225,23 @@ void AtomicStructure::applyPBC(double &dx, double &dy, double &dz)
     const double ly = cell[4];
     const double lz = cell[8];
 
-    if ( isCell ) {
+    if (isCell)
+    {
         // x-direction
-        if ( dx > lx*0.5 ) dx -= lx;
-        else if ( dx < -lx*0.5 ) dx += lx;  
+        if (dx > lx * 0.5)
+            dx -= lx;
+        else if (dx < -lx * 0.5)
+            dx += lx;
         // y-direction
-        if ( dy > ly*0.5 ) dy -= ly;
-        else if ( dy < -ly*0.5 ) dy += ly;
+        if (dy > ly * 0.5)
+            dy -= ly;
+        else if (dy < -ly * 0.5)
+            dy += ly;
         // z-direction
-        if ( dz > lz*0.5 ) dz -= lz;
-        else if ( dz < -lz*0.5 ) dz += lz;   
+        if (dz > lz * 0.5)
+            dz -= lz;
+        else if (dz < -lz * 0.5)
+            dz += lz;
     }
 }
 
@@ -244,7 +251,7 @@ double AtomicStructure::distance(Atom *atom_i, Atom *atom_j)
     double yij = atom_i->y - atom_j->y;
     double zij = atom_i->z - atom_j->z;
     applyPBC(xij, yij, zij);
-    return  sqrt( xij*xij + yij*yij + zij*zij );
+    return sqrt(xij * xij + yij * yij + zij * zij);
 }
 
 double AtomicStructure::distance(Atom *atom_i, Atom *atom_j, double drij[3])
@@ -254,36 +261,38 @@ double AtomicStructure::distance(Atom *atom_i, Atom *atom_j, double drij[3])
     double yij = atom_i->y - atom_j->y;
     double zij = atom_i->z - atom_j->z;
     applyPBC(xij, yij, zij);
-    drij[0] = xij; drij[1] = yij; drij[2] = zij; 
-    return  sqrt( xij*xij + yij*yij + zij*zij );
+    drij[0] = xij;
+    drij[1] = yij;
+    drij[2] = zij;
+    return sqrt(xij * xij + yij * yij + zij * zij);
 }
 
 void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
 {
     // check atomic data is available
-    if ( !isAtom )
-        throw std::runtime_error( (Log(ERROR) << "No atomic structure available for table of distances").toString() );
+    if (!isAtom)
+        throw std::runtime_error((Log(ERROR) << "No atomic structure available for table of distances").toString());
 
     // check PBC is applied
-    if ( !isCell )
-        throw std::runtime_error( (Log(WARN) << "No PBC is applied for table of distances").toString() );
+    if (!isCell)
+        throw std::runtime_error((Log(WARN) << "No PBC is applied for table of distances").toString());
 
     // TODO: optimize memory usage for matrix (e.g. neighbor profiling)
     // allocate memory for table of distances
-    tableOfDistances = new Distance*[numberOfAtoms];
+    tableOfDistances = new Distance *[numberOfAtoms];
     for (int i = 0; i < numberOfAtoms; ++i)
         tableOfDistances[i] = new Distance[numberOfAtoms];
-    
+
     // loop over atom i and j
-    for (int i=0; i<numberOfAtoms; i++) 
-    {   
-        for (int j=0; j<i; j++) 
+    for (int i = 0; i < numberOfAtoms; i++)
+    {
+        for (int j = 0; j < i; j++)
         {
             // calculate distance between atoms i and j from atomic structure
             double drij[3];
             double rij = distance(atoms[i], atoms[j], drij);
 
-            // skip calculation if it is outside the global cutoff radius 
+            // skip calculation if it is outside the global cutoff radius
             // if ( rij > globalCutOffRadius ) continue;
 
             // fill table of distances
@@ -292,6 +301,6 @@ void AtomicStructure::calculateTableOfDistances(double globalCutOffRadius)
         }
     }
 
-    // set table of distance is claculated
+    // set table of distance is calculated
     isTableOfDistances = true;
 }
